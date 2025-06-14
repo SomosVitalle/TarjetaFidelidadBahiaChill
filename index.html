@@ -251,7 +251,7 @@
                 <div class="stamp blurred"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
                 <div class="stamp blurred"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
             </div>
-            <a href="https://wa.link/3gtlh3" target="_blank" id="back-qr-link" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 102px; height: 102px; display: flex; justify-content: center; align-items: center; z-index: 2; background: none; border-radius: 16px;">
+            <a id="back-qr-link" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 102px; height: 102px; display: flex; justify-content: center; align-items: center; z-index: 2; background: none; border-radius: 16px; cursor:pointer;">
                 <div class="qr-code qr-code-back sharp" id="back-qr" style="pointer-events: auto; width: 90px; height: 90px;">
                     <img src="Variantes/qr_blanco_transparente.png" alt="QR Tarjeta" style="width: 90px; height: 90px; object-fit: contain; opacity: 1; background: rgba(255,255,255,0.35); border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.18); padding: 6px;" />
                 </div>
@@ -265,6 +265,16 @@
             </div>
             <div class="footer blurred" id="back-footer" style="transform: scaleX(-1);">
                 SOLO TE FALTAN <span class="highlight">3 PALMAS</span> PARA RECLAMAR TU REGALO
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="qr-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:50; justify-content:center; align-items:center; background:rgba(0,0,0,0.18);">
+        <div class="modal-content" style="backdrop-filter: blur(16px) saturate(180%); background: rgba(61,129,157,0.18); border-radius: 18px; box-shadow: 0 4px 30px rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.2); padding: 32px 24px 24px 24px; min-width: 260px; max-width: 90vw; text-align:center;">
+            <div style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #fff; margin-bottom: 18px;">¿Quieres más información?</div>
+            <div style="display:flex; gap:18px; justify-content:center;">
+                <button id="qr-modal-si" style="backdrop-filter: blur(8px) saturate(180%); background: rgba(255,255,255,0.25); border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); color: #25647a; font-weight: bold; font-size: 1rem; padding: 8px 22px; cursor:pointer; transition: background 0.2s;">Sí</button>
+                <button id="qr-modal-no" style="backdrop-filter: blur(8px) saturate(180%); background: rgba(255,255,255,0.18); border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 1rem; padding: 8px 22px; cursor:pointer; transition: background 0.2s;">No</button>
             </div>
         </div>
     </div>
@@ -311,6 +321,33 @@
             document.querySelectorAll('.card-back .blurred').forEach(el => {
                 el.style.filter = 'none';
             });
+        });
+        // Modal QR
+        const qrModalOverlay = document.getElementById('qr-modal-overlay');
+        const qrModalSi = document.getElementById('qr-modal-si');
+        const qrModalNo = document.getElementById('qr-modal-no');
+        const backQrLink = document.getElementById('back-qr-link');
+        let modalOpen = false;
+        function openQrModal(e) {
+            e.preventDefault();
+            qrModalOverlay.style.display = 'flex';
+            modalOpen = true;
+        }
+        function closeQrModal() {
+            qrModalOverlay.style.display = 'none';
+            modalOpen = false;
+        }
+        backQrLink.addEventListener('click', openQrModal);
+        backQrLink.addEventListener('touchstart', openQrModal);
+        qrModalSi.addEventListener('click', function(e) {
+            window.open('https://wa.link/3gtlh3', '_blank');
+            closeQrModal();
+        });
+        qrModalNo.addEventListener('click', function(e) {
+            closeQrModal();
+        });
+        qrModalOverlay.addEventListener('click', function(e) {
+            if (e.target === qrModalOverlay) closeQrModal();
         });
     </script>
 </body>
