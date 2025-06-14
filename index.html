@@ -161,6 +161,10 @@
             transform: scaleX(-1);
             opacity: 0.5;
         }
+
+        .shine-reset {
+            animation: none !important;
+        }
     </style>
 </head>
 <body>
@@ -233,18 +237,15 @@
         const card = document.getElementById('card');
         
         card.addEventListener('click', function() {
-            // Reset animation by removing and re-adding the class
-            this.classList.remove('flipped');
-            // Forzar reflow y resetear la animación
-            void this.offsetWidth;
-            this.classList.add('flipped');
-            
-            // Resetear el brillo para que funcione en cada giro
+            // Alternar la clase 'flipped' para girar a la derecha o volver
+            this.classList.toggle('flipped');
+
+            // Reiniciar la animación de brillo en ambas caras
             const cards = this.querySelectorAll('.card');
             cards.forEach(card => {
-                card.style.animation = 'none';
+                card.classList.remove('shine-reset');
                 void card.offsetWidth;
-                card.style.animation = '';
+                card.classList.add('shine-reset');
             });
         });
     </script>
