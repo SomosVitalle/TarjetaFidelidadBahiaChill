@@ -314,9 +314,10 @@
     (function() {
         const card = document.getElementById('card');
         let lastX = 0, lastY = 0;
-        const maxTilt = 30; // 3 veces más movimiento visual
-        const smoothing = 0.15; // suavizado del movimiento
-        let gyroX = 0, gyroY = 0;
+        const maxTilt = 30; // grados máximos de inclinación visual
+        const smoothing = 0.9; // suavizado del movimiento (6 veces más rápido)
+        let baseRotation = 0; // para mantener el giro de la tarjeta
+        let baseTransform = '';
 
         function lerp(a, b, t) { return a + (b - a) * t; }
 
@@ -324,31 +325,38 @@
             // Invertimos los ejes para el efecto solicitado
             let tiltX = Math.max(Math.min(event.beta, maxTilt), -maxTilt);   // adelante/atrás
             let tiltY = Math.max(Math.min(event.gamma, maxTilt), -maxTilt);  // izquierda/derecha
-            // Si el celular se inclina hacia atrás, la tarjeta sube (rotación X negativa)
-            // Si el celular se inclina a la derecha, la tarjeta gira levemente a la izquierda (rotación Y negativa)
-            gyroX = lerp(gyroX, -tiltX, smoothing);
-            gyroY = lerp(gyroY, -tiltY, smoothing);
-            applyGyroTransform();
+            // Efecto invertido: si el móvil se inclina a la derecha, la tarjeta gira a la izquierda
+            let effectX = -tiltY; // giro horizontal invertido
+            let effectY = -tiltX; // elevación vertical invertida
+            // Suavizado
+            lastX = lerp(lastX, effectX, smoothing);
+            lastY = lerp(lastY, effectY, smoothing);
+            // Aplica la transformación base (rotación de la tarjeta) + efecto giroscopio
+            card.style.transform = baseTransform + ` rotateY(${lastX}deg) rotateX(${lastY}deg)`;
         }
 
-        function applyGyroTransform() {
-            // Mantén la rotación Y de flip, pero suma la del giroscopio
-            let baseRotateY = 0;
-            if (card.classList.contains('flipped')) baseRotateY = 180;
-            card.style.transform = `rotateY(${baseRotateY + gyroY}deg) rotateX(${gyroX}deg)`;
+        // Actualiza la rotación base al girar la tarjeta
+        function updateBaseTransform() {
+            if (card.classList.contains('flipped')) {
+                baseTransform = 'rotateY(180deg)';
+            } else {
+                baseTransform = '';
+            }
         }
 
-        // Intercepta el click para girar la tarjeta y mantener la info correcta
+        // Intercepta el click para girar la tarjeta y actualizar la base
         card.addEventListener('click', function() {
             this.classList.toggle('flipped');
-            // Reinicia la animación de brillo en ambas caras
+            updateBaseTransform();
+            // Aplica la base inmediatamente para evitar parpadeos
+            card.style.transform = baseTransform + ` rotateY(${lastX}deg) rotateX(${lastY}deg)`;
+            // Reiniciar la animación de brillo en ambas caras
             const cards = this.querySelectorAll('.card');
             cards.forEach(card => {
                 card.classList.remove('shine-reset');
                 void card.offsetWidth;
                 card.classList.add('shine-reset');
             });
-            // Efecto de blur/nitidez según la cara visible
             const isFlipped = this.classList.contains('flipped');
             document.querySelectorAll('.card .sharp').forEach(el => {
                 el.style.filter = isFlipped ? 'blur(2px)' : 'none';
@@ -362,25 +370,12 @@
             document.querySelectorAll('.card-back .blurred').forEach(el => {
                 el.style.filter = isFlipped ? 'blur(2px)' : 'none';
             });
-            // Aplica la rotación base + giroscopio
-            applyGyroTransform();
         });
 
-        // Inicializa el estado visual correcto
+        // Inicializa la base al cargar
         window.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.card .sharp').forEach(el => {
-                el.style.filter = 'none';
-            });
-            document.querySelectorAll('.card .blurred').forEach(el => {
-                el.style.filter = 'blur(2px)';
-            });
-            document.querySelectorAll('.card-back .sharp').forEach(el => {
-                el.style.filter = 'blur(2px)';
-            });
-            document.querySelectorAll('.card-back .blurred').forEach(el => {
-                el.style.filter = 'none';
-            });
-            applyGyroTransform();
+            updateBaseTransform();
+            card.style.transform = baseTransform + ` rotateY(${lastX}deg) rotateX(${lastY}deg)`;
         });
 
         if (window.DeviceOrientationEvent) {
