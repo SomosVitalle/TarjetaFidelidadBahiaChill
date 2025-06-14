@@ -316,28 +316,25 @@
         let lastX = 0, lastY = 0;
         const maxTilt = 30; // grados máximos de inclinación visual
         const smoothing = 0.9; // suavizado del movimiento (6 veces más rápido)
-        let baseRotation = 0; // para mantener el giro de la tarjeta
         let baseTransform = '';
+        let isFlipped = false;
 
         function lerp(a, b, t) { return a + (b - a) * t; }
 
         function handleOrientation(event) {
-            // Invertimos los ejes para el efecto solicitado
             let tiltX = Math.max(Math.min(event.beta, maxTilt), -maxTilt);   // adelante/atrás
             let tiltY = Math.max(Math.min(event.gamma, maxTilt), -maxTilt);  // izquierda/derecha
-            // Efecto invertido: si el móvil se inclina a la derecha, la tarjeta gira a la izquierda
             let effectX = -tiltY; // giro horizontal invertido
             let effectY = -tiltX; // elevación vertical invertida
-            // Suavizado
             lastX = lerp(lastX, effectX, smoothing);
             lastY = lerp(lastY, effectY, smoothing);
             // Aplica la transformación base (rotación de la tarjeta) + efecto giroscopio
             card.style.transform = baseTransform + ` rotateY(${lastX}deg) rotateX(${lastY}deg)`;
         }
 
-        // Actualiza la rotación base al girar la tarjeta
         function updateBaseTransform() {
-            if (card.classList.contains('flipped')) {
+            isFlipped = card.classList.contains('flipped');
+            if (isFlipped) {
                 baseTransform = 'rotateY(180deg)';
             } else {
                 baseTransform = '';
@@ -345,19 +342,23 @@
         }
 
         // Intercepta el click para girar la tarjeta y actualizar la base
-        card.addEventListener('click', function() {
+        card.addEventListener('click', function(e) {
+            // Evita conflicto con el permiso de deviceorientation
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function' && e.detail === 1) {
+                // Si es el primer click, solo pide permiso
+                return;
+            }
             this.classList.toggle('flipped');
             updateBaseTransform();
-            // Aplica la base inmediatamente para evitar parpadeos
-            card.style.transform = baseTransform + ` rotateY(${lastX}deg) rotateX(${lastY}deg)`;
-            // Reiniciar la animación de brillo en ambas caras
+            // Reinicia la animación de brillo en ambas caras
             const cards = this.querySelectorAll('.card');
             cards.forEach(card => {
                 card.classList.remove('shine-reset');
                 void card.offsetWidth;
                 card.classList.add('shine-reset');
             });
-            const isFlipped = this.classList.contains('flipped');
+            // Efecto de blur/nitidez según la cara visible
+            isFlipped = this.classList.contains('flipped');
             document.querySelectorAll('.card .sharp').forEach(el => {
                 el.style.filter = isFlipped ? 'blur(2px)' : 'none';
             });
@@ -370,9 +371,10 @@
             document.querySelectorAll('.card-back .blurred').forEach(el => {
                 el.style.filter = isFlipped ? 'blur(2px)' : 'none';
             });
+            // Aplica la base inmediatamente para evitar parpadeos
+            card.style.transform = baseTransform + ` rotateY(${lastX}deg) rotateX(${lastY}deg)`;
         });
 
-        // Inicializa la base al cargar
         window.addEventListener('DOMContentLoaded', () => {
             updateBaseTransform();
             card.style.transform = baseTransform + ` rotateY(${lastX}deg) rotateX(${lastY}deg)`;
