@@ -11,7 +11,7 @@
         
         body {
             font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            background: linear-gradient(135deg, #3d819d 0%, #25647a 50%, #13394a 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -39,7 +39,7 @@
             height: 100%;
             backface-visibility: hidden;
             border-radius: 15px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            background: linear-gradient(135deg, rgba(61, 129, 157, 0.18) 0%, rgba(61, 129, 157, 0.08) 100%);
             backdrop-filter: blur(16px) saturate(180%);
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -57,10 +57,19 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, 
-                rgba(255,255,255,0) 0%, 
-                rgba(255,255,255,0.3) 50%, 
-                rgba(255,255,255,0) 100%);
+            /* Gradiente prisma arcoíris */
+            background: linear-gradient(90deg,
+                rgba(255,0,102,0.0) 0%,
+                rgba(255,0,102,0.5) 10%,
+                rgba(255,154,0,0.5) 25%,
+                rgba(208,222,33,0.5) 40%,
+                rgba(79,220,74,0.5) 55%,
+                rgba(63,218,216,0.5) 70%,
+                rgba(47,201,226,0.5) 80%,
+                rgba(28,127,238,0.5) 90%,
+                rgba(95,21,242,0.5) 100%,
+                rgba(255,0,102,0.0) 100%
+            );
             transition: none;
         }
         
@@ -75,7 +84,7 @@
         
         .card-back {
             transform: rotateY(180deg);
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            background: linear-gradient(135deg, rgba(61, 129, 157, 0.18) 0%, rgba(61, 129, 157, 0.08) 100%);
             backdrop-filter: blur(16px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
@@ -165,69 +174,79 @@
         .shine-reset {
             animation: none !important;
         }
+
+        /* Efectos de nitidez y blur según la cara visible */
+        .card .sharp {
+            filter: none;
+            transition: filter 0.4s;
+        }
+        .card .blurred {
+            filter: blur(2px);
+            transition: filter 0.4s;
+        }
+        .card-back .sharp {
+            filter: none;
+            transition: filter 0.4s;
+        }
+        .card-back .blurred {
+            filter: blur(2px);
+            transition: filter 0.4s;
+        }
     </style>
 </head>
 <body>
     <div class="card-container" id="card">
         <!-- Front of the card -->
         <div class="card">
-            <div class="palm-logo">
+            <div class="palm-logo sharp" id="front-logo">
                 <i class="fas fa-palette"></i>
             </div>
-            <div class="title">BAHIA CHILL</div>
-            
+            <div class="title sharp" id="front-title">BAHIA CHILL</div>
             <div class="stamps">
-                <div class="stamp"><i class="fas fa-palette"></i></div>
-                <div class="stamp"><i class="fas fa-palette"></i></div>
-                <div class="stamp"><i class="fas fa-palette"></i></div>
-                <div class="stamp"><i class="fas fa-palette"></i></div>
-                <div class="stamp"><i class="fas fa-palette"></i></div>
+                <div class="stamp sharp"><i class="fas fa-palette"></i></div>
+                <div class="stamp sharp"><i class="fas fa-palette"></i></div>
+                <div class="stamp sharp"><i class="fas fa-palette"></i></div>
+                <div class="stamp sharp"><i class="fas fa-palette"></i></div>
+                <div class="stamp sharp"><i class="fas fa-palette"></i></div>
             </div>
             <div class="stamps">
-                <div class="stamp"><i class="fas fa-palette"></i></div>
-                <div class="stamp"><i class="fas fa-palette"></i></div>
-                <div class="stamp"><i class="fas fa-palette"></i></div>
-                <div class="stamp"><i class="fas fa-palette"></i></div>
-                <div class="stamp"><i class="fas fa-palette"></i></div>
+                <div class="stamp sharp"><i class="fas fa-palette"></i></div>
+                <div class="stamp sharp"><i class="fas fa-palette"></i></div>
+                <div class="stamp sharp"><i class="fas fa-palette"></i></div>
+                <div class="stamp sharp"><i class="fas fa-palette"></i></div>
+                <div class="stamp sharp"><i class="fas fa-palette"></i></div>
             </div>
-            
-            <div class="qr-code">
+            <div class="qr-code blurred" id="front-qr">
                 <i class="fas fa-qrcode"></i>
             </div>
-            
-            <div class="footer">
+            <div class="footer sharp" id="front-footer">
                 SOLO TE FALTAN <span class="highlight">3 PALMAS</span> PARA RECLAMAR TU REGALO
             </div>
         </div>
-        
         <!-- Back of the card -->
         <div class="card card-back">
-            <div class="palm-logo" style="opacity: 0.3; transform: scaleX(-1); right: 10px; left: auto;">
+            <div class="palm-logo blurred" id="back-logo" style="opacity: 0.3; transform: scaleX(-1); right: 10px; left: auto;">
                 <i class="fas fa-palette"></i>
             </div>
-            <div class="title" style="transform: scaleX(-1);">BAHIA CHILL</div>
-            
+            <div class="title blurred" id="back-title" style="transform: scaleX(-1);">BAHIA CHILL</div>
             <div class="stamps stamps-back">
-                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
-                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
-                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
-                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
-                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
+                <div class="stamp blurred"><i class="fas fa-palette"></i></div>
+                <div class="stamp blurred"><i class="fas fa-palette"></i></div>
+                <div class="stamp blurred"><i class="fas fa-palette"></i></div>
+                <div class="stamp blurred"><i class="fas fa-palette"></i></div>
+                <div class="stamp blurred"><i class="fas fa-palette"></i></div>
             </div>
-            
-            <div class="qr-code qr-code-back">
+            <div class="qr-code qr-code-back sharp" id="back-qr">
                 <i class="fas fa-qrcode"></i>
             </div>
-            
             <div class="stamps stamps-back" style="margin-top: 10px;">
-                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
-                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
-                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
-                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
-                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
+                <div class="stamp blurred"><i class="fas fa-palette"></i></div>
+                <div class="stamp blurred"><i class="fas fa-palette"></i></div>
+                <div class="stamp blurred"><i class="fas fa-palette"></i></div>
+                <div class="stamp blurred"><i class="fas fa-palette"></i></div>
+                <div class="stamp blurred"><i class="fas fa-palette"></i></div>
             </div>
-            
-            <div class="footer" style="transform: scaleX(-1);">
+            <div class="footer blurred" id="back-footer" style="transform: scaleX(-1);">
                 SOLO TE FALTAN <span class="highlight">3 PALMAS</span> PARA RECLAMAR TU REGALO
             </div>
         </div>
@@ -235,17 +254,45 @@
 
     <script>
         const card = document.getElementById('card');
-        
         card.addEventListener('click', function() {
-            // Alternar la clase 'flipped' para girar a la derecha o volver
             this.classList.toggle('flipped');
-
             // Reiniciar la animación de brillo en ambas caras
             const cards = this.querySelectorAll('.card');
             cards.forEach(card => {
                 card.classList.remove('shine-reset');
                 void card.offsetWidth;
                 card.classList.add('shine-reset');
+            });
+            // Efecto de blur/nitidez según la cara visible
+            const isFlipped = this.classList.contains('flipped');
+            // Frente
+            document.querySelectorAll('.card .sharp').forEach(el => {
+                el.style.filter = isFlipped ? 'blur(2px)' : 'none';
+            });
+            document.querySelectorAll('.card .blurred').forEach(el => {
+                el.style.filter = isFlipped ? 'none' : 'blur(2px)';
+            });
+            // Reverso
+            document.querySelectorAll('.card-back .sharp').forEach(el => {
+                el.style.filter = isFlipped ? 'none' : 'blur(2px)';
+            });
+            document.querySelectorAll('.card-back .blurred').forEach(el => {
+                el.style.filter = isFlipped ? 'blur(2px)' : 'none';
+            });
+        });
+        // Inicializar el estado visual correcto
+        window.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.card .sharp').forEach(el => {
+                el.style.filter = 'none';
+            });
+            document.querySelectorAll('.card .blurred').forEach(el => {
+                el.style.filter = 'blur(2px)';
+            });
+            document.querySelectorAll('.card-back .sharp').forEach(el => {
+                el.style.filter = 'blur(2px)';
+            });
+            document.querySelectorAll('.card-back .blurred').forEach(el => {
+                el.style.filter = 'none';
             });
         });
     </script>
