@@ -310,6 +310,54 @@
                 el.style.filter = 'none';
             });
         });
+        // --- GIROSCOPIO: movimiento suave de la tarjeta con el móvil ---
+    (function() {
+        const card = document.getElementById('card');
+        let lastX = 0, lastY = 0;
+        const maxTilt = 15; // grados máximos de inclinación visual
+        const smoothing = 0.15; // suavizado del movimiento
+
+        function lerp(a, b, t) { return a + (b - a) * t; }
+
+        function handleOrientation(event) {
+            // Limita el rango para evitar movimientos bruscos
+            let tiltX = Math.max(Math.min(event.beta, maxTilt), -maxTilt);   // adelante/atrás
+            let tiltY = Math.max(Math.min(event.gamma, maxTilt), -maxTilt);  // izquierda/derecha
+            // Suavizado
+            lastX = lerp(lastX, tiltX, smoothing);
+            lastY = lerp(lastY, tiltY, smoothing);
+            // Solo si no está volteada
+            if (!card.classList.contains('flipped')) {
+                card.style.transform = `rotateY(${lastY}deg) rotateX(${-lastX}deg)`;
+            }
+        }
+
+        // Restablece la rotación al quitar el dedo o dejar de mover
+        function resetTilt() {
+            if (!card.classList.contains('flipped')) {
+                card.style.transform = '';
+            }
+        }
+
+        if (window.DeviceOrientationEvent) {
+            // Algunos navegadores requieren permiso explícito
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                window.addEventListener('click', function askPerm() {
+                    DeviceOrientationEvent.requestPermission().then(function(response) {
+                        if (response === 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation);
+                        }
+                    });
+                    window.removeEventListener('click', askPerm);
+                });
+            } else {
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+        }
+        window.addEventListener('touchend', resetTilt);
+        window.addEventListener('touchcancel', resetTilt);
+    })();
+    // --- FIN GIROSCOPIO ---
     </script>
 </body>
 </html>
