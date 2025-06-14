@@ -65,12 +65,11 @@
         }
         
         .card-container.flipped .card::after {
-            animation: shine 1.5s ease-out;
+            animation: shine 1s ease-out;
         }
         
         @keyframes shine {
             0% { left: -100%; }
-            20% { left: 100%; }
             100% { left: 100%; }
         }
         
@@ -236,8 +235,17 @@
         card.addEventListener('click', function() {
             // Reset animation by removing and re-adding the class
             this.classList.remove('flipped');
-            void this.offsetWidth; // Trigger reflow
+            // Forzar reflow y resetear la animación
+            void this.offsetWidth;
             this.classList.add('flipped');
+            
+            // Resetear el brillo para que funcione en cada giro
+            const cards = this.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.style.animation = 'none';
+                void card.offsetWidth;
+                card.style.animation = '';
+            });
         });
     </script>
 </body>
