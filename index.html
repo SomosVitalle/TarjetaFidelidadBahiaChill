@@ -32,10 +32,6 @@
             transform: rotateY(180deg);
         }
         
-        .card-container.flipped-back {
-            transform: rotateY(360deg);
-        }
-        
         .card {
             position: absolute;
             width: 100%;
@@ -175,7 +171,7 @@
         
         <!-- Back of the card -->
         <div class="card card-back">
-            <div class="palm-logo" style="opacity: 0.3; transform: scaleX(-1);">
+            <div class="palm-logo" style="opacity: 0.3; transform: scaleX(-1); right: 10px; left: auto;">
                 <i class="fas fa-palette"></i>
             </div>
             <div class="title" style="transform: scaleX(-1);">BAHIA CHILL</div>
@@ -208,17 +204,9 @@
 
     <script>
         const card = document.getElementById('card');
-        let isFlipped = false;
         
         card.addEventListener('click', function() {
-            if (isFlipped) {
-                this.classList.remove('flipped');
-                this.classList.add('flipped-back');
-            } else {
-                this.classList.remove('flipped-back');
-                this.classList.add('flipped');
-            }
-            isFlipped = !isFlipped;
+            this.classList.toggle('flipped');
         });
     </script>
 </body>
