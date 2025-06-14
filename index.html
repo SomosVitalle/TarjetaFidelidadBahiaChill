@@ -310,92 +310,37 @@
                 el.style.filter = 'none';
             });
         });
-        // --- GIROSCOPIO: movimiento suave de la tarjeta con el móvil ---
-    (function() {
-        const card = document.getElementById('card');
+
+        // --- INICIO: Giroscopio para inclinación de la tarjeta ---
         let lastX = 0, lastY = 0;
-        const maxTilt = 30; // grados máximos de inclinación visual
-        const smoothing = 0.9; // suavizado del movimiento (6 veces más rápido)
-        let baseTransform = '';
-        let isFlipped = false;
-
-        function lerp(a, b, t) { return a + (b - a) * t; }
-
+        const maxTilt = 25; // grados máximos
+        function clamp(val, min, max) {
+            return Math.max(min, Math.min(max, val));
+        }
         function handleOrientation(event) {
-            let tiltX = Math.max(Math.min(event.beta, maxTilt), -maxTilt);   // adelante/atrás
-            let tiltY = Math.max(Math.min(event.gamma, maxTilt), -maxTilt);  // izquierda/derecha
-            let effectX = -tiltY; // giro horizontal invertido
-            let effectY = -tiltX; // elevación vertical invertida
-            lastX = lerp(lastX, effectX, smoothing);
-            lastY = lerp(lastY, effectY, smoothing);
-            // Aplica la transformación base (rotación de la tarjeta) + efecto giroscopio
-            card.style.transform = baseTransform + ` rotateY(${lastX}deg) rotateX(${lastY}deg)`;
+            // event.beta: -180 (arriba) a 180 (abajo), vertical
+            // event.gamma: -90 (izq) a 90 (der), horizontal
+            // event.alpha: 0-360 (compás, no lo usamos)
+            let x = clamp(event.beta, -45, 45); // inclinación adelante/atrás
+            let y = clamp(event.gamma, -45, 45); // inclinación izq/der
+            // Normalizar a rango -1 a 1
+            x = x / 45;
+            y = y / 45;
+            // Multiplicar por el máximo de inclinación
+            const tiltX = clamp(x * maxTilt, -maxTilt, maxTilt);
+            const tiltY = clamp(-y * maxTilt, -maxTilt, maxTilt); // invertido para efecto natural
+            // Suavizado rápido
+            lastX = lastX + (tiltX - lastX) * 0.5;
+            lastY = lastY + (tiltY - lastY) * 0.5;
+            // Mantener el giroY de flip
+            const isFlipped = card.classList.contains('flipped');
+            const flipY = isFlipped ? 180 : 0;
+            card.style.transform = `rotateY(${flipY}deg) rotateX(${lastX}deg) rotateZ(${lastY}deg)`;
         }
-
-        function updateBaseTransform() {
-            isFlipped = card.classList.contains('flipped');
-            if (isFlipped) {
-                baseTransform = 'rotateY(180deg)';
-            } else {
-                baseTransform = '';
-            }
-        }
-
-        // Intercepta el click para girar la tarjeta y actualizar la base
-        card.addEventListener('click', function(e) {
-            // Evita conflicto con el permiso de deviceorientation
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function' && e.detail === 1) {
-                // Si es el primer click, solo pide permiso
-                return;
-            }
-            this.classList.toggle('flipped');
-            updateBaseTransform();
-            // Reinicia la animación de brillo en ambas caras
-            const cards = this.querySelectorAll('.card');
-            cards.forEach(card => {
-                card.classList.remove('shine-reset');
-                void card.offsetWidth;
-                card.classList.add('shine-reset');
-            });
-            // Efecto de blur/nitidez según la cara visible
-            isFlipped = this.classList.contains('flipped');
-            document.querySelectorAll('.card .sharp').forEach(el => {
-                el.style.filter = isFlipped ? 'blur(2px)' : 'none';
-            });
-            document.querySelectorAll('.card .blurred').forEach(el => {
-                el.style.filter = isFlipped ? 'none' : 'blur(2px)';
-            });
-            document.querySelectorAll('.card-back .sharp').forEach(el => {
-                el.style.filter = isFlipped ? 'none' : 'blur(2px)';
-            });
-            document.querySelectorAll('.card-back .blurred').forEach(el => {
-                el.style.filter = isFlipped ? 'blur(2px)' : 'none';
-            });
-            // Aplica la base inmediatamente para evitar parpadeos
-            card.style.transform = baseTransform + ` rotateY(${lastX}deg) rotateX(${lastY}deg)`;
-        });
-
-        window.addEventListener('DOMContentLoaded', () => {
-            updateBaseTransform();
-            card.style.transform = baseTransform + ` rotateY(${lastX}deg) rotateX(${lastY}deg)`;
-        });
-
         if (window.DeviceOrientationEvent) {
-            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                window.addEventListener('click', function askPerm() {
-                    DeviceOrientationEvent.requestPermission().then(function(response) {
-                        if (response === 'granted') {
-                            window.addEventListener('deviceorientation', handleOrientation);
-                        }
-                    });
-                    window.removeEventListener('click', askPerm);
-                });
-            } else {
-                window.addEventListener('deviceorientation', handleOrientation);
-            }
+            window.addEventListener('deviceorientation', handleOrientation, true);
         }
-    })();
-    // --- FIN GIROSCOPIO ---
+        // --- FIN: Giroscopio para inclinación de la tarjeta ---
     </script>
 </body>
 </html>
