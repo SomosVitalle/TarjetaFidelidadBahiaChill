@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bahía Chill - Tarjeta de Fidelización</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@300;400&display=swap');
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+        
+        .card-container {
+            width: 380px;
+            height: 220px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1s;
+            cursor: pointer;
+        }
+        
+        .card-container.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-container.flipped-back {
+            transform: rotateY(360deg);
+        }
+        
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            background: rgba(61, 129, 157, 0.6);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .card-back {
+            transform: rotateY(180deg);
+            background: rgba(61, 129, 157, 0.7);
+        }
+        
+        .palm-logo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            opacity: 0.7;
+            font-size: 28px;
+        }
+        
+        .title {
+            font-family: 'Playfair Display', serif;
+            text-align: center;
+            font-size: 24px;
+            margin-top: 10px;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .stamps {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+        }
+        
+        .stamp {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .stamp i {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        .qr-code {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            opacity: 0.3;
+        }
+        
+        .qr-code-back {
+            opacity: 0.8;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            margin-top: auto;
+            opacity: 0.9;
+        }
+        
+        .highlight {
+            font-family: 'Playfair Display', serif;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .stamps-back {
+            transform: scaleX(-1);
+        }
+        
+        .stamp-back {
+            transform: scaleX(-1);
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="card-container" id="card">
+        <!-- Front of the card -->
+        <div class="card">
+            <div class="palm-logo">
+                <i class="fas fa-palette"></i>
+            </div>
+            <div class="title">BAHIA CHILL</div>
+            
+            <div class="stamps">
+                <div class="stamp"><i class="fas fa-palette"></i></div>
+                <div class="stamp"><i class="fas fa-palette"></i></div>
+                <div class="stamp"><i class="fas fa-palette"></i></div>
+                <div class="stamp"><i class="fas fa-palette"></i></div>
+                <div class="stamp"><i class="fas fa-palette"></i></div>
+            </div>
+            <div class="stamps">
+                <div class="stamp"><i class="fas fa-palette"></i></div>
+                <div class="stamp"><i class="fas fa-palette"></i></div>
+                <div class="stamp"><i class="fas fa-palette"></i></div>
+                <div class="stamp"><i class="fas fa-palette"></i></div>
+                <div class="stamp"><i class="fas fa-palette"></i></div>
+            </div>
+            
+            <div class="qr-code">
+                <i class="fas fa-qrcode"></i>
+            </div>
+            
+            <div class="footer">
+                SOLO TE FALTAN <span class="highlight">3 PALMAS</span> PARA RECLAMAR TU REGALO
+            </div>
+        </div>
+        
+        <!-- Back of the card -->
+        <div class="card card-back">
+            <div class="palm-logo" style="opacity: 0.3; transform: scaleX(-1);">
+                <i class="fas fa-palette"></i>
+            </div>
+            <div class="title" style="transform: scaleX(-1);">BAHIA CHILL</div>
+            
+            <div class="stamps stamps-back">
+                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
+                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
+                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
+                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
+                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
+            </div>
+            
+            <div class="qr-code qr-code-back">
+                <i class="fas fa-qrcode"></i>
+            </div>
+            
+            <div class="stamps stamps-back" style="margin-top: 10px;">
+                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
+                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
+                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
+                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
+                <div class="stamp stamp-back"><i class="fas fa-palette"></i></div>
+            </div>
+            
+            <div class="footer" style="transform: scaleX(-1);">
+                SOLO TE FALTAN <span class="highlight">3 PALMAS</span> PARA RECLAMAR TU REGALO
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const card = document.getElementById('card');
+        let isFlipped = false;
+        
+        card.addEventListener('click', function() {
+            if (isFlipped) {
+                this.classList.remove('flipped');
+                this.classList.add('flipped-back');
+            } else {
+                this.classList.remove('flipped-back');
+                this.classList.add('flipped');
+            }
+            isFlipped = !isFlipped;
+        });
+    </script>
+</body>
+</html>
