@@ -11,7 +11,7 @@
         
         body {
             font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -26,6 +26,7 @@
             transform-style: preserve-3d;
             transition: transform 1s;
             cursor: pointer;
+            filter: drop-shadow(0 0 10px rgba(0, 195, 255, 0.3));
         }
         
         .card-container.flipped {
@@ -38,9 +39,10 @@
             height: 100%;
             backface-visibility: hidden;
             border-radius: 15px;
-            background: rgba(61, 129, 157, 0.6);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(16px) saturate(180%);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 15px;
             display: flex;
             flex-direction: column;
@@ -50,7 +52,9 @@
         
         .card-back {
             transform: rotateY(180deg);
-            background: rgba(61, 129, 157, 0.7);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         .palm-logo {
