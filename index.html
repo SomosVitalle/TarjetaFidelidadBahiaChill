@@ -310,37 +310,6 @@
                 el.style.filter = 'none';
             });
         });
-
-        // --- INICIO: Giroscopio para inclinación de la tarjeta ---
-        let lastX = 0, lastY = 0;
-        const maxTilt = 25; // grados máximos
-        function clamp(val, min, max) {
-            return Math.max(min, Math.min(max, val));
-        }
-        function handleOrientation(event) {
-            // event.beta: -180 (arriba) a 180 (abajo), vertical
-            // event.gamma: -90 (izq) a 90 (der), horizontal
-            // event.alpha: 0-360 (compás, no lo usamos)
-            let x = clamp(event.beta, -45, 45); // inclinación adelante/atrás
-            let y = clamp(event.gamma, -45, 45); // inclinación izq/der
-            // Normalizar a rango -1 a 1
-            x = x / 45;
-            y = y / 45;
-            // Multiplicar por el máximo de inclinación
-            const tiltX = clamp(x * maxTilt, -maxTilt, maxTilt);
-            const tiltY = clamp(-y * maxTilt, -maxTilt, maxTilt); // invertido para efecto natural
-            // Suavizado rápido
-            lastX = lastX + (tiltX - lastX) * 0.5;
-            lastY = lastY + (tiltY - lastY) * 0.5;
-            // Mantener el giroY de flip
-            const isFlipped = card.classList.contains('flipped');
-            const flipY = isFlipped ? 180 : 0;
-            card.style.transform = `rotateY(${flipY}deg) rotateX(${lastX}deg) rotateZ(${lastY}deg)`;
-        }
-        if (window.DeviceOrientationEvent) {
-            window.addEventListener('deviceorientation', handleOrientation, true);
-        }
-        // --- FIN: Giroscopio para inclinación de la tarjeta ---
     </script>
 </body>
 </html>
