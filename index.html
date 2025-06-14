@@ -281,7 +281,17 @@
 
     <script>
         const card = document.getElementById('card');
-        card.addEventListener('click', function() {
+        const qrModalOverlay = document.getElementById('qr-modal-overlay');
+        const qrModalSi = document.getElementById('qr-modal-si');
+        const qrModalNo = document.getElementById('qr-modal-no');
+        const backQrLink = document.getElementById('back-qr-link');
+        let modalOpen = false;
+
+        // Gira la tarjeta solo si no se hace click en el QR trasero
+        card.addEventListener('click', function(e) {
+            if (modalOpen) return;
+            // Si el click fue en el QR trasero y la tarjeta está volteada, no girar
+            if (e.target.closest('#back-qr-link') && card.classList.contains('flipped')) return;
             this.classList.toggle('flipped');
             // Reiniciar la animación de brillo en ambas caras
             const cards = this.querySelectorAll('.card');
@@ -292,14 +302,12 @@
             });
             // Efecto de blur/nitidez según la cara visible
             const isFlipped = this.classList.contains('flipped');
-            // Frente
             document.querySelectorAll('.card .sharp').forEach(el => {
                 el.style.filter = isFlipped ? 'blur(2px)' : 'none';
             });
             document.querySelectorAll('.card .blurred').forEach(el => {
                 el.style.filter = isFlipped ? 'none' : 'blur(2px)';
             });
-            // Reverso
             document.querySelectorAll('.card-back .sharp').forEach(el => {
                 el.style.filter = isFlipped ? 'none' : 'blur(2px)';
             });
@@ -322,14 +330,11 @@
                 el.style.filter = 'none';
             });
         });
-        // Modal QR
-        const qrModalOverlay = document.getElementById('qr-modal-overlay');
-        const qrModalSi = document.getElementById('qr-modal-si');
-        const qrModalNo = document.getElementById('qr-modal-no');
-        const backQrLink = document.getElementById('back-qr-link');
-        let modalOpen = false;
+        // Modal QR: solo si la tarjeta está volteada
         function openQrModal(e) {
+            if (!card.classList.contains('flipped')) return; // Solo si está volteada
             e.preventDefault();
+            e.stopPropagation();
             qrModalOverlay.style.display = 'flex';
             modalOpen = true;
         }
