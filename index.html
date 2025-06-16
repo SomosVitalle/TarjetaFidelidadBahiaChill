@@ -167,15 +167,36 @@
         loginBtn.addEventListener('click', function(e) {
             const usuario = document.getElementById('usuario').value.trim();
             const pin = document.getElementById('pin').value.trim();
+            // Admin login
             if (usuario === 'Admin' && pin === '2272') {
                 errorMsg.style.display = 'none';
-                // Guardar sesión en localStorage
                 localStorage.setItem('bahiaChillLogin', 'ok');
-                // Redirigir a tarjeta.html
-                window.location.href = 'tarjeta.html';
+                window.location.href = 'panel_de_control.html';
+                return;
+            }
+            // Usuarios normales
+            const users = JSON.parse(localStorage.getItem('usuarios')) || [];
+            const user = users.find(u => u.username === usuario && u.pin === pin);
+            if (user) {
+                if (user.paused) {
+                    errorMsg.textContent = 'Usuario pausado. Contacta al administrador.';
+                    errorMsg.style.display = 'block';
+                } else {
+                    errorMsg.style.display = 'none';
+                    localStorage.setItem('bahiaChillLogin', 'ok');
+                    window.location.href = 'tarjeta.html';
+                }
             } else {
                 errorMsg.textContent = 'Usuario o PIN incorrecto';
                 errorMsg.style.display = 'block';
+            }
+        });
+        // Crear usuario juan automáticamente si no existe
+        window.addEventListener('DOMContentLoaded', function() {
+            let users = JSON.parse(localStorage.getItem('usuarios')) || [];
+            if (!users.some(u => u.username === 'juan')) {
+                users.push({ username: 'juan', pin: '1234', telefono: '', paused: false });
+                localStorage.setItem('usuarios', JSON.stringify(users));
             }
         });
         // Elimina el submit por Enter
