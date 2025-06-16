@@ -293,21 +293,21 @@
         const backQrLink = document.getElementById('back-qr-link');
         let modalOpen = false;
 
-        // Gira la tarjeta solo si no se hace click en el QR trasero
-        card.addEventListener('click', function(e) {
+        // Gira la tarjeta solo si no se hace click en el QR trasero ni en el modal
+        function handleCardClick(e) {
             if (modalOpen) return;
             // Si el click fue en el QR trasero y la tarjeta está volteada, no girar
             if (e.target.closest('#back-qr-link') && card.classList.contains('flipped')) return;
-            this.classList.toggle('flipped');
+            card.classList.toggle('flipped');
             // Reiniciar la animación de brillo en ambas caras
-            const cards = this.querySelectorAll('.card');
-            cards.forEach(card => {
-                card.classList.remove('shine-reset');
-                void card.offsetWidth;
-                card.classList.add('shine-reset');
+            const cards = card.querySelectorAll('.card');
+            cards.forEach(cardEl => {
+                cardEl.classList.remove('shine-reset');
+                void cardEl.offsetWidth;
+                cardEl.classList.add('shine-reset');
             });
             // Efecto de blur/nitidez según la cara visible
-            const isFlipped = this.classList.contains('flipped');
+            const isFlipped = card.classList.contains('flipped');
             document.querySelectorAll('.card .sharp').forEach(el => {
                 el.style.filter = isFlipped ? 'blur(2px)' : 'none';
             });
@@ -320,7 +320,9 @@
             document.querySelectorAll('.card-back .blurred').forEach(el => {
                 el.style.filter = isFlipped ? 'blur(2px)' : 'none';
             });
-        });
+        }
+        card.removeEventListener('click', handleCardClick); // Previene duplicados
+        card.addEventListener('click', handleCardClick);
         // Inicializar el estado visual correcto
         window.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.card .sharp').forEach(el => {
@@ -377,3 +379,9 @@
             });
             qrImgBack.addEventListener('touchmove', function(e) {
                 clearTimeout(touchTimer);
+                touchMoved = true;
+            });
+        }
+    </script>
+</body>
+</html>
