@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - Admin</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 800px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #0077b6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background: #0077b6; color: #fff; }
+        tr:nth-child(even) { background: #f2f2f2; }
+        .actions button { margin: 0 2px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .btn { background: #0077b6; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+        .btn:hover { background: #023e8a; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <button class="btn" onclick="goToTarjeta()">Ir a la tarjeta</button>
+            <button class="btn" onclick="goToLogin()">Volver al login</button>
+        </div>
+        <h1>Panel de Control - Administrador</h1>
+        <form id="userForm">
+            <div class="form-group">
+                <label for="username">Usuario</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="pin">PIN</label>
+                <input type="text" id="pin" required maxlength="6">
+            </div>
+            <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input type="text" id="telefono" required maxlength="15">
+            </div>
+            <button type="submit" class="btn">Agregar Usuario</button>
+        </form>
+        <h2>Lista de Usuarios</h2>
+        <table id="usersTable">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Usuario</th>
+                    <th>PIN</th>
+                    <th>Tel.</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Usuarios serán listados aquí -->
+            </tbody>
+        </table>
+    </div>
+    <script>
+        // Utiliza localStorage para almacenar usuarios y pines
+        function getUsers() {
+            return JSON.parse(localStorage.getItem('usuarios')) || [];
+        }
+        function setUsers(users) {
+            localStorage.setItem('usuarios', JSON.stringify(users));
+        }
+        function renderUsers() {
+            const users = getUsers();
+            const tbody = document.querySelector('#usersTable tbody');
+            tbody.innerHTML = '';
+            users.forEach((user, idx) => {
+                const isPaused = user.paused;
+                const icon = isPaused ? '▶️' : '⏸️';
+                const iconTitle = isPaused ? 'Reactivar usuario' : 'Pausar usuario';
+                tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="width:40px;">
+                        <button onclick="togglePauseUser(${idx})" title="${iconTitle}" style="background:none;border:none;font-size:1.2em;cursor:pointer;">${icon}</button>
+                    </td>
+                    <td><input type="text" value="${user.username}" data-idx="${idx}" class="edit-username" disabled></td>
+                    <td><input type="text" value="${user.pin}" data-idx="${idx}" class="edit-pin" maxlength="6" disabled></td>
+                    <td><input type="text" value="${user.telefono || ''}" data-idx="${idx}" class="edit-telefono" maxlength="15" disabled></td>
+                    <td class="actions">
+                        <button onclick="enableEdit(${idx})">Modificar</button>
+                        <button onclick="confirmDeleteUser(${idx})">Eliminar</button>
+                        <button onclick="saveUser(${idx})" class="save-btn" style="display:none;">Guardar</button>
+                        <button onclick="cancelEdit(${idx})" class="cancel-btn" style="display:none;">Cancelar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const pin = document.getElementById('pin').value.trim();
+            const telefono = document.getElementById('telefono').value.trim();
+            if (!username || !pin || !telefono) return;
+            const users = getUsers();
+            users.push({ username, pin, telefono });
+            setUsers(users);
+            renderUsers();
+            this.reset();
+        });
+        window.enableEdit = function(idx) {
+            document.querySelector(`.edit-username[data-idx='${idx}']`).disabled = false;
+            document.querySelector(`.edit-pin[data-idx='${idx}']`).disabled = false;
+            document.querySelector(`.edit-telefono[data-idx='${idx}']`).disabled = false;
+            const tr = document.querySelectorAll('#usersTable tbody tr')[idx];
+            tr.querySelector('.save-btn').style.display = '';
+            tr.querySelector('.cancel-btn').style.display = '';
+            tr.querySelector('button[onclick^="enableEdit"]').style.display = 'none';
+            tr.querySelector('button[onclick^="confirmDeleteUser"]').style.display = 'none';
+        }
+        window.saveUser = function(idx) {
+            const username = document.querySelector(`.edit-username[data-idx='${idx}']`).value.trim();
+            const pin = document.querySelector(`.edit-pin[data-idx='${idx}']`).value.trim();
+            const telefono = document.querySelector(`.edit-telefono[data-idx='${idx}']`).value.trim();
+            const users = getUsers();
+            users[idx] = { ...users[idx], username, pin, telefono };
+            setUsers(users);
+            renderUsers();
+        }
+        window.cancelEdit = function(idx) {
+            renderUsers();
+        }
+        window.confirmDeleteUser = function(idx) {
+            const users = getUsers();
+            const username = users[idx].username;
+            if (confirm(`¿Estás seguro de eliminar al usuario "${username}"?`)) {
+                window.deleteUser(idx);
+            }
+        }
+        window.deleteUser = function(idx) {
+            const users = getUsers();
+            users.splice(idx, 1);
+            setUsers(users);
+            renderUsers();
+        }
+        window.togglePauseUser = function(idx) {
+            const users = getUsers();
+            users[idx].paused = !users[idx].paused;
+            setUsers(users);
+            renderUsers();
+        }
+        function goToTarjeta() {
+            if (confirm('¿Estás seguro de querer ir a la tarjeta?')) {
+                window.location.href = 'tarjeta.html';
+            }
+        }
+        function goToLogin() {
+            if (confirm('¿Estás seguro de querer ir al login?')) {
+                window.location.href = 'index.html';
+                window.location.reload();
+            }
+        }
+        // Inicializar tabla
+        renderUsers();
+    </script>
+</body>
+</html>
