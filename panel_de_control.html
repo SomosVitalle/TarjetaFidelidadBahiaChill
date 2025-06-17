@@ -50,6 +50,7 @@
                     <th>Usuario</th>
                     <th>PIN</th>
                     <th>Tel.</th>
+                    <th>#</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -74,6 +75,11 @@
                 const isPaused = user.paused;
                 const icon = isPaused ? '▶️' : '⏸️';
                 const iconTitle = isPaused ? 'Reactivar usuario' : 'Pausar usuario';
+                const numero = typeof user.numero === 'number' && user.numero >= 0 && user.numero <= 10 ? user.numero : 0;
+                let selectOptions = '';
+                for (let i = 0; i <= 10; i++) {
+                    selectOptions += `<option value="${i}"${i === numero ? ' selected' : ''}>${i}</option>`;
+                }
                 tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td style="width:40px;">
@@ -82,6 +88,7 @@
                     <td><input type="text" value="${user.username}" data-idx="${idx}" class="edit-username" disabled></td>
                     <td><input type="text" value="${user.pin}" data-idx="${idx}" class="edit-pin" maxlength="6" disabled></td>
                     <td><input type="text" value="${user.telefono || ''}" data-idx="${idx}" class="edit-telefono" maxlength="15" disabled></td>
+                    <td><select data-idx="${idx}" class="edit-numero" disabled>${selectOptions}</select></td>
                     <td class="actions">
                         <button onclick="enableEdit(${idx})">Modificar</button>
                         <button onclick="confirmDeleteUser(${idx})">Eliminar</button>
@@ -97,9 +104,11 @@
             const username = document.getElementById('username').value.trim();
             const pin = document.getElementById('pin').value.trim();
             const telefono = document.getElementById('telefono').value.trim();
+            // Por defecto, el número será 0
+            const numero = 0;
             if (!username || !pin || !telefono) return;
             const users = getUsers();
-            users.push({ username, pin, telefono });
+            users.push({ username, pin, telefono, numero });
             setUsers(users);
             renderUsers();
             this.reset();
@@ -108,6 +117,7 @@
             document.querySelector(`.edit-username[data-idx='${idx}']`).disabled = false;
             document.querySelector(`.edit-pin[data-idx='${idx}']`).disabled = false;
             document.querySelector(`.edit-telefono[data-idx='${idx}']`).disabled = false;
+            document.querySelector(`.edit-numero[data-idx='${idx}']`).disabled = false;
             const tr = document.querySelectorAll('#usersTable tbody tr')[idx];
             tr.querySelector('.save-btn').style.display = '';
             tr.querySelector('.cancel-btn').style.display = '';
@@ -118,8 +128,10 @@
             const username = document.querySelector(`.edit-username[data-idx='${idx}']`).value.trim();
             const pin = document.querySelector(`.edit-pin[data-idx='${idx}']`).value.trim();
             const telefono = document.querySelector(`.edit-telefono[data-idx='${idx}']`).value.trim();
+            const numero = parseInt(document.querySelector(`.edit-numero[data-idx='${idx}']`).value, 10);
+            if (isNaN(numero) || numero < 0 || numero > 10) return alert('El número debe estar entre 0 y 10');
             const users = getUsers();
-            users[idx] = { ...users[idx], username, pin, telefono };
+            users[idx] = { ...users[idx], username, pin, telefono, numero };
             setUsers(users);
             renderUsers();
         }
