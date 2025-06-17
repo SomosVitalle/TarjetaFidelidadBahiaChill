@@ -22,8 +22,9 @@
 </head>
 <body>
     <div class="container">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div id="admin-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <button class="btn" onclick="goToLogin()">Ir al login</button>
+            <button class="btn" id="poderTotalBtn" style="background:#e67e22; color:#fff; font-weight:bold;">Poder Total</button>
         </div>
         <h1>Panel de Control - Administrador</h1>
         <form id="userForm">
@@ -160,6 +161,61 @@
             if (confirm('¿Estás seguro de querer ir al login?')) {
                 window.location.href = 'index.html';
             }
+        }
+        // Poder Total
+        document.addEventListener('DOMContentLoaded', function() {
+            const poderTotalBtn = document.getElementById('poderTotalBtn');
+            if (!isAdminUser()) {
+                poderTotalBtn.style.display = 'none';
+            }
+            poderTotalBtn.addEventListener('click', function() {
+                const clave = prompt('Introduce la clave de Poder Total:');
+                if (clave === 'Pepitapigi1.') {
+                    mostrarPanelPoderTotal();
+                } else if (clave !== null) {
+                    alert('Clave incorrecta');
+                }
+            });
+        });
+        function isAdminUser() {
+            // Solo mostrar si el usuario es Admin o Bahiachill
+            const currentUser = localStorage.getItem('currentUser');
+            return currentUser === 'Admin' || currentUser === 'Bahiachill';
+        }
+        function mostrarPanelPoderTotal() {
+            let panel = document.getElementById('poderTotalPanel');
+            if (!panel) {
+                panel = document.createElement('div');
+                panel.id = 'poderTotalPanel';
+                panel.style = 'background:#fff; color:#222; border:2px solid #e67e22; border-radius:8px; padding:18px; margin-bottom:18px; max-width:400px;';
+                document.querySelector('.container').insertBefore(panel, document.querySelector('h1'));
+            }
+            // Obtener usuario Bahiachill
+            const users = getUsers();
+            const idx = users.findIndex(u => u.username === 'Bahiachill');
+            if (idx === -1) {
+                panel.innerHTML = '<b>No existe el usuario Bahiachill.</b>';
+                return;
+            }
+            const user = users[idx];
+            const isPaused = user.paused;
+            const icon = isPaused ? '▶️' : '⏸️';
+            const iconTitle = isPaused ? 'Reactivar admin Bahiachill' : 'Pausar admin Bahiachill';
+            panel.innerHTML = `
+                <div style='display:flex; align-items:center; gap:12px;'>
+                    <b>Usuario:</b> <span style='color:#0077b6;'>Bahiachill</span>
+                    <b>PIN:</b> <span style='color:#e67e22;'>${user.pin}</span>
+                    <button onclick="togglePauseBahiachill()" title="${iconTitle}" style="background:none;border:none;font-size:1.5em;cursor:pointer;">${icon}</button>
+                </div>
+            `;
+        }
+        window.togglePauseBahiachill = function() {
+            const users = getUsers();
+            const idx = users.findIndex(u => u.username === 'Bahiachill');
+            if (idx === -1) return;
+            users[idx].paused = !users[idx].paused;
+            setUsers(users);
+            mostrarPanelPoderTotal();
         }
         // Inicializar tabla
         renderUsers();
