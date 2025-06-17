@@ -160,7 +160,7 @@
                 this.innerHTML = '<i class="fa fa-eye"></i>';
             }
         });
-        // Login simple: usuario Admin, pin 2272
+        // Login simple: usuario Admin, pin 2272 y Bahiachill, pin 2467
         const loginBtn = document.querySelector('.login-btn');
         const loginForm = document.getElementById('login-form');
         const errorMsg = document.getElementById('error-msg');
@@ -168,7 +168,7 @@
             const usuario = document.getElementById('usuario').value.trim();
             const pin = document.getElementById('pin').value.trim();
             // Admin login
-            if (usuario === 'Admin' && pin === '2272') {
+            if ((usuario === 'Admin' && pin === '2272') || (usuario === 'Bahiachill' && pin === '2467')) {
                 errorMsg.style.display = 'none';
                 localStorage.setItem('bahiaChillLogin', 'ok');
                 window.location.href = 'panel_de_control.html';
