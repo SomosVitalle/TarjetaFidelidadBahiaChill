@@ -22,9 +22,9 @@
 </head>
 <body>
     <div class="container">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <button class="btn" onclick="goToTarjeta()">Ir a la tarjeta</button>
-            <button class="btn" onclick="goToLogin()">Volver al login</button>
+        <div id="admin-header" style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:20px;">
+            <button class="btn" onclick="goToLogin()">Ir al login</button>
+            <button class="btn" id="poderTotalBtn" style="background:#000; color:#e74c3c; font-weight:bold; border:2px solid #e74c3c; margin-left:10px; display:none;">Poder Total</button>
         </div>
         <h1>Panel de Control - Administrador</h1>
         <form id="userForm">
@@ -171,8 +171,12 @@
                 alert('El usuario ya existe');
                 return;
             }
-            await createUserSupabase({ username, pin, telefono, numero, paused: false, admin: false });
-            renderUsers();
+            const { error } = await supabase.from('usuarios').insert([{ username, pin, telefono, numero, paused: false, admin: false }]);
+            if (error) {
+                alert('Error al crear usuario: ' + error.message);
+                return;
+            }
+            await renderUsers();
             this.reset();
         });
         window.enableEdit = function(username) {
@@ -214,19 +218,14 @@
         }
         // Poder Total
         document.addEventListener('DOMContentLoaded', function() {
-            const poderTotalBtn = document.createElement('button');
-            poderTotalBtn.className = 'btn';
-            poderTotalBtn.textContent = 'Poder Total';
-            poderTotalBtn.style = 'margin-top:20px;';
-            document.querySelector('.container').appendChild(poderTotalBtn);
-            poderTotalBtn.addEventListener('click', async function() {
-                const clave = prompt('Introduce la clave de Poder Total:');
-                if (clave === 'Pepitapigi1.') {
-                    await mostrarPanelPoderTotal();
-                } else if (clave !== null) {
-                    alert('Clave incorrecta');
-                }
-            });
+            // Mostrar botón Poder Total solo si el usuario es Admin
+            const poderTotalBtn = document.getElementById('poderTotalBtn');
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser === 'Admin') {
+                poderTotalBtn.style.display = '';
+            } else {
+                poderTotalBtn.style.display = 'none';
+            }
         });
         async function mostrarPanelPoderTotal() {
             let panel = document.getElementById('poderTotalPanel');
@@ -257,11 +256,6 @@
             const user = await getUserSupabase('Bahiachill');
             await updateUserSupabase('Bahiachill', { paused: !user.paused });
             mostrarPanelPoderTotal();
-        }
-        function goToTarjeta() {
-            if (confirm('¿Estás seguro de querer ir a la tarjeta?')) {
-                window.location.href = 'tarjeta.html';
-            }
         }
         function goToLogin() {
             if (confirm('¿Estás seguro de querer ir al login?')) {
