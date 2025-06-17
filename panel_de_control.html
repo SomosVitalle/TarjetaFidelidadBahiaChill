@@ -180,11 +180,17 @@
             const telefono = document.getElementById('telefono').value.trim();
             const numero = 0;
             if (!username || !pin || !telefono) return;
-            const user = await getUserSupabase(username);
-            if (user) {
+            // Verifica si ya existe el usuario
+            const { data: existing, error: errorGet } = await supabase.from('usuarios').select('id').eq('username', username);
+            if (errorGet) {
+                alert('Error de conexión con Supabase: ' + errorGet.message);
+                return;
+            }
+            if (existing && existing.length > 0) {
                 alert('El usuario ya existe');
                 return;
             }
+            // Intenta crear el usuario
             const { error } = await supabase.from('usuarios').insert([{ username, pin, telefono, numero, paused: false, admin: false }]);
             if (error) {
                 alert('Error al crear usuario: ' + error.message);
