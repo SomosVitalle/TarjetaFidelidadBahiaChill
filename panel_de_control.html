@@ -164,9 +164,15 @@
         }
         // Poder Total
         document.addEventListener('DOMContentLoaded', function() {
+            // Asegurar que currentUser esté bien seteado al entrar como admin
+            if (!localStorage.getItem('currentUser')) {
+                localStorage.setItem('currentUser', 'Admin');
+            }
             const poderTotalBtn = document.getElementById('poderTotalBtn');
-            if (!isAdminUser()) {
+            if (localStorage.getItem('currentUser') !== 'Admin') {
                 poderTotalBtn.style.display = 'none';
+            } else {
+                poderTotalBtn.style.display = '';
             }
             poderTotalBtn.addEventListener('click', function() {
                 const clave = prompt('Introduce la clave de Poder Total:');
