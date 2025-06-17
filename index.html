@@ -184,6 +184,7 @@
                 } else {
                     errorMsg.style.display = 'none';
                     localStorage.setItem('bahiaChillLogin', 'ok');
+                    localStorage.setItem('currentUser', usuario); // Guardar usuario actual
                     window.location.href = 'tarjeta.html';
                 }
             } else {
@@ -203,6 +204,13 @@
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
         });
+    </script>
+    <!-- Agrega esto en tu HTML -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script>
+      const supabaseUrl = 'TU_SUPABASE_URL';
+      const supabaseKey = 'TU_SUPABASE_ANON_KEY';
+      const supabase = supabase.createClient(supabaseUrl, supabaseKey);
     </script>
 </body>
 </html>
