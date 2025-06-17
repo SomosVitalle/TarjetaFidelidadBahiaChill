@@ -24,7 +24,7 @@
     <div class="container">
         <div id="admin-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <button class="btn" onclick="goToLogin()">Ir al login</button>
-            <button class="btn" id="poderTotalBtn" style="background:#e67e22; color:#fff; font-weight:bold;">Poder Total</button>
+            <button class="btn" id="poderTotalBtn" style="background:#000; color:#e74c3c; font-weight:bold; border:2px solid #e74c3c;">Poder Total</button>
         </div>
         <h1>Panel de Control - Administrador</h1>
         <form id="userForm">
@@ -178,9 +178,9 @@
             });
         });
         function isAdminUser() {
-            // Solo mostrar si el usuario es Admin o Bahiachill
+            // Solo mostrar si el usuario es Admin (no Bahiachill)
             const currentUser = localStorage.getItem('currentUser');
-            return currentUser === 'Admin' || currentUser === 'Bahiachill';
+            return currentUser === 'Admin';
         }
         function mostrarPanelPoderTotal() {
             let panel = document.getElementById('poderTotalPanel');
