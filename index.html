@@ -171,6 +171,7 @@
             if ((usuario === 'Admin' && pin === '2272') || (usuario === 'Bahiachill' && pin === '2467')) {
                 errorMsg.style.display = 'none';
                 localStorage.setItem('bahiaChillLogin', 'ok');
+                localStorage.setItem('currentUser', usuario); // Guardar usuario actual
                 window.location.href = 'panel_de_control.html';
                 return;
             }
