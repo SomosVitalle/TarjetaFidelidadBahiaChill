@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bahía Chill - Tarjeta VIP</title>
+    <script>
+      if (localStorage.getItem('isLoggedIn') !== 'true') {
+        window.location.href = 'login.html';
+      }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -217,20 +222,8 @@
                 <img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" />
             </div>
             <div class="title sharp" id="front-title">BAHIA CHILL</div>
-            <div class="stamps">
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-            </div>
-            <div class="stamps">
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-            </div>
+            <div class="stamps" id="stamps-row-1"></div>
+            <div class="stamps" id="stamps-row-2"></div>
             <div class="qr-code blurred" id="front-qr" style="pointer-events: none; background: none; box-shadow: none;">
                 <img src="Variantes/qr_blanco_transparente.png" alt="QR Tarjeta" style="width: 180px; height: 180px; object-fit: contain; opacity: 1; background: none; border-radius: 0; box-shadow: none; padding: 0; transform: scaleX(-1);" />
             </div>
@@ -382,6 +375,37 @@
                 touchMoved = true;
             });
         }
+        // Renderizar stickers según usuario logueado y su número
+        function renderStickers() {
+            // Obtener usuario logueado
+            const username = localStorage.getItem('currentUser');
+            const users = JSON.parse(localStorage.getItem('usuarios')) || [];
+            const user = users.find(u => u.username === username);
+            let numero = 0;
+            if (user && typeof user.numero === 'number' && user.numero >= 0 && user.numero <= 10) {
+                numero = user.numero;
+            }
+            // Rellenar stickers
+            const logoSrc = 'Variantes/palma_blanca_sin_fondo.jpg.png';
+            const stickers = [];
+            for (let i = 0; i < 10; i++) {
+                if (i < numero) {
+                    stickers.push(`<div class='stamp sharp'><img src='${logoSrc}' alt='Logo Bahía Chill' /></div>`);
+                } else {
+                    stickers.push(`<div class='stamp sharp' style='background:rgba(255,255,255,0.08);border:1px dashed #fff;'><i class='fa-regular fa-circle' style='color:#fff;opacity:0.3;font-size:22px;'></i></div>`);
+                }
+            }
+            // 2 filas de 5
+            document.getElementById('stamps-row-1').innerHTML = stickers.slice(0,5).join('');
+            document.getElementById('stamps-row-2').innerHTML = stickers.slice(5,10).join('');
+            // Actualizar texto de footer
+            const faltan = 10 - numero;
+            document.getElementById('front-footer').innerHTML = `SOLO TE FALTAN <span class="highlight">${faltan} PALMAS</span> PARA RECLAMAR TU REGALO`;
+        }
+        window.addEventListener('DOMContentLoaded', function() {
+            renderStickers();
+            // ...existing code...
+        });
     </script>
 </body>
 </html>
