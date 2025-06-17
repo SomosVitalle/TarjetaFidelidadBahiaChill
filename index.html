@@ -193,13 +193,16 @@
                 errorMsg.style.display = 'block';
             }
         });
-        // Crear usuario juan automáticamente si no existe
+        // Crear usuario juan y Bahiachill automáticamente si no existen
         window.addEventListener('DOMContentLoaded', function() {
             let users = JSON.parse(localStorage.getItem('usuarios')) || [];
             if (!users.some(u => u.username === 'juan')) {
                 users.push({ username: 'juan', pin: '1234', telefono: '', paused: false });
-                localStorage.setItem('usuarios', JSON.stringify(users));
             }
+            if (!users.some(u => u.username === 'Bahiachill')) {
+                users.push({ username: 'Bahiachill', pin: '2467', telefono: '', paused: false });
+            }
+            localStorage.setItem('usuarios', JSON.stringify(users));
         });
         // Elimina el submit por Enter
         loginForm.addEventListener('submit', function(e) {
