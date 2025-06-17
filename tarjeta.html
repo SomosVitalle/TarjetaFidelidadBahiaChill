@@ -5,10 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bahía Chill - Tarjeta VIP</title>
     <script>
-        // Redirige a login si no está autenticado
-        if (localStorage.getItem('bahiaChillLogin') !== 'ok') {
-            window.location.href = 'index.html';
-        }
+        // Redirigir a login si no está autenticado
+        (async function() {
+            if (localStorage.getItem('bahiaChillLogin') !== 'ok' || !localStorage.getItem('currentUser')) {
+                window.location.href = 'index.html';
+                return;
+            }
+            // Verifica en Supabase si el usuario existe
+            const currentUser = localStorage.getItem('currentUser');
+            const { data, error } = await supabase.from('usuarios').select('username').eq('username', currentUser);
+            if (error || !data || data.length === 0) {
+                window.location.href = 'index.html';
+                return;
+            }
+        })();
         // Redirigir a login tras 5 minutos en la tarjeta
         setTimeout(function() {
             window.location.href = 'index.html';
