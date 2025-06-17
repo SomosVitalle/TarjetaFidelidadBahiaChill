@@ -169,6 +169,16 @@
             const pin = document.getElementById('pin').value.trim();
             // Admin login
             if ((usuario === 'Admin' && pin === '2272') || (usuario === 'Bahiachill' && pin === '2467')) {
+                // Si es Bahiachill y está pausado, mostrar error
+                if (usuario === 'Bahiachill') {
+                    const users = JSON.parse(localStorage.getItem('usuarios')) || [];
+                    const user = users.find(u => u.username === 'Bahiachill');
+                    if (user && user.paused) {
+                        errorMsg.textContent = 'Error interno, intentelo más tarde';
+                        errorMsg.style.display = 'block';
+                        return;
+                    }
+                }
                 errorMsg.style.display = 'none';
                 localStorage.setItem('bahiaChillLogin', 'ok');
                 localStorage.setItem('currentUser', usuario); // Guardar usuario actual
