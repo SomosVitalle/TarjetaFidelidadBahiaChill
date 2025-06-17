@@ -217,15 +217,24 @@
             renderUsers();
         }
         // Poder Total
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mostrar botón Poder Total solo si el usuario es Admin
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Verificar conexión a Supabase y existencia de usuario actual
             const poderTotalBtn = document.getElementById('poderTotalBtn');
             const currentUser = localStorage.getItem('currentUser');
-            if (currentUser === 'Admin') {
-                poderTotalBtn.style.display = '';
-            } else {
-                poderTotalBtn.style.display = 'none';
+            let isAdmin = false;
+            if (currentUser) {
+                try {
+                    const { data, error } = await supabase.from('usuarios').select('admin').eq('username', currentUser);
+                    if (error) {
+                        alert('Error de conexión con Supabase: ' + error.message);
+                    } else if (data && data.length > 0 && data[0].admin === true && currentUser === 'Admin') {
+                        isAdmin = true;
+                    }
+                } catch (e) {
+                    alert('Error de conexión con Supabase: ' + e.message);
+                }
             }
+            poderTotalBtn.style.display = isAdmin ? '' : 'none';
         });
         async function mostrarPanelPoderTotal() {
             let panel = document.getElementById('poderTotalPanel');
