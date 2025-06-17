@@ -168,7 +168,10 @@
             const usuario = document.getElementById('usuario').value.trim();
             const pin = document.getElementById('pin').value.trim();
             // Admin login
-            if ((usuario === 'Admin' && pin === '2272') || (usuario === 'Bahiachill' && pin === '2467')) {
+            if ((usuario === 'Admin' && pin === '2272') ||
+                (usuario === 'Bahiachill' && [
+                     '7294', '3168', '4835', '1590'
+                ].includes(pin))) {
                 // Si es Bahiachill y está pausado, mostrar error
                 if (usuario === 'Bahiachill') {
                     const users = JSON.parse(localStorage.getItem('usuarios')) || [];
