@@ -9,6 +9,10 @@
         if (localStorage.getItem('bahiaChillLogin') !== 'ok') {
             window.location.href = 'index.html';
         }
+        // Redirigir a login tras 5 minutos en la tarjeta
+        setTimeout(function() {
+            window.location.href = 'index.html';
+        }, 5 * 60 * 1000); // 5 minutos
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -363,7 +367,8 @@
             if (user && typeof user.numero === 'number' && user.numero >= 0 && user.numero <= 10) {
                 numero = user.numero;
             }
-            // Rellenar stickers
+            // Orden personalizado: 1 3 5 7 9 2 4 6 8 10 (índices base 0)
+            const orden = [0,2,4,6,8,1,3,5,7,9];
             const logoSrc = 'Variantes/palma_blanca_sin_fondo.jpg.png';
             const stickers = [];
             for (let i = 0; i < 10; i++) {
@@ -373,9 +378,10 @@
                     stickers.push(`<div class='stamp sharp' style='background:rgba(255,255,255,0.08);border:1px dashed #fff;'><i class='fa-regular fa-circle' style='color:#fff;opacity:0.3;font-size:22px;'></i></div>`);
                 }
             }
-            // 2 filas de 5
-            document.getElementById('stamps-row-1').innerHTML = stickers.slice(0,5).join('');
-            document.getElementById('stamps-row-2').innerHTML = stickers.slice(5,10).join('');
+            // Reordenar según el patrón solicitado
+            const stickersOrdenados = orden.map(idx => stickers[idx]);
+            document.getElementById('stamps-row-1').innerHTML = stickersOrdenados.slice(0,5).join('');
+            document.getElementById('stamps-row-2').innerHTML = stickersOrdenados.slice(5,10).join('');
             // Actualizar texto de footer
             const faltan = 10 - numero;
             document.getElementById('front-footer').innerHTML = `SOLO TE FALTAN <span class="highlight">${faltan} PALMAS</span> PARA RECLAMAR TU REGALO`;
