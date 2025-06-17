@@ -158,9 +158,13 @@
             renderUsers();
         }
         function goToTarjeta() {
-            if (confirm('¿Estás seguro de querer ir a la tarjeta?')) {
-                window.location.href = 'tarjeta.html';
+            // Obtener el usuario seleccionado (por defecto el primero si hay)
+            const users = getUsers();
+            if (users.length > 0) {
+                // Guardar el usuario actual en localStorage
+                localStorage.setItem('currentUser', users[0].username);
             }
+            window.location.href = 'tarjeta.html';
         }
         function goToLogin() {
             if (confirm('¿Estás seguro de querer ir al login?')) {
