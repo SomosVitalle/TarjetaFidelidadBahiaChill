@@ -225,8 +225,9 @@
             <div class="title sharp" id="front-title">BAHIA CHILL</div>
             <div class="stamps" id="stamps-row-1"></div>
             <div class="stamps" id="stamps-row-2"></div>
-            <!-- Elimina el QR del frente -->
-            <!-- <div class="qr-code blurred" id="front-qr" ...> ... </div> -->
+            <div class="qr-code blurred" id="front-qr" style="pointer-events: none; background: none; box-shadow: none;">
+                <img src="Variantes/qr_blanco_transparente.png" alt="QR Tarjeta" style="width: 180px; height: 180px; object-fit: contain; opacity: 1; background: none; border-radius: 0; box-shadow: none; padding: 0; transform: scaleX(-1);" />
+            </div>
             <div class="footer sharp" id="front-footer">
                 SOLO TE FALTAN <span class="highlight">3 PALMAS</span> PARA RECLAMAR TU REGALO
             </div>
@@ -244,10 +245,9 @@
                 <div class="stamp blurred"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
                 <div class="stamp blurred"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
             </div>
-            <!-- Elimina el contenedor del QR trasero, pero deja el signo de interrogación -->
-            <a id="back-question-link" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; display: flex; justify-content: center; align-items: center; z-index: 10; background: none; border-radius: 50%; cursor:pointer; box-shadow: 0 0 12px 2px rgba(0,0,0,0.18);">
-                <div class="question-icon-back sharp" style="pointer-events: auto; width: 80px; height: 80px; background: rgba(255,255,255,0.10); box-shadow: 0 0 8px 1px rgba(0,0,0,0.10); display: flex; justify-content: center; align-items: center; font-size: 60px; border-radius: 50%; border: 2px solid #fff;">
-                    <i class="fa-solid fa-question" style="color: #fff; opacity: 0.95; font-size: 60px; transform: scaleX(1);"></i>
+            <a id="back-qr-link" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; display: flex; justify-content: center; align-items: center; z-index: 10; background: none; border-radius: 50%; cursor:pointer; box-shadow: 0 0 12px 2px rgba(0,0,0,0.18);">
+                <div class="qr-code qr-code-back sharp" id="back-qr" style="pointer-events: auto; width: 80px; height: 80px; background: rgba(255,255,255,0.10); box-shadow: 0 0 8px 1px rgba(0,0,0,0.10); display: flex; justify-content: center; align-items: center; font-size: 60px; border-radius: 50%; border: 2px solid #fff;">
+                    <i class="fa-solid fa-question" id="question-icon" style="color: #fff; opacity: 0.95; font-size: 60px; transform: scaleX(1);"></i>
                 </div>
             </a>
             <div class="stamps stamps-back" style="margin-top: 10px;">
@@ -263,44 +263,27 @@
         </div>
     </div>
 
-    <!-- Elimina el modal del QR y deja solo el modal de ayuda -->
-    <div class="modal-overlay" id="help-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:50; justify-content:center; align-items:center; background:rgba(0,0,0,0.18);">
+    <div class="modal-overlay" id="qr-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:50; justify-content:center; align-items:center; background:rgba(0,0,0,0.18);">
         <div class="modal-content" style="backdrop-filter: blur(16px) saturate(180%); background: rgba(61,129,157,0.18); border-radius: 18px; box-shadow: 0 4px 30px rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.2); padding: 32px 24px 24px 24px; min-width: 260px; max-width: 90vw; text-align:center;">
-            <div style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #fff; margin-bottom: 18px;">Todas las respuestas a tus preguntas están aquí</div>
+            <div style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #fff; margin-bottom: 18px;">Todas las respuestas a tus preguntas estan aqui</div>
             <div style="display:flex; justify-content:center; align-items:center; margin-bottom:18px;">
-                <!-- Aquí puedes poner cualquier contenido de ayuda -->
-                <span style="font-size: 2.5rem; color: #fff; opacity: 0.8;"><i class="fa-solid fa-question"></i></span>
+                <img src="Variantes/qr_blanco_transparente.png" alt="QR Tarjeta" style="width: 160px; height: 160px; object-fit: contain; opacity: 1; background: none; border-radius: 0; box-shadow: none; padding: 0;" />
             </div>
             <div style="display:flex; gap:18px; justify-content:center;">
-                <button id="help-modal-close" style="backdrop-filter: blur(8px) saturate(180%); background: rgba(255,255,255,0.25); border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); color: #25647a; font-weight: bold; font-size: 1rem; padding: 8px 22px; cursor:pointer; transition: background 0.2s;">Cerrar</button>
+                <button id="qr-modal-si" style="backdrop-filter: blur(8px) saturate(180%); background: rgba(255,255,255,0.25); border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); color: #25647a; font-weight: bold; font-size: 1rem; padding: 8px 22px; cursor:pointer; transition: background 0.2s;">Sí</button>
+                <button id="qr-modal-no" style="backdrop-filter: blur(8px) saturate(180%); background: rgba(255,255,255,0.18); border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 1rem; padding: 8px 22px; cursor:pointer; transition: background 0.2s;">No</button>
             </div>
         </div>
     </div>
 
     <script>
         const card = document.getElementById('card');
-        // Elimina referencias y lógica del QR y deja solo la del signo de interrogación
-        const helpModalOverlay = document.getElementById('help-modal-overlay');
-        const helpModalClose = document.getElementById('help-modal-close');
-        const backQuestionLink = document.getElementById('back-question-link');
+        const qrModalOverlay = document.getElementById('qr-modal-overlay');
+        const qrModalSi = document.getElementById('qr-modal-si');
+        const qrModalNo = document.getElementById('qr-modal-no');
+        const backQrLink = document.getElementById('back-qr-link');
         let modalOpen = false;
-        function openHelpModal(e) {
-            if (!card.classList.contains('flipped')) return;
-            e.preventDefault();
-            e.stopPropagation();
-            helpModalOverlay.style.display = 'flex';
-            modalOpen = true;
-        }
-        function closeHelpModal() {
-            helpModalOverlay.style.display = 'none';
-            modalOpen = false;
-        }
-        backQuestionLink.addEventListener('click', openHelpModal);
-        backQuestionLink.addEventListener('touchstart', openHelpModal);
-        helpModalClose.addEventListener('click', closeHelpModal);
-        helpModalOverlay.addEventListener('click', function(e) {
-            if (e.target === helpModalOverlay) closeHelpModal();
-        });
+
         // Gira la tarjeta solo si no se hace click en el QR trasero ni en el modal
         function handleCardClick(e) {
             if (modalOpen) return;
