@@ -280,6 +280,46 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      const SUPABASE_URL = 'https://senqhfrzhsvrwiqschuf.supabase.co';
+      const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbnFoZnJ6aHN2cndpcXNjaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMTA3MzksImV4cCI6MjA2NTY4NjczOX0.SoQUuDrUtIObkHMTn6HOOR74MvYTI5bgy4-PDU4p-dg';
+      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      async function getUserData() {
+        const username = localStorage.getItem('currentUser');
+        const { data, error } = await supabase.from('usuarios').select('*').eq('username', username).maybeSingle();
+        return data;
+      }
+      async function renderStickers() {
+        const user = await getUserData();
+        let numero = 0;
+        if (user && typeof user.numero === 'number' && user.numero >= 0 && user.numero <= 10) {
+          numero = user.numero;
+        }
+        // Orden personalizado: 1 3 5 7 9 2 4 6 8 10 (índices base 0)
+        const orden = [0,2,4,6,8,1,3,5,7,9];
+        const logoSrc = 'Variantes/palma_blanca_sin_fondo.jpg.png';
+        const stickers = [];
+        for (let i = 0; i < 10; i++) {
+            if (i < numero) {
+                stickers.push(`<div class='stamp sharp'><img src='${logoSrc}' alt='Logo Bahía Chill' /></div>`);
+            } else {
+                stickers.push(`<div class='stamp sharp' style='background:rgba(255,255,255,0.08);border:1px dashed #fff;'><i class='fa-regular fa-circle' style='color:#fff;opacity:0.3;font-size:22px;'></i></div>`);
+            }
+        }
+        // Reordenar según el patrón solicitado
+        const stickersOrdenados = orden.map(idx => stickers[idx]);
+        document.getElementById('stamps-row-1').innerHTML = stickersOrdenados.slice(0,5).join('');
+        document.getElementById('stamps-row-2').innerHTML = stickersOrdenados.slice(5,10).join('');
+        // Actualizar texto de footer
+        const faltan = 10 - numero;
+        document.getElementById('front-footer').innerHTML = `SOLO TE FALTAN <span class="highlight">${faltan} PALMAS</span> PARA RECLAMAR TU REGALO`;
+      }
+      window.addEventListener('DOMContentLoaded', function() {
+        renderStickers();
+        // ...existing code...
+      });
+    </script>
     <script>
         const card = document.getElementById('card');
         const qrModalOverlay = document.getElementById('qr-modal-overlay');
@@ -357,12 +397,21 @@
         qrModalOverlay.addEventListener('click', function(e) {
             if (e.target === qrModalOverlay) closeQrModal();
         });
+        // Función para obtener usuario desde Supabase
+        async function getUserSupabase(username) {
+            const { data, error } = await supabase
+                .from('usuarios')
+                .select('*')
+                .eq('username', username)
+                .maybeSingle();
+            if (error) return null;
+            return data;
+        }
         // Renderizar stickers según usuario logueado y su número
-        function renderStickers() {
+        async function renderStickers() {
             // Obtener usuario logueado
             const username = localStorage.getItem('currentUser');
-            const users = JSON.parse(localStorage.getItem('usuarios')) || [];
-            const user = users.find(u => u.username === username);
+            const user = await getUserSupabase(username);
             let numero = 0;
             if (user && typeof user.numero === 'number' && user.numero >= 0 && user.numero <= 10) {
                 numero = user.numero;
