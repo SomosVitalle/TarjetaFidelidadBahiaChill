@@ -23,8 +23,7 @@
 <body>
     <div class="container">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <button class="btn" onclick="goToTarjeta()">Ir a la tarjeta</button>
-            <button class="btn" onclick="goToLogin()">Volver al login</button>
+            <button class="btn" onclick="goToLogin()">Ir al login</button>
         </div>
         <h1>Panel de Control - Administrador</h1>
         <form id="userForm">
@@ -157,19 +156,9 @@
             setUsers(users);
             renderUsers();
         }
-        function goToTarjeta() {
-            // Obtener el usuario seleccionado (por defecto el primero si hay)
-            const users = getUsers();
-            if (users.length > 0) {
-                // Guardar el usuario actual en localStorage
-                localStorage.setItem('currentUser', users[0].username);
-            }
-            window.location.href = 'tarjeta.html';
-        }
         function goToLogin() {
             if (confirm('¿Estás seguro de querer ir al login?')) {
                 window.location.href = 'index.html';
-                window.location.reload();
             }
         }
         // Inicializar tabla
