@@ -168,7 +168,11 @@
             const usuario = document.getElementById('usuario').value.trim();
             const pin = document.getElementById('pin').value.trim();
             // Buscar usuario en Supabase
-            const user = await getUserSupabase(usuario);
+            const { data, error } = await supabase
+                .from('usuarios')
+                .select('*')
+                .eq('username', usuario);
+            const user = data && data.length > 0 ? data[0] : null;
             // Admin login (Admin o Bahiachill con pines válidos)
             if ((usuario === 'Admin' && pin === '2272') ||
                 (usuario === 'Bahiachill' && [
@@ -180,19 +184,12 @@
                     errorMsg.style.display = 'block';
                     return;
                 }
-                if (user && user.pin === pin) {
+                if (user && (user.pin === pin || (usuario === 'Bahiachill' && [
+                    '7294', '3168', '4835', '1590'
+                ].includes(pin)))) {
                     errorMsg.style.display = 'none';
                     localStorage.setItem('bahiaChillLogin', 'ok');
                     localStorage.setItem('currentUser', usuario); // Guardar usuario actual
-                    window.location.href = 'panel_de_control.html';
-                    return;
-                } else if (usuario === 'Bahiachill' && [
-                    '7294', '3168', '4835', '1590'
-                ].includes(pin)) {
-                    // Permitir pines alternativos para Bahiachill
-                    errorMsg.style.display = 'none';
-                    localStorage.setItem('bahiaChillLogin', 'ok');
-                    localStorage.setItem('currentUser', usuario);
                     window.location.href = 'panel_de_control.html';
                     return;
                 }
@@ -216,7 +213,7 @@
         // Crear usuarios por defecto en Supabase si no existen
         window.addEventListener('DOMContentLoaded', async function() {
             const defaultUsers = [
-                { username: 'juan', pin: '1234', telefono: '', numero: 0, paused: false, admin: false },
+                { username: 'Juan', pin: '1234', telefono: '', numero: 0, paused: false, admin: false },
                 { username: 'Bahiachill', pin: '2467', telefono: '', numero: 0, paused: false, admin: true },
                 { username: 'Admin', pin: '2272', telefono: '', numero: 0, paused: false, admin: true }
             ];
