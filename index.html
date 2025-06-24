@@ -147,126 +147,124 @@
             </form>
         </div>
     </div>
-    <script>
-        // Mostrar/ocultar PIN
-        const pinInput = document.getElementById('pin');
-        const togglePin = document.getElementById('togglePin');
-        togglePin.addEventListener('click', function() {
-            if (pinInput.type === 'password') {
-                pinInput.type = 'text';
-                this.innerHTML = '<i class="fa fa-eye-slash"></i>';
-            } else {
-                pinInput.type = 'password';
-                this.innerHTML = '<i class="fa fa-eye"></i>';
-            }
-        });
-        // Login simple: usuario Admin, pin 2272 y Bahiachill, pin 2467
-        const loginBtn = document.querySelector('.login-btn');
-        const loginForm = document.getElementById('login-form');
-        const errorMsg = document.getElementById('error-msg');
-        loginBtn.addEventListener('click', async function(e) {
-            const usuario = document.getElementById('usuario').value.trim();
-            const pin = document.getElementById('pin').value.trim();
-            // Buscar usuario en Supabase
-            const { data, error } = await supabase
-                .from('usuarios')
-                .select('*')
-                .eq('username', usuario);
-            const user = data && data.length > 0 ? data[0] : null;
-            // Admin login (Admin o Bahiachill con pines válidos)
-            if ((usuario === 'Admin' && pin === '2272') ||
-                (usuario === 'Bahiachill' && [
-                    '2467', '7294', '3168', '4835', '1590'
-                ].includes(pin))) {
-                // Si es Bahiachill y está pausado, mostrar error
-                if (usuario === 'Bahiachill' && user && user.paused) {
-                    errorMsg.textContent = 'Error interno, intentelo más tarde';
-                    errorMsg.style.display = 'block';
-                    return;
-                }
-                if (user && (user.pin === pin || (usuario === 'Bahiachill' && [
-                    '7294', '3168', '4835', '1590'
-                ].includes(pin)))) {
-                    errorMsg.style.display = 'none';
-                    localStorage.setItem('bahiaChillLogin', 'ok');
-                    localStorage.setItem('currentUser', usuario); // Guardar usuario actual
-                    window.location.href = 'panel_de_control.html';
-                    return;
-                }
-            }
-            // Usuarios normales
-            if (user && user.pin === pin) {
-                if (user.paused) {
-                    errorMsg.textContent = 'Usuario pausado. Contacta al administrador.';
-                    errorMsg.style.display = 'block';
-                } else {
-                    errorMsg.style.display = 'none';
-                    localStorage.setItem('bahiaChillLogin', 'ok');
-                    localStorage.setItem('currentUser', usuario); // Guardar usuario actual
-                    window.location.href = 'tarjeta.html';
-                }
-            } else {
-                errorMsg.textContent = 'Usuario o PIN incorrecto';
-                errorMsg.style.display = 'block';
-            }
-        });
-        // Crear usuarios por defecto en Supabase si no existen
-        window.addEventListener('DOMContentLoaded', async function() {
-            const defaultUsers = [
-                { username: 'Juan', pin: '1234', telefono: '', numero: 0, paused: false, admin: false },
-                { username: 'Bahiachill', pin: '2467', telefono: '', numero: 0, paused: false, admin: true },
-                { username: 'Admin', pin: '2272', telefono: '', numero: 0, paused: false, admin: true }
-            ];
-            for (const user of defaultUsers) {
-                const existing = await getUserSupabase(user.username);
-                if (!existing) {
-                    await createUserSupabase(user);
-                }
-            }
-        });
-        // Elimina el submit por Enter
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-        });
-        // Función para obtener usuario desde Supabase
-        async function getUserSupabase(username) {
-            const { data, error } = await supabase
-                .from('usuarios')
-                .select('*')
-                .eq('username', username)
-                .maybeSingle();
-            if (error) return null;
-            return data;
-        }
-        // Función para crear usuario en Supabase
-        async function createUserSupabase(user) {
-            const { data, error } = await supabase
-                .from('usuarios')
-                .insert([user]);
-            return { data, error };
-        }
-        // Función para actualizar usuario en Supabase
-        async function updateUserSupabase(username, fields) {
-            const { data, error } = await supabase
-                .from('usuarios')
-                .update(fields)
-                .eq('username', username);
-            return { data, error };
-        }
-        // Función para obtener todos los usuarios
-        async function getAllUsersSupabase() {
-            const { data, error } = await supabase
-                .from('usuarios')
-                .select('*');
-            return data || [];
-        }
-    </script>
-    <!-- Agrega esto en tu HTML -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
       const SUPABASE_URL = 'https://senqhfrzhsvrwiqschuf.supabase.co';
       const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbnFoZnJ6aHN2cndpcXNjaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMTA3MzksImV4cCI6MjA2NTY4NjczOX0.SoQUuDrUtIObkHMTn6HOOR74MvYTI5bgy4-PDU4p-dg';
       window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      // Mostrar/ocultar PIN
+      const pinInput = document.getElementById('pin');
+      const togglePin = document.getElementById('togglePin');
+      togglePin.addEventListener('click', function() {
+          if (pinInput.type === 'password') {
+              pinInput.type = 'text';
+              this.innerHTML = '<i class="fa fa-eye-slash"></i>';
+          } else {
+              pinInput.type = 'password';
+              this.innerHTML = '<i class="fa fa-eye"></i>';
+          }
+      });
+      // Login simple: usuario Admin, pin 2272 y Bahiachill, pin 2467
+      const loginBtn = document.querySelector('.login-btn');
+      const loginForm = document.getElementById('login-form');
+      const errorMsg = document.getElementById('error-msg');
+      loginBtn.addEventListener('click', async function(e) {
+          const usuario = document.getElementById('usuario').value.trim();
+          const pin = document.getElementById('pin').value.trim();
+          // Buscar usuario en Supabase
+          const { data, error } = await supabase
+              .from('usuarios')
+              .select('*')
+              .eq('username', usuario);
+          const user = data && data.length > 0 ? data[0] : null;
+          // Admin login (Admin o Bahiachill con pines válidos)
+          if ((usuario === 'Admin' && pin === '2272') ||
+              (usuario === 'Bahiachill' && [
+                  '2467', '7294', '3168', '4835', '1590'
+              ].includes(pin))) {
+              // Si es Bahiachill y está pausado, mostrar error
+              if (usuario === 'Bahiachill' && user && user.paused) {
+                  errorMsg.textContent = 'Error interno, intentelo más tarde';
+                  errorMsg.style.display = 'block';
+                  return;
+              }
+              if (user && (user.pin === pin || (usuario === 'Bahiachill' && [
+                  '7294', '3168', '4835', '1590'
+              ].includes(pin)))) {
+                  errorMsg.style.display = 'none';
+                  localStorage.setItem('bahiaChillLogin', 'ok');
+                  localStorage.setItem('currentUser', usuario); // Guardar usuario actual
+                  window.location.href = 'panel_de_control.html';
+                  return;
+              }
+          }
+          // Usuarios normales
+          if (user && user.pin === pin) {
+              if (user.paused) {
+                  errorMsg.textContent = 'Usuario pausado. Contacta al administrador.';
+                  errorMsg.style.display = 'block';
+              } else {
+                  errorMsg.style.display = 'none';
+                  localStorage.setItem('bahiaChillLogin', 'ok');
+                  localStorage.setItem('currentUser', usuario); // Guardar usuario actual
+                  window.location.href = 'tarjeta.html';
+              }
+          } else {
+              errorMsg.textContent = 'Usuario o PIN incorrecto';
+              errorMsg.style.display = 'block';
+          }
+      });
+      // Crear usuarios por defecto en Supabase si no existen
+      window.addEventListener('DOMContentLoaded', async function() {
+          const defaultUsers = [
+              { username: 'Juan', pin: '1234', telefono: '', numero: 0, paused: false, admin: false },
+              { username: 'Bahiachill', pin: '2467', telefono: '', numero: 0, paused: false, admin: true },
+              { username: 'Admin', pin: '2272', telefono: '', numero: 0, paused: false, admin: true }
+          ];
+          for (const user of defaultUsers) {
+              const existing = await getUserSupabase(user.username);
+              if (!existing) {
+                  await createUserSupabase(user);
+              }
+          }
+      });
+      // Elimina el submit por Enter
+      loginForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+      });
+      // Función para obtener usuario desde Supabase
+      async function getUserSupabase(username) {
+          const { data, error } = await supabase
+              .from('usuarios')
+              .select('*')
+              .eq('username', username)
+              .maybeSingle();
+          if (error) return null;
+          return data;
+      }
+      // Función para crear usuario en Supabase
+      async function createUserSupabase(user) {
+          const { data, error } = await supabase
+              .from('usuarios')
+              .insert([user]);
+          return { data, error };
+      }
+      // Función para actualizar usuario en Supabase
+      async function updateUserSupabase(username, fields) {
+          const { data, error } = await supabase
+              .from('usuarios')
+              .update(fields)
+              .eq('username', username);
+          return { data, error };
+      }
+      // Función para obtener todos los usuarios
+      async function getAllUsersSupabase() {
+          const { data, error } = await supabase
+              .from('usuarios')
+              .select('*');
+          return data || [];
+      }
     </script>
 </body>
 </html>
