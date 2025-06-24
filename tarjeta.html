@@ -263,7 +263,7 @@
         }
     </style>
 </head>
-<body>
+<body style="display:none;" id="body-block">
     <div class="card-container" id="card">
         <!-- Front of the card -->
         <div class="card">
@@ -473,6 +473,7 @@
       window.addEventListener('DOMContentLoaded', async function() {
         const ok = await checkAndRedirect();
         if (!ok) return;
+        document.getElementById('body-block').style.display = '';
         await renderStickers();
         setupCardUI();
       });
