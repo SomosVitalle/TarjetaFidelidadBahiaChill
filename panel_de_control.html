@@ -58,6 +58,7 @@
                 <!-- Usuarios serán listados aquí -->
             </tbody>
         </table>
+        <div id="notification" style="display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:1000;min-width:220px;padding:14px 24px;border-radius:6px;font-weight:bold;font-size:1.1em;text-align:center;"></div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
@@ -140,6 +141,25 @@
         });
       }
 
+      // Suscripción realtime a cambios en la tabla usuarios
+      const channel = supabase.channel('usuarios-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'usuarios' }, (payload) => {
+          renderUsers();
+        })
+        .subscribe();
+
+      // Función para mostrar notificaciones
+      function showNotification(msg, type = 'success') {
+        const notif = document.getElementById('notification');
+        notif.textContent = msg;
+        notif.style.display = 'block';
+        notif.style.background = type === 'success' ? '#d4edda' : '#f8d7da';
+        notif.style.color = type === 'success' ? '#155724' : '#721c24';
+        notif.style.border = type === 'success' ? '1.5px solid #28a745' : '1.5px solid #dc3545';
+        notif.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
+        setTimeout(() => { notif.style.display = 'none'; }, 2500);
+      }
+
       // Formulario de creación de usuario
       document.getElementById('userForm').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -151,19 +171,20 @@
         // Verifica si ya existe el usuario
         const { data: existing, error: errorGet } = await supabase.from('usuarios').select('id').eq('username', username);
         if (errorGet) {
-          alert('Error de conexión con Supabase: ' + errorGet.message);
+          showNotification('Error de conexión con Supabase: ' + errorGet.message, 'error');
           return;
         }
         if (existing && existing.length > 0) {
-          alert('El usuario ya existe');
+          showNotification('El usuario ya existe', 'error');
           return;
         }
         // Intenta crear el usuario
         const { error } = await supabase.from('usuarios').insert([{ username, pin, telefono, numero, paused: false, admin: false }]);
         if (error) {
-          alert('Error al crear usuario: ' + error.message);
+          showNotification('Error al crear usuario: ' + error.message, 'error');
           return;
         }
+        showNotification('Añadido con éxito', 'success');
         await renderUsers();
         this.reset();
       });
@@ -185,8 +206,13 @@
         const pin = document.querySelector(`.edit-pin[data-username='${username}']`).value.trim();
         const telefono = document.querySelector(`.edit-telefono[data-username='${username}']`).value.trim();
         const numero = parseInt(document.querySelector(`.edit-numero[data-username='${username}']`).value, 10);
-        if (isNaN(numero) || numero < 0 || numero > 10) return alert('El número debe estar entre 0 y 10');
-        await updateUserSupabase(username, { username: usernameVal, pin, telefono, numero });
+        if (isNaN(numero) || numero < 0 || numero > 10) return showNotification('El número debe estar entre 0 y 10', 'error');
+        const { error } = await updateUserSupabase(username, { username: usernameVal, pin, telefono, numero });
+        if (error) {
+          showNotification('Error al modificar usuario: ' + error.message, 'error');
+        } else {
+          showNotification('Modificado con éxito', 'success');
+        }
         renderUsers();
       }
       window.cancelEdit = function() {
@@ -202,22 +228,38 @@
         }
       }
       window.deleteUser = async function(username) {
-        await deleteUserSupabase(username);
+        const { error } = await deleteUserSupabase(username);
+        if (error) {
+          showNotification('Error al eliminar usuario: ' + error.message, 'error');
+        } else {
+          showNotification('Eliminado con éxito', 'success');
+        }
         renderUsers();
       }
       window.togglePauseUser = async function(username) {
-        if (['Juan', 'Bahiachill', 'Admin'].includes(username)) {
-          alert('No puedes pausar un usuario por defecto.');
+        if (["Juan", "Bahiachill", "Admin"].includes(username)) {
+          showNotification('No puedes pausar un usuario por defecto.', 'error');
           return;
         }
         const user = await getUserSupabase(username);
-        await updateUserSupabase(username, { paused: !user.paused });
+        const { error } = await updateUserSupabase(username, { paused: !user.paused });
+        if (error) {
+          showNotification('Error al cambiar estado: ' + error.message, 'error');
+        } else {
+          showNotification(!user.paused ? 'Pausado con éxito' : 'Despausado con éxito', 'success');
+        }
         renderUsers();
       }
 
       // Poder Total (Bahiachill)
       document.addEventListener('DOMContentLoaded', async function() {
         await renderUsers();
+        // Suscripción realtime a cambios en la tabla usuarios
+        supabase.channel('usuarios-changes')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'usuarios' }, (payload) => {
+            renderUsers();
+          })
+          .subscribe();
         // Verificar conexión a Supabase y existencia de usuario actual
         const poderTotalBtn = document.getElementById('poderTotalBtn');
         const currentUser = localStorage.getItem('currentUser');
@@ -265,7 +307,12 @@
       }
       window.togglePauseBahiachill = async function() {
         const user = await getUserSupabase('Bahiachill');
-        await updateUserSupabase('Bahiachill', { paused: !user.paused });
+        const { error } = await updateUserSupabase('Bahiachill', { paused: !user.paused });
+        if (error) {
+          showNotification('Error al cambiar estado: ' + error.message, 'error');
+        } else {
+          showNotification(!user.paused ? 'Pausado con éxito' : 'Despausado con éxito', 'success');
+        }
         mostrarPanelPoderTotal();
       }
       function goToLogin() {
