@@ -4,26 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bahía Chill - Tarjeta VIP</title>
-    <script>
-        // Redirigir a login si no está autenticado
-        (async function() {
-            if (localStorage.getItem('bahiaChillLogin') !== 'ok' || !localStorage.getItem('currentUser')) {
-                window.location.href = 'index.html';
-                return;
-            }
-            // Verifica en Supabase si el usuario existe
-            const currentUser = localStorage.getItem('currentUser');
-            const { data, error } = await supabase.from('usuarios').select('username').eq('username', currentUser);
-            if (error || !data || data.length === 0) {
-                window.location.href = 'index.html';
-                return;
-            }
-        })();
-        // Redirigir a login tras 5 minutos en la tarjeta
-        setTimeout(function() {
-            window.location.href = 'index.html';
-        }, 5 * 60 * 1000); // 5 minutos
-    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -292,16 +272,37 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+      // Inicialización global de Supabase
       const SUPABASE_URL = 'https://senqhfrzhsvrwiqschuf.supabase.co';
       const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbnFoZnJ6aHN2cndpcXNjaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMTA3MzksImV4cCI6MjA2NTY4NjczOX0.SoQUuDrUtIObkHMTn6HOOR74MvYTI5bgy4-PDU4p-dg';
-      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      async function getUserData() {
-        const username = localStorage.getItem('currentUser');
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      // Verifica login y existencia de usuario en Supabase
+      async function checkAndRedirect() {
+        if (localStorage.getItem('bahiaChillLogin') !== 'ok' || !localStorage.getItem('currentUser')) {
+          window.location.href = 'index.html';
+          return false;
+        }
+        const currentUser = localStorage.getItem('currentUser');
+        const { data, error } = await supabase.from('usuarios').select('username').eq('username', currentUser);
+        if (error || !data || data.length === 0) {
+          window.location.href = 'index.html';
+          return false;
+        }
+        return true;
+      }
+
+      // Obtiene datos del usuario actual
+      async function getUserSupabase(username) {
         const { data, error } = await supabase.from('usuarios').select('*').eq('username', username).maybeSingle();
+        if (error) return null;
         return data;
       }
+
+      // Renderiza los stickers según el campo numero
       async function renderStickers() {
-        const user = await getUserData();
+        const username = localStorage.getItem('currentUser');
+        const user = await getUserSupabase(username);
         let numero = 0;
         if (user && typeof user.numero === 'number' && user.numero >= 0 && user.numero <= 10) {
           numero = user.numero;
@@ -311,13 +312,12 @@
         const logoSrc = 'Variantes/palma_blanca_sin_fondo.jpg.png';
         const stickers = [];
         for (let i = 0; i < 10; i++) {
-            if (i < numero) {
-                stickers.push(`<div class='stamp sharp'><img src='${logoSrc}' alt='Logo Bahía Chill' /></div>`);
-            } else {
-                stickers.push(`<div class='stamp sharp' style='background:rgba(255,255,255,0.08);border:1px dashed #fff;'><i class='fa-regular fa-circle' style='color:#fff;opacity:0.3;font-size:22px;'></i></div>`);
-            }
+          if (i < numero) {
+            stickers.push(`<div class='stamp sharp'><img src='${logoSrc}' alt='Logo Bahía Chill' /></div>`);
+          } else {
+            stickers.push(`<div class='stamp sharp' style='background:rgba(255,255,255,0.08);border:1px dashed #fff;'><i class='fa-regular fa-circle' style='color:#fff;opacity:0.3;font-size:22px;'></i></div>`);
+          }
         }
-        // Reordenar según el patrón solicitado
         const stickersOrdenados = orden.map(idx => stickers[idx]);
         document.getElementById('stamps-row-1').innerHTML = stickersOrdenados.slice(0,5).join('');
         document.getElementById('stamps-row-2').innerHTML = stickersOrdenados.slice(5,10).join('');
@@ -325,130 +325,92 @@
         const faltan = 10 - numero;
         document.getElementById('front-footer').innerHTML = `SOLO TE FALTAN <span class="highlight">${faltan} PALMAS</span> PARA RECLAMAR TU REGALO`;
       }
-      window.addEventListener('DOMContentLoaded', function() {
-        renderStickers();
-        // ...existing code...
-      });
-    </script>
-    <script>
+
+      // Redirigir a login tras 5 minutos
+      setTimeout(function() {
+        window.location.href = 'index.html';
+      }, 5 * 60 * 1000);
+
+      // Lógica de la tarjeta y modal QR
+      function setupCardUI() {
         const card = document.getElementById('card');
         const qrModalOverlay = document.getElementById('qr-modal-overlay');
         const qrModalSi = document.getElementById('qr-modal-si');
         const qrModalNo = document.getElementById('qr-modal-no');
         const backQrLink = document.getElementById('back-qr-link');
         let modalOpen = false;
-
-        // Gira la tarjeta solo si no se hace click en el QR trasero ni en el modal
         function handleCardClick(e) {
-            if (modalOpen) return;
-            // Si el click fue en el QR trasero y la tarjeta está volteada, no girar
-            if (e.target.closest('#back-qr-link') && card.classList.contains('flipped')) return;
-            card.classList.toggle('flipped');
-            // Reiniciar la animación de brillo en ambas caras
-            const cards = card.querySelectorAll('.card');
-            cards.forEach(cardEl => {
-                cardEl.classList.remove('shine-reset');
-                void cardEl.offsetWidth;
-                cardEl.classList.add('shine-reset');
-            });
-            // Efecto de blur/nitidez según la cara visible
-            const isFlipped = card.classList.contains('flipped');
-            document.querySelectorAll('.card .sharp').forEach(el => {
-                el.style.filter = isFlipped ? 'blur(2px)' : 'none';
-            });
-            document.querySelectorAll('.card .blurred').forEach(el => {
-                el.style.filter = isFlipped ? 'none' : 'blur(2px)';
-            });
-            document.querySelectorAll('.card-back .sharp').forEach(el => {
-                el.style.filter = isFlipped ? 'none' : 'blur(2px)';
-            });
-            document.querySelectorAll('.card-back .blurred').forEach(el => {
-                el.style.filter = isFlipped ? 'blur(2px)' : 'none';
-            });
+          if (modalOpen) return;
+          if (e.target.closest('#back-qr-link') && card.classList.contains('flipped')) return;
+          card.classList.toggle('flipped');
+          const cards = card.querySelectorAll('.card');
+          cards.forEach(cardEl => {
+            cardEl.classList.remove('shine-reset');
+            void cardEl.offsetWidth;
+            cardEl.classList.add('shine-reset');
+          });
+          const isFlipped = card.classList.contains('flipped');
+          document.querySelectorAll('.card .sharp').forEach(el => {
+            el.style.filter = isFlipped ? 'blur(2px)' : 'none';
+          });
+          document.querySelectorAll('.card .blurred').forEach(el => {
+            el.style.filter = isFlipped ? 'none' : 'blur(2px)';
+          });
+          document.querySelectorAll('.card-back .sharp').forEach(el => {
+            el.style.filter = isFlipped ? 'none' : 'blur(2px)';
+          });
+          document.querySelectorAll('.card-back .blurred').forEach(el => {
+            el.style.filter = isFlipped ? 'blur(2px)' : 'none';
+          });
         }
-        card.removeEventListener('click', handleCardClick); // Previene duplicados
+        card.removeEventListener('click', handleCardClick);
         card.addEventListener('click', handleCardClick);
-        // Inicializar el estado visual correcto
         window.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.card .sharp').forEach(el => {
-                el.style.filter = 'none';
-            });
-            document.querySelectorAll('.card .blurred').forEach(el => {
-                el.style.filter = 'blur(2px)';
-            });
-            document.querySelectorAll('.card-back .sharp').forEach(el => {
-                el.style.filter = 'blur(2px)';
-            });
-            document.querySelectorAll('.card-back .blurred').forEach(el => {
-                el.style.filter = 'none';
-            });
+          document.querySelectorAll('.card .sharp').forEach(el => {
+            el.style.filter = 'none';
+          });
+          document.querySelectorAll('.card .blurred').forEach(el => {
+            el.style.filter = 'blur(2px)';
+          });
+          document.querySelectorAll('.card-back .sharp').forEach(el => {
+            el.style.filter = 'blur(2px)';
+          });
+          document.querySelectorAll('.card-back .blurred').forEach(el => {
+            el.style.filter = 'none';
+          });
         });
-        // Modal QR: solo si la tarjeta está volteada
         function openQrModal(e) {
-            if (!card.classList.contains('flipped')) return; // Solo si está volteada
-            e.preventDefault();
-            e.stopPropagation();
-            qrModalOverlay.style.display = 'flex';
-            modalOpen = true;
+          if (!card.classList.contains('flipped')) return;
+          e.preventDefault();
+          e.stopPropagation();
+          qrModalOverlay.style.display = 'flex';
+          modalOpen = true;
         }
         function closeQrModal() {
-            qrModalOverlay.style.display = 'none';
-            modalOpen = false;
+          qrModalOverlay.style.display = 'none';
+          modalOpen = false;
         }
         backQrLink.addEventListener('click', openQrModal);
         backQrLink.addEventListener('touchstart', openQrModal);
         qrModalSi.addEventListener('click', function(e) {
-            window.open('https://wa.link/3gtlh3', '_blank');
-            closeQrModal();
+          window.open('https://wa.link/3gtlh3', '_blank');
+          closeQrModal();
         });
         qrModalNo.addEventListener('click', function(e) {
-            closeQrModal();
+          closeQrModal();
         });
         qrModalOverlay.addEventListener('click', function(e) {
-            if (e.target === qrModalOverlay) closeQrModal();
+          if (e.target === qrModalOverlay) closeQrModal();
         });
-        // Función para obtener usuario desde Supabase
-        async function getUserSupabase(username) {
-            const { data, error } = await supabase
-                .from('usuarios')
-                .select('*')
-                .eq('username', username)
-                .maybeSingle();
-            if (error) return null;
-            return data;
-        }
-        // Renderizar stickers según usuario logueado y su número
-        async function renderStickers() {
-            // Obtener usuario logueado
-            const username = localStorage.getItem('currentUser');
-            const user = await getUserSupabase(username);
-            let numero = 0;
-            if (user && typeof user.numero === 'number' && user.numero >= 0 && user.numero <= 10) {
-                numero = user.numero;
-            }
-            // Orden personalizado: 1 3 5 7 9 2 4 6 8 10 (índices base 0)
-            const orden = [0,2,4,6,8,1,3,5,7,9];
-            const logoSrc = 'Variantes/palma_blanca_sin_fondo.jpg.png';
-            const stickers = [];
-            for (let i = 0; i < 10; i++) {
-                if (i < numero) {
-                    stickers.push(`<div class='stamp sharp'><img src='${logoSrc}' alt='Logo Bahía Chill' /></div>`);
-                } else {
-                    stickers.push(`<div class='stamp sharp' style='background:rgba(255,255,255,0.08);border:1px dashed #fff;'><i class='fa-regular fa-circle' style='color:#fff;opacity:0.3;font-size:22px;'></i></div>`);
-                }
-            }
-            // Reordenar según el patrón solicitado
-            const stickersOrdenados = orden.map(idx => stickers[idx]);
-            document.getElementById('stamps-row-1').innerHTML = stickersOrdenados.slice(0,5).join('');
-            document.getElementById('stamps-row-2').innerHTML = stickersOrdenados.slice(5,10).join('');
-            // Actualizar texto de footer
-            const faltan = 10 - numero;
-            document.getElementById('front-footer').innerHTML = `SOLO TE FALTAN <span class="highlight">${faltan} PALMAS</span> PARA RECLAMAR TU REGALO`;
-        }
-        window.addEventListener('DOMContentLoaded', function() {
-            renderStickers();
-            // ...existing code...
-        });
+      }
+
+      // Secuencia principal: check login, render UI
+      window.addEventListener('DOMContentLoaded', async function() {
+        const ok = await checkAndRedirect();
+        if (!ok) return;
+        await renderStickers();
+        setupCardUI();
+      });
     </script>
 </body>
 </html>
