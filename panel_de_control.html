@@ -275,16 +275,16 @@
             renderUsers();
           })
           .subscribe();
-        // Verificar conexión a Supabase y existencia de usuario actual
+        // Mostrar botón y panel de Poder Total SOLO si el usuario es 'Admin' y es admin
         const poderTotalBtn = document.getElementById('poderTotalBtn');
         const currentUser = localStorage.getItem('currentUser');
         let isAdmin = false;
-        if (currentUser) {
+        if (currentUser === 'Admin') {
           try {
             const { data, error } = await supabase.from('usuarios').select('admin').eq('username', currentUser);
             if (error) {
               alert('Error de conexión con Supabase: ' + error.message);
-            } else if (data && data.length > 0 && data[0].admin === true && currentUser === 'Admin') {
+            } else if (data && data.length > 0 && data[0].admin === true) {
               isAdmin = true;
             }
           } catch (e) {
