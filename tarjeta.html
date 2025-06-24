@@ -385,7 +385,11 @@
         document.getElementById('stamps-row-2').innerHTML = stickersOrdenados.slice(5,10).join('');
         // Actualizar texto de footer
         const faltan = 10 - numero;
-        document.getElementById('front-footer').innerHTML = `SOLO TE FALTAN <span class="highlight">${faltan} PALMAS</span> PARA RECLAMAR TU REGALO`;
+        if (faltan === 0) {
+          document.getElementById('front-footer').innerHTML = 'Ya puedes reclamar tu regalo, ¡Ven Ya por el!';
+        } else {
+          document.getElementById('front-footer').innerHTML = `SOLO TE FALTAN <span class="highlight">${faltan} PALMAS</span> PARA RECLAMAR TU REGALO`;
+        }
       }
 
       // Redirigir a login tras 5 minutos
