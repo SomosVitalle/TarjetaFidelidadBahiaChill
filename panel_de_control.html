@@ -43,11 +43,11 @@
             </div>
             <div class="form-group">
                 <label for="pin">PIN <span style="font-weight:normal; color:#888;">(ultimos 4 digitos de la cedula)</span></label>
-                <input type="text" id="pin" required maxlength="4" minlength="4" pattern="\\d{4}" title="Debe ser exactamente 4 dígitos">
+                <input type="text" id="pin" required maxlength="4" minlength="4" pattern="\\d{4}" title="Debe ser exactamente 4 dígitos" inputmode="numeric" autocomplete="one-time-code">
             </div>
             <div class="form-group">
                 <label for="telefono">Teléfono <span style="font-weight:normal; color:#888;">(11 números)</span></label>
-                <input type="text" id="telefono" required maxlength="11" minlength="11" pattern="\\d{11}" title="Debe ser exactamente 11 números">
+                <input type="text" id="telefono" required maxlength="11" minlength="11" pattern="\\d{11}" title="Debe ser exactamente 11 números" inputmode="tel" autocomplete="tel">
             </div>
             <button type="submit" class="btn">Agregar Usuario</button>
         </form>
@@ -144,8 +144,8 @@
               <button onclick="togglePauseUser('${user.username}')" title="${iconTitle}" style="background:none;border:none;font-size:1.2em;cursor:pointer;">${icon}</button>
             </td>
             <td><input type="text" value="${user.username}" data-username="${user.username}" class="edit-username" disabled></td>
-            <td><input type="text" value="${user.pin}" data-username="${user.username}" class="edit-pin" maxlength="6" disabled></td>
-            <td><input type="text" value="${user.telefono || ''}" data-username="${user.username}" class="edit-telefono" maxlength="15" disabled></td>
+            <td><input type="text" value="${user.pin}" data-username="${user.username}" class="edit-pin" maxlength="6" disabled inputmode="numeric" autocomplete="one-time-code"></td>
+            <td><input type="text" value="${user.telefono || ''}" data-username="${user.username}" class="edit-telefono" maxlength="15" disabled inputmode="tel" autocomplete="tel"></td>
             <td><select data-username="${user.username}" class="edit-numero" disabled>${selectOptions}</select></td>
             <td class="actions">
               <button onclick="enableEdit('${user.username}')">Modificar</button>
@@ -339,18 +339,53 @@
           </div>
           <button id="pausarTodosBtn" style="margin-top:10px; background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer;">Pausar a todos los usuarios</button>
           <button id="despausarTodosBtn" style="margin-top:10px; background:#27ae60; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer; margin-left:10px;">Despausar a Todos</button>
+          <div style='margin-top:18px; padding:10px; border-top:1px solid #eee;'>
+            <b>Borrado especial:</b><br>
+            <input type="text" id="borradoEspecialInput" placeholder="Usuario a eliminar" style="margin-top:6px; padding:6px; border-radius:4px; border:1px solid #ccc; width:70%;">
+            <button id="borradoEspecialBtn" style="background:#c0392b; color:#fff; border:none; border-radius:6px; padding:7px 14px; font-weight:bold; cursor:pointer; margin-left:8px;">Eliminar</button>
+            <div id="borradoEspecialMsg" style="margin-top:6px; color:#c0392b; font-size:0.98em;"></div>
+          </div>
         `;
         document.getElementById('pausarTodosBtn').onclick = pausarTodosMenosAdminYJuan;
         document.getElementById('despausarTodosBtn').onclick = despausarTodosMenosAdminYJuan;
+        document.getElementById('borradoEspecialBtn').onclick = async function() {
+          const input = document.getElementById('borradoEspecialInput');
+          const msg = document.getElementById('borradoEspecialMsg');
+          const username = input.value.trim();
+          msg.textContent = '';
+          if (!username) {
+            msg.textContent = 'Debes escribir el nombre de usuario a eliminar.';
+            return;
+          }
+          if (username === 'Admin') {
+            msg.textContent = 'No puedes eliminar el usuario Admin.';
+            return;
+          }
+          const user = await getUserSupabase(username);
+          if (!user) {
+            msg.textContent = 'Usuario no encontrado.';
+            return;
+          }
+          if (!confirm(`¿Seguro que deseas eliminar a "${username}"? Esta acción no se puede deshacer.`)) return;
+          const { error } = await deleteUserSupabase(username);
+          if (error) {
+            msg.textContent = 'Error al eliminar: ' + error.message;
+          } else {
+            msg.style.color = '#27ae60';
+            msg.textContent = 'Usuario eliminado con éxito.';
+            input.value = '';
+            renderUsers();
+          }
+        };
       }
       async function pausarTodosMenosAdminYJuan() {
         // Pausa todos los usuarios excepto Admin y Juan
-        const { data: users, error } = await supabase.from('usuarios').select('username, paused');
+        const { data, error } = await supabase.from('usuarios').select('username, paused');
         if (error) {
           showNotification('Error al obtener usuarios: ' + error.message, 'error');
           return;
         }
-        const usuariosAPausar = users.filter(u => u.username !== 'Admin' && u.username !== 'Juan' && !u.paused);
+        const usuariosAPausar = data.filter(u => u.username !== 'Admin' && u.username !== 'Juan' && !u.paused);
         if (usuariosAPausar.length === 0) {
           showNotification('No hay usuarios activos para pausar.', 'success');
           return;
@@ -367,12 +402,12 @@
       }
       async function despausarTodosMenosAdminYJuan() {
         if (!confirm('Al aplicar esta función, todos (incluidos los que estaban bloqueados antes de la pausa masiva) serán despausados, ¿desea continuar?')) return;
-        const { data: users, error } = await supabase.from('usuarios').select('username, paused');
+        const { data, error } = await supabase.from('usuarios').select('username, paused');
         if (error) {
           showNotification('Error al obtener usuarios: ' + error.message, 'error');
           return;
         }
-        const usuariosADespausar = users.filter(u => u.username !== 'Admin' && u.username !== 'Juan' && u.paused);
+        const usuariosADespausar = data.filter(u => u.username !== 'Admin' && u.username !== 'Juan' && u.paused);
         if (usuariosADespausar.length === 0) {
           showNotification('No hay usuarios pausados para despausar.', 'success');
           return;
