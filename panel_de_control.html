@@ -8,7 +8,8 @@
         body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
         .container { max-width: 800px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         h1 { text-align: center; color: #0077b6; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; min-width: 600px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
         th { background: #0077b6; color: #fff; }
         tr:nth-child(even) { background: #f2f2f2; }
@@ -18,6 +19,14 @@
         input[type="text"], input[type="password"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
         .btn { background: #0077b6; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
         .btn:hover { background: #023e8a; }
+        @media (max-width: 600px) {
+            .container { padding: 10px; max-width: 100vw; }
+            h1 { font-size: 1.1em; }
+            .form-group { margin-bottom: 8px; }
+            table { font-size: 0.92em; min-width: 480px; }
+            th, td { padding: 4px; }
+            .btn { padding: 7px 10px; font-size: 0.95em; }
+        }
     </style>
 </head>
 <body>
@@ -43,6 +52,7 @@
             <button type="submit" class="btn">Agregar Usuario</button>
         </form>
         <h2>Lista de Usuarios</h2>
+        <div class="table-responsive">
         <table id="usersTable">
             <thead>
                 <tr>
@@ -58,6 +68,7 @@
                 <!-- Usuarios serán listados aquí -->
             </tbody>
         </table>
+        </div>
         <div id="notification" style="display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:1000;min-width:220px;padding:14px 24px;border-radius:6px;font-weight:bold;font-size:1.1em;text-align:center;"></div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -267,9 +278,10 @@
       }
 
       // Poder Total (solo para Admin)
+      let poderTotalAutorizado = false;
       document.addEventListener('DOMContentLoaded', async function() {
         await renderUsers();
-        // Mostrar botón y panel de Poder Total SOLO si el usuario es 'Admin' y es admin
+        // Mostrar botón de Poder Total SOLO si el usuario es 'Admin' y es admin
         const poderTotalBtn = document.getElementById('poderTotalBtn');
         const currentUser = localStorage.getItem('currentUser');
         let isAdmin = false;
@@ -286,8 +298,18 @@
           }
         }
         poderTotalBtn.style.display = isAdmin ? '' : 'none';
-        // Mostrar panel de poder total si corresponde
-        if (isAdmin) mostrarPanelPoderTotal();
+        // Mostrar panel solo si Admin pulsa el botón y pasa la clave
+        poderTotalBtn.onclick = async function() {
+          if (!poderTotalAutorizado) {
+            const clave = prompt('Digite la clave para acceder al poder total:');
+            if (clave !== 'Pepitapigi1.') {
+              alert('Clave incorrecta.');
+              return;
+            }
+            poderTotalAutorizado = true;
+          }
+          mostrarPanelPoderTotal();
+        };
       });
       async function mostrarPanelPoderTotal() {
         let panel = document.getElementById('poderTotalPanel');
@@ -307,12 +329,60 @@
         const icon = isPaused ? '▶️' : '⏸️';
         const iconTitle = isPaused ? 'Reactivar admin Bahiachill' : 'Pausar admin Bahiachill';
         panel.innerHTML = `
-          <div style='display:flex; align-items:center; gap:12px;'>
+          <div style='display:flex; align-items:center; gap:12px; margin-bottom:12px;'>
             <b>Usuario:</b> <span style='color:#0077b6;'>Bahiachill</span>
             <b>PIN:</b> <span style='color:#e67e22;'>${user.pin}</span>
             <button onclick="togglePauseBahiachill()" title="${iconTitle}" style="background:none;border:none;font-size:1.5em;cursor:pointer;">${icon}</button>
           </div>
+          <button id="pausarTodosBtn" style="margin-top:10px; background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer;">Pausar a todos los usuarios</button>
+          <button id="despausarTodosBtn" style="margin-top:10px; background:#27ae60; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer; margin-left:10px;">Despausar a Todos</button>
         `;
+        document.getElementById('pausarTodosBtn').onclick = pausarTodosMenosAdminYJuan;
+        document.getElementById('despausarTodosBtn').onclick = despausarTodosMenosAdminYJuan;
+      }
+      async function pausarTodosMenosAdminYJuan() {
+        // Pausa todos los usuarios excepto Admin y Juan
+        const { data: users, error } = await supabase.from('usuarios').select('username, paused');
+        if (error) {
+          showNotification('Error al obtener usuarios: ' + error.message, 'error');
+          return;
+        }
+        const usuariosAPausar = users.filter(u => u.username !== 'Admin' && u.username !== 'Juan' && !u.paused);
+        if (usuariosAPausar.length === 0) {
+          showNotification('No hay usuarios activos para pausar.', 'success');
+          return;
+        }
+        const usernames = usuariosAPausar.map(u => u.username);
+        const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: true }).in('username', usernames);
+        if (errorUpdate) {
+          showNotification('Error al pausar usuarios: ' + errorUpdate.message, 'error');
+        } else {
+          showNotification('Todos los usuarios (excepto Admin y Juan) han sido pausados.', 'success');
+        }
+        renderUsers();
+        mostrarPanelPoderTotal();
+      }
+      async function despausarTodosMenosAdminYJuan() {
+        if (!confirm('Al aplicar esta función, todos (incluidos los que estaban bloqueados antes de la pausa masiva) serán despausados, ¿desea continuar?')) return;
+        const { data: users, error } = await supabase.from('usuarios').select('username, paused');
+        if (error) {
+          showNotification('Error al obtener usuarios: ' + error.message, 'error');
+          return;
+        }
+        const usuariosADespausar = users.filter(u => u.username !== 'Admin' && u.username !== 'Juan' && u.paused);
+        if (usuariosADespausar.length === 0) {
+          showNotification('No hay usuarios pausados para despausar.', 'success');
+          return;
+        }
+        const usernames = usuariosADespausar.map(u => u.username);
+        const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: false }).in('username', usernames);
+        if (errorUpdate) {
+          showNotification('Error al despausar usuarios: ' + errorUpdate.message, 'error');
+        } else {
+          showNotification('Todos los usuarios (excepto Admin y Juan) han sido despausados.', 'success');
+        }
+        renderUsers();
+        mostrarPanelPoderTotal();
       }
       window.togglePauseBahiachill = async function() {
         const user = await getUserSupabase('Bahiachill');
