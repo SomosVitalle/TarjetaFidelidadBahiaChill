@@ -100,16 +100,6 @@
         { username: 'Admin', pin: '2272', telefono: '', numero: 0, paused: false, admin: true }
       ];
 
-      // Asegura que los usuarios por defecto existan SIEMPRE
-      async function ensureDefaultUsers() {
-        for (const user of defaultUsers) {
-          const { data, error } = await supabase.from('usuarios').select('id').eq('username', user.username);
-          if (!data || data.length === 0) {
-            await supabase.from('usuarios').insert([user]);
-          }
-        }
-      }
-
       // CRUD Supabase
       async function getAllUsersSupabase() {
         const { data, error } = await supabase.from('usuarios').select('*');
@@ -135,7 +125,7 @@
 
       // Renderizado de usuarios
       async function renderUsers() {
-        await ensureDefaultUsers(); // Siempre asegura los usuarios por defecto
+        // const users = await getAllUsersSupabase();
         const users = await getAllUsersSupabase();
         const tbody = document.querySelector('#usersTable tbody');
         tbody.innerHTML = '';
