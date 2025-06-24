@@ -156,7 +156,7 @@
         });
       }
 
-      // Suscripción realtime a cambios en la tabla usuarios
+      // Suscripción realtime a cambios en la tabla usuarios (solo una vez, global)
       const channel = supabase.channel('usuarios-changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'usuarios' }, (payload) => {
           renderUsers();
@@ -266,15 +266,9 @@
         renderUsers();
       }
 
-      // Poder Total (Bahiachill)
+      // Poder Total (solo para Admin)
       document.addEventListener('DOMContentLoaded', async function() {
         await renderUsers();
-        // Suscripción realtime a cambios en la tabla usuarios
-        supabase.channel('usuarios-changes')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'usuarios' }, (payload) => {
-            renderUsers();
-          })
-          .subscribe();
         // Mostrar botón y panel de Poder Total SOLO si el usuario es 'Admin' y es admin
         const poderTotalBtn = document.getElementById('poderTotalBtn');
         const currentUser = localStorage.getItem('currentUser');
