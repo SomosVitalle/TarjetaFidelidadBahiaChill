@@ -261,10 +261,33 @@
             opacity: 0.95 !important;
             font-size: 60px !important;
         }
+
+        .gift-anim {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%) scale(0.1);
+            font-size: 10vw;
+            z-index: 99999;
+            opacity: 0;
+            transition: transform 1s cubic-bezier(.7,1.7,.5,1), opacity 0.5s;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+        .gift-anim.show {
+            opacity: 1;
+            transform: translate(-50%,-50%) scale(1.4);
+        }
+        .footer.gift-claim {
+            font-size: 1.35em !important;
+            font-weight: bold !important;
+        }
     </style>
 </head>
 <body style="display:none;" id="body-block">
     <div class="card-container" id="card">
+        <!-- Animación de regalo -->
+        <div id="gift-anim" class="gift-anim" style="display:none;">🎁</div>
         <!-- Front of the card -->
         <div class="card">
             <div class="palm-logo sharp" id="front-logo">
@@ -385,11 +408,36 @@
         document.getElementById('stamps-row-2').innerHTML = stickersOrdenados.slice(5,10).join('');
         // Actualizar texto de footer
         const faltan = 10 - numero;
+        const footer = document.getElementById('front-footer');
         if (faltan === 0) {
-          document.getElementById('front-footer').innerHTML = 'Ya puedes reclamar tu regalo, ¡Ven Ya por el!';
+          footer.innerHTML = 'Ya puedes reclamar tu regalo, ¡Ven Ya por el!';
+          footer.classList.add('gift-claim');
+          // Animación regalo y vibración
+          showGiftAnimation();
         } else {
-          document.getElementById('front-footer').innerHTML = `SOLO TE FALTAN <span class="highlight">${faltan} PALMAS</span> PARA RECLAMAR TU REGALO`;
+          footer.innerHTML = `SOLO TE FALTAN <span class="highlight">${faltan} PALMAS</span> PARA RECLAMAR TU REGALO`;
+          footer.classList.remove('gift-claim');
         }
+      }
+
+      // Animación de regalo y vibración
+      function showGiftAnimation() {
+        const gift = document.getElementById('gift-anim');
+        if (!gift) return;
+        // Si ya está visible, no repetir
+        if (gift.classList.contains('show')) return;
+        gift.style.display = 'block';
+        setTimeout(() => {
+          gift.classList.add('show');
+          // Vibración 3 veces por 0.5s
+          if (navigator.vibrate) {
+            navigator.vibrate([500, 200, 500, 200, 500]);
+          }
+          setTimeout(() => {
+            gift.classList.remove('show');
+            setTimeout(() => { gift.style.display = 'none'; }, 400);
+          }, 1000);
+        }, 100);
       }
 
       // Redirigir a login tras 5 minutos
