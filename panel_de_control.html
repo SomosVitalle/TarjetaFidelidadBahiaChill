@@ -61,239 +61,217 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Redirigir a login si no está autenticado o no es admin
-        (async function() {
-            if (localStorage.getItem('bahiaChillLogin') !== 'ok' || !localStorage.getItem('currentUser')) {
-                window.location.href = 'index.html';
-                return;
-            }
-            // Verifica en Supabase si el usuario es admin
-            const currentUser = localStorage.getItem('currentUser');
-            const { data, error } = await supabase.from('usuarios').select('admin').eq('username', currentUser);
-            if (error || !data || data.length === 0 || data[0].admin !== true) {
-                window.location.href = 'index.html';
-                return;
-            }
-        })();
       const SUPABASE_URL = 'https://senqhfrzhsvrwiqschuf.supabase.co';
       const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbnFoZnJ6aHN2cndpcXNjaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMTA3MzksImV4cCI6MjA2NTY4NjczOX0.SoQUuDrUtIObkHMTn6HOOR74MvYTI5bgy4-PDU4p-dg';
       const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-      // Funciones CRUD para usuarios en Supabase
-      async function getUsers() {
+      // Usuarios por defecto
+      const defaultUsers = [
+        { username: 'Juan', pin: '1234', telefono: '', numero: 0, paused: false, admin: false },
+        { username: 'Bahiachill', pin: '2467', telefono: '', numero: 0, paused: false, admin: true },
+        { username: 'Admin', pin: '2272', telefono: '', numero: 0, paused: false, admin: true }
+      ];
+
+      // Asegura que los usuarios por defecto existan SIEMPRE
+      async function ensureDefaultUsers() {
+        for (const user of defaultUsers) {
+          const { data, error } = await supabase.from('usuarios').select('id').eq('username', user.username);
+          if (!data || data.length === 0) {
+            await supabase.from('usuarios').insert([user]);
+          }
+        }
+      }
+
+      // CRUD Supabase
+      async function getAllUsersSupabase() {
         const { data, error } = await supabase.from('usuarios').select('*');
         return data || [];
       }
-      async function setUsers() { /* No se usa más, todo es directo en Supabase */ }
-      async function addUser(user) {
-        await supabase.from('usuarios').insert([user]);
-      }
-      async function updateUser(id, fields) {
-        await supabase.from('usuarios').update(fields).eq('id', id);
-      }
-      async function deleteUser(id) {
-        await supabase.from('usuarios').delete().eq('id', id);
-      }
-      async function getUserByUsername(username) {
-        const { data } = await supabase.from('usuarios').select('*').eq('username', username).maybeSingle();
+      async function getUserSupabase(username) {
+        const { data, error } = await supabase.from('usuarios').select('*').eq('username', username).maybeSingle();
+        if (error) return null;
         return data;
       }
-        // Funciones Supabase para usuarios
-        async function getAllUsersSupabase() {
-            const { data, error } = await supabase
-                .from('usuarios')
-                .select('*');
-            return data || [];
-        }
-        async function getUserSupabase(username) {
-            const { data, error } = await supabase
-                .from('usuarios')
-                .select('*')
-                .eq('username', username)
-                .maybeSingle();
-            if (error) return null;
-            return data;
-        }
-        async function createUserSupabase(user) {
-            const { data, error } = await supabase
-                .from('usuarios')
-                .insert([user]);
-            return { data, error };
-        }
-        async function updateUserSupabase(username, fields) {
-            const { data, error } = await supabase
-                .from('usuarios')
-                .update(fields)
-                .eq('username', username);
-            return { data, error };
-        }
-        async function deleteUserSupabase(username) {
-            const { data, error } = await supabase
-                .from('usuarios')
-                .delete()
-                .eq('username', username);
-            return { data, error };
-        }
-        // Utiliza localStorage para almacenar usuarios y pines
-        function getUsers() {
-            return JSON.parse(localStorage.getItem('usuarios')) || [];
-        }
-        function setUsers(users) {
-            localStorage.setItem('usuarios', JSON.stringify(users));
-        }
-        async function renderUsers() {
-            const users = await getAllUsersSupabase();
-            const tbody = document.querySelector('#usersTable tbody');
-            tbody.innerHTML = '';
-            users.forEach((user, idx) => {
-                const isPaused = user.paused;
-                const icon = isPaused ? '▶️' : '⏸️';
-                const iconTitle = isPaused ? 'Reactivar usuario' : 'Pausar usuario';
-                const numero = typeof user.numero === 'number' && user.numero >= 0 && user.numero <= 10 ? user.numero : 0;
-                let selectOptions = '';
-                for (let i = 0; i <= 10; i++) {
-                    selectOptions += `<option value="${i}"${i === numero ? ' selected' : ''}>${i}</option>`;
-                }
-                tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td style="width:40px;">
-                        <button onclick="togglePauseUser('${user.username}')" title="${iconTitle}" style="background:none;border:none;font-size:1.2em;cursor:pointer;">${icon}</button>
-                    </td>
-                    <td><input type="text" value="${user.username}" data-username="${user.username}" class="edit-username" disabled></td>
-                    <td><input type="text" value="${user.pin}" data-username="${user.username}" class="edit-pin" maxlength="6" disabled></td>
-                    <td><input type="text" value="${user.telefono || ''}" data-username="${user.username}" class="edit-telefono" maxlength="15" disabled></td>
-                    <td><select data-username="${user.username}" class="edit-numero" disabled>${selectOptions}</select></td>
-                    <td class="actions">
-                        <button onclick="enableEdit('${user.username}')">Modificar</button>
-                        <button onclick="confirmDeleteUser('${user.username}')">Eliminar</button>
-                        <button onclick="saveUser('${user.username}')" class="save-btn" style="display:none;">Guardar</button>
-                        <button onclick="cancelEdit()" class="cancel-btn" style="display:none;">Cancelar</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-        document.getElementById('userForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value.trim();
-            const pin = document.getElementById('pin').value.trim();
-            const telefono = document.getElementById('telefono').value.trim();
-            const numero = 0;
-            if (!username || !pin || !telefono) return;
-            // Verifica si ya existe el usuario
-            const { data: existing, error: errorGet } = await supabase.from('usuarios').select('id').eq('username', username);
-            if (errorGet) {
-                alert('Error de conexión con Supabase: ' + errorGet.message);
-                return;
-            }
-            if (existing && existing.length > 0) {
-                alert('El usuario ya existe');
-                return;
-            }
-            // Intenta crear el usuario
-            const { error } = await supabase.from('usuarios').insert([{ username, pin, telefono, numero, paused: false, admin: false }]);
-            if (error) {
-                alert('Error al crear usuario: ' + error.message);
-                return;
-            }
-            await renderUsers();
-            this.reset();
+      async function createUserSupabase(user) {
+        const { data, error } = await supabase.from('usuarios').insert([user]);
+        return { data, error };
+      }
+      async function updateUserSupabase(username, fields) {
+        const { data, error } = await supabase.from('usuarios').update(fields).eq('username', username);
+        return { data, error };
+      }
+      async function deleteUserSupabase(username) {
+        const { data, error } = await supabase.from('usuarios').delete().eq('username', username);
+        return { data, error };
+      }
+
+      // Renderizado de usuarios
+      async function renderUsers() {
+        await ensureDefaultUsers(); // Siempre asegura los usuarios por defecto
+        const users = await getAllUsersSupabase();
+        const tbody = document.querySelector('#usersTable tbody');
+        tbody.innerHTML = '';
+        users.forEach((user, idx) => {
+          const isPaused = user.paused;
+          const icon = isPaused ? '▶️' : '⏸️';
+          const iconTitle = isPaused ? 'Reactivar usuario' : 'Pausar usuario';
+          const numero = typeof user.numero === 'number' && user.numero >= 0 && user.numero <= 10 ? user.numero : 0;
+          let selectOptions = '';
+          for (let i = 0; i <= 10; i++) {
+            selectOptions += `<option value="${i}"${i === numero ? ' selected' : ''}>${i}</option>`;
+          }
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td style="width:40px;">
+              <button onclick="togglePauseUser('${user.username}')" title="${iconTitle}" style="background:none;border:none;font-size:1.2em;cursor:pointer;">${icon}</button>
+            </td>
+            <td><input type="text" value="${user.username}" data-username="${user.username}" class="edit-username" disabled></td>
+            <td><input type="text" value="${user.pin}" data-username="${user.username}" class="edit-pin" maxlength="6" disabled></td>
+            <td><input type="text" value="${user.telefono || ''}" data-username="${user.username}" class="edit-telefono" maxlength="15" disabled></td>
+            <td><select data-username="${user.username}" class="edit-numero" disabled>${selectOptions}</select></td>
+            <td class="actions">
+              <button onclick="enableEdit('${user.username}')">Modificar</button>
+              <button onclick="confirmDeleteUser('${user.username}')">Eliminar</button>
+              <button onclick="saveUser('${user.username}')" class="save-btn" style="display:none;">Guardar</button>
+              <button onclick="cancelEdit()" class="cancel-btn" style="display:none;">Cancelar</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
         });
-        window.enableEdit = function(username) {
-            document.querySelector(`.edit-username[data-username='${username}']`).disabled = false;
-            document.querySelector(`.edit-pin[data-username='${username}']`).disabled = false;
-            document.querySelector(`.edit-telefono[data-username='${username}']`).disabled = false;
-            document.querySelector(`.edit-numero[data-username='${username}']`).disabled = false;
-            const tr = Array.from(document.querySelectorAll('#usersTable tbody tr')).find(tr => tr.querySelector(`.edit-username[data-username='${username}']`));
-            tr.querySelector('.save-btn').style.display = '';
-            tr.querySelector('.cancel-btn').style.display = '';
-            tr.querySelector('button[onclick^="enableEdit"]').style.display = 'none';
-            tr.querySelector('button[onclick^="confirmDeleteUser"]').style.display = 'none';
+      }
+
+      // Formulario de creación de usuario
+      document.getElementById('userForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value.trim();
+        const pin = document.getElementById('pin').value.trim();
+        const telefono = document.getElementById('telefono').value.trim();
+        const numero = 0;
+        if (!username || !pin || !telefono) return;
+        // Verifica si ya existe el usuario
+        const { data: existing, error: errorGet } = await supabase.from('usuarios').select('id').eq('username', username);
+        if (errorGet) {
+          alert('Error de conexión con Supabase: ' + errorGet.message);
+          return;
         }
-        window.saveUser = async function(username) {
-            const usernameVal = document.querySelector(`.edit-username[data-username='${username}']`).value.trim();
-            const pin = document.querySelector(`.edit-pin[data-username='${username}']`).value.trim();
-            const telefono = document.querySelector(`.edit-telefono[data-username='${username}']`).value.trim();
-            const numero = parseInt(document.querySelector(`.edit-numero[data-username='${username}']`).value, 10);
-            if (isNaN(numero) || numero < 0 || numero > 10) return alert('El número debe estar entre 0 y 10');
-            await updateUserSupabase(username, { username: usernameVal, pin, telefono, numero });
-            renderUsers();
+        if (existing && existing.length > 0) {
+          alert('El usuario ya existe');
+          return;
         }
-        window.cancelEdit = function() {
-            renderUsers();
+        // Intenta crear el usuario
+        const { error } = await supabase.from('usuarios').insert([{ username, pin, telefono, numero, paused: false, admin: false }]);
+        if (error) {
+          alert('Error al crear usuario: ' + error.message);
+          return;
         }
-        window.confirmDeleteUser = function(username) {
-            if (confirm(`¿Estás seguro de eliminar al usuario "${username}"?`)) {
-                window.deleteUser(username);
-            }
-        }
-        window.deleteUser = async function(username) {
-            await deleteUserSupabase(username);
-            renderUsers();
-        }
-        window.togglePauseUser = async function(username) {
-            const user = await getUserSupabase(username);
-            await updateUserSupabase(username, { paused: !user.paused });
-            renderUsers();
-        }
-        // Poder Total
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Verificar conexión a Supabase y existencia de usuario actual
-            const poderTotalBtn = document.getElementById('poderTotalBtn');
-            const currentUser = localStorage.getItem('currentUser');
-            let isAdmin = false;
-            if (currentUser) {
-                try {
-                    const { data, error } = await supabase.from('usuarios').select('admin').eq('username', currentUser);
-                    if (error) {
-                        alert('Error de conexión con Supabase: ' + error.message);
-                    } else if (data && data.length > 0 && data[0].admin === true && currentUser === 'Admin') {
-                        isAdmin = true;
-                    }
-                } catch (e) {
-                    alert('Error de conexión con Supabase: ' + e.message);
-                }
-            }
-            poderTotalBtn.style.display = isAdmin ? '' : 'none';
-        });
-        async function mostrarPanelPoderTotal() {
-            let panel = document.getElementById('poderTotalPanel');
-            if (!panel) {
-                panel = document.createElement('div');
-                panel.id = 'poderTotalPanel';
-                panel.style = 'background:#fff; color:#222; border:2px solid #e67e22; border-radius:8px; padding:18px; margin-bottom:18px; max-width:400px;';
-                document.querySelector('.container').insertBefore(panel, document.querySelector('h1'));
-            }
-            // Obtener usuario Bahiachill desde Supabase
-            const user = await getUserSupabase('Bahiachill');
-            if (!user) {
-                panel.innerHTML = '<b>No existe el usuario Bahiachill.</b>';
-                return;
-            }
-            const isPaused = user.paused;
-            const icon = isPaused ? '▶️' : '⏸️';
-            const iconTitle = isPaused ? 'Reactivar admin Bahiachill' : 'Pausar admin Bahiachill';
-            panel.innerHTML = `
-                <div style='display:flex; align-items:center; gap:12px;'>
-                    <b>Usuario:</b> <span style='color:#0077b6;'>Bahiachill</span>
-                    <b>PIN:</b> <span style='color:#e67e22;'>${user.pin}</span>
-                    <button onclick="togglePauseBahiachill()" title="${iconTitle}" style="background:none;border:none;font-size:1.5em;cursor:pointer;">${icon}</button>
-                </div>
-            `;
-        }
-        window.togglePauseBahiachill = async function() {
-            const user = await getUserSupabase('Bahiachill');
-            await updateUserSupabase('Bahiachill', { paused: !user.paused });
-            mostrarPanelPoderTotal();
-        }
-        function goToLogin() {
-            if (confirm('¿Estás seguro de querer ir al login?')) {
-                window.location.href = 'index.html';
-                window.location.reload();
-            }
-        }
-        // Inicializar tabla
+        await renderUsers();
+        this.reset();
+      });
+
+      // Edición y acciones de usuario
+      window.enableEdit = function(username) {
+        document.querySelector(`.edit-username[data-username='${username}']`).disabled = false;
+        document.querySelector(`.edit-pin[data-username='${username}']`).disabled = false;
+        document.querySelector(`.edit-telefono[data-username='${username}']`).disabled = false;
+        document.querySelector(`.edit-numero[data-username='${username}']`).disabled = false;
+        const tr = Array.from(document.querySelectorAll('#usersTable tbody tr')).find(tr => tr.querySelector(`.edit-username[data-username='${username}']`));
+        tr.querySelector('.save-btn').style.display = '';
+        tr.querySelector('.cancel-btn').style.display = '';
+        tr.querySelector('button[onclick^="enableEdit"]').style.display = 'none';
+        tr.querySelector('button[onclick^="confirmDeleteUser"]').style.display = 'none';
+      }
+      window.saveUser = async function(username) {
+        const usernameVal = document.querySelector(`.edit-username[data-username='${username}']`).value.trim();
+        const pin = document.querySelector(`.edit-pin[data-username='${username}']`).value.trim();
+        const telefono = document.querySelector(`.edit-telefono[data-username='${username}']`).value.trim();
+        const numero = parseInt(document.querySelector(`.edit-numero[data-username='${username}']`).value, 10);
+        if (isNaN(numero) || numero < 0 || numero > 10) return alert('El número debe estar entre 0 y 10');
+        await updateUserSupabase(username, { username: usernameVal, pin, telefono, numero });
         renderUsers();
+      }
+      window.cancelEdit = function() {
+        renderUsers();
+      }
+      window.confirmDeleteUser = function(username) {
+        if (['Juan', 'Bahiachill', 'Admin'].includes(username)) {
+          alert('No puedes eliminar un usuario por defecto.');
+          return;
+        }
+        if (confirm(`¿Estás seguro de eliminar al usuario "${username}"?`)) {
+          window.deleteUser(username);
+        }
+      }
+      window.deleteUser = async function(username) {
+        await deleteUserSupabase(username);
+        renderUsers();
+      }
+      window.togglePauseUser = async function(username) {
+        if (['Juan', 'Bahiachill', 'Admin'].includes(username)) {
+          alert('No puedes pausar un usuario por defecto.');
+          return;
+        }
+        const user = await getUserSupabase(username);
+        await updateUserSupabase(username, { paused: !user.paused });
+        renderUsers();
+      }
+
+      // Poder Total (Bahiachill)
+      document.addEventListener('DOMContentLoaded', async function() {
+        await renderUsers();
+        // Verificar conexión a Supabase y existencia de usuario actual
+        const poderTotalBtn = document.getElementById('poderTotalBtn');
+        const currentUser = localStorage.getItem('currentUser');
+        let isAdmin = false;
+        if (currentUser) {
+          try {
+            const { data, error } = await supabase.from('usuarios').select('admin').eq('username', currentUser);
+            if (error) {
+              alert('Error de conexión con Supabase: ' + error.message);
+            } else if (data && data.length > 0 && data[0].admin === true && currentUser === 'Admin') {
+              isAdmin = true;
+            }
+          } catch (e) {
+            alert('Error de conexión con Supabase: ' + e.message);
+          }
+        }
+        poderTotalBtn.style.display = isAdmin ? '' : 'none';
+      });
+      async function mostrarPanelPoderTotal() {
+        let panel = document.getElementById('poderTotalPanel');
+        if (!panel) {
+          panel = document.createElement('div');
+          panel.id = 'poderTotalPanel';
+          panel.style = 'background:#fff; color:#222; border:2px solid #e67e22; border-radius:8px; padding:18px; margin-bottom:18px; max-width:400px;';
+          document.querySelector('.container').insertBefore(panel, document.querySelector('h1'));
+        }
+        // Obtener usuario Bahiachill desde Supabase
+        const user = await getUserSupabase('Bahiachill');
+        if (!user) {
+          panel.innerHTML = '<b>No existe el usuario Bahiachill.</b>';
+          return;
+        }
+        const isPaused = user.paused;
+        const icon = isPaused ? '▶️' : '⏸️';
+        const iconTitle = isPaused ? 'Reactivar admin Bahiachill' : 'Pausar admin Bahiachill';
+        panel.innerHTML = `
+          <div style='display:flex; align-items:center; gap:12px;'>
+            <b>Usuario:</b> <span style='color:#0077b6;'>Bahiachill</span>
+            <b>PIN:</b> <span style='color:#e67e22;'>${user.pin}</span>
+            <button onclick="togglePauseBahiachill()" title="${iconTitle}" style="background:none;border:none;font-size:1.5em;cursor:pointer;">${icon}</button>
+          </div>
+        `;
+      }
+      window.togglePauseBahiachill = async function() {
+        const user = await getUserSupabase('Bahiachill');
+        await updateUserSupabase('Bahiachill', { paused: !user.paused });
+        mostrarPanelPoderTotal();
+      }
+      function goToLogin() {
+        if (confirm('¿Estás seguro de querer ir al login?')) {
+          window.location.href = 'index.html';
+          window.location.reload();
+        }
+      }
     </script>
 </body>
 </html>
