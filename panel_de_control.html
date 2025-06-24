@@ -154,7 +154,7 @@
             </td>
             <td><input type="text" value="${user.username}" data-username="${user.username}" class="edit-username" disabled></td>
             <td><input type="text" value="${user.pin}" data-username="${user.username}" class="edit-pin" maxlength="6" disabled inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{4}"></td>
-            <td><input type="text" value="${user.telefono || ''}" data-username="${user.username}" class="edit-telefono" maxlength="15" disabled inputmode="tel" autocomplete="tel" pattern="[0-9]{11}"></td>
+            <td><input type="text" value="${user.telefono || ''}" data-username="${user.username}" class="edit-telefono" maxlength="15" disabled inputmode="tel" autocomplete="tel" pattern="[0-9]{10}"></td>
             <td><select data-username="${user.username}" class="edit-numero" disabled>${selectOptions}</select></td>
             <td class="actions">
               <button onclick="enableEdit('${user.username}')">Modificar</button>
