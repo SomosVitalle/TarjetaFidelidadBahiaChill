@@ -207,6 +207,37 @@
             object-fit: contain;
             opacity: 0.7;
         }
+
+        /* FAQ MODAL: fuerza visibilidad y z-index */
+        #faq-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999 !important;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(2px);
+            justify-content: center;
+            align-items: center;
+        }
+        #faq-modal[aria-visible="true"] {
+            display: flex !important;
+        }
+        #faq-modal > div {
+            background: linear-gradient(135deg,#3d819d 0%,#25647a 100%);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.25);
+            padding: 32px 20px 24px 20px;
+            max-width: 370px;
+            width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -253,8 +284,8 @@
         </div>
     </div>
     <!-- MODAL FAQ -->
-    <div id="faq-modal" style="display:none;position:fixed;z-index:1000;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.25);backdrop-filter:blur(2px);justify-content:center;align-items:center;">
-      <div style="background:linear-gradient(135deg,#3d819d 0%,#25647a 100%);border-radius:18px;box-shadow:0 8px 32px 0 rgba(0,0,0,0.25);padding:32px 20px 24px 20px;max-width:370px;width:90vw;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;align-items:center;">
+    <div id="faq-modal" aria-visible="false">
+      <div>
         <div style="width:100%;display:flex;justify-content:flex-end;margin-bottom:8px;">
           <button id="faq-close" style="background:none;border:none;color:#fff;font-size:28px;cursor:pointer;line-height:1;opacity:0.8;">&times;</button>
         </div>
@@ -370,6 +401,7 @@
         if (questionBtn) {
           questionBtn.addEventListener('click', function(e) {
             e.stopPropagation();
+            faqModal.setAttribute('aria-visible', 'true');
             faqModal.style.display = 'flex';
             modalOpen = true;
           });
@@ -377,16 +409,22 @@
         if (faqClose) {
           faqClose.addEventListener('click', function(e) {
             e.stopPropagation();
+            faqModal.setAttribute('aria-visible', 'false');
             faqModal.style.display = 'none';
             modalOpen = false;
           });
         }
         faqModal.addEventListener('click', function(e) {
           if (e.target === faqModal) {
+            faqModal.setAttribute('aria-visible', 'false');
             faqModal.style.display = 'none';
             modalOpen = false;
           }
         });
+        // Evita que el click en el signo de pregunta gire la tarjeta
+        if (questionBtn) {
+          questionBtn.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+        }
         window.addEventListener('DOMContentLoaded', () => {
           document.querySelectorAll('.card .sharp').forEach(el => {
             el.style.filter = 'none';
