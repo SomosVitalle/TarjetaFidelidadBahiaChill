@@ -62,9 +62,23 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-      const SUPABASE_URL = 'https://senqhfrzhsvrwiqschuf.supabase.co';
-      const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbnFoZnJ6aHN2cndpcXNjaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMTA3MzksImV4cCI6MjA2NTY4NjczOX0.SoQUuDrUtIObkHMTn6HOOR74MvYTI5bgy4-PDU4p-dg';
-      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      // Redirigir a login si no está autenticado o no es admin (debe ir antes de cualquier otra lógica)
+      (async function() {
+        if (localStorage.getItem('bahiaChillLogin') !== 'ok' || !localStorage.getItem('currentUser')) {
+          window.location.href = 'index.html';
+          return;
+        }
+        // Inicializa Supabase antes de usarlo
+        const SUPABASE_URL = 'https://senqhfrzhsvrwiqschuf.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbnFoZnJ6aHN2cndpcXNjaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMTA3MzksImV4cCI6MjA2NTY4NjczOX0.SoQUuDrUtIObkHMTn6HOOR74MvYTI5bgy4-PDU4p-dg';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const currentUser = localStorage.getItem('currentUser');
+        const { data, error } = await supabase.from('usuarios').select('admin').eq('username', currentUser);
+        if (error || !data || data.length === 0 || data[0].admin !== true) {
+          window.location.href = 'index.html';
+          return;
+        }
+      })();
 
       // Usuarios por defecto
       const defaultUsers = [
@@ -321,22 +335,6 @@
           window.location.reload();
         }
       }
-    </script>
-    <script>
-      // Redirigir a login si no está autenticado o no es admin
-      (async function() {
-        if (localStorage.getItem('bahiaChillLogin') !== 'ok' || !localStorage.getItem('currentUser')) {
-          window.location.href = 'index.html';
-          return;
-        }
-        // Verifica en Supabase si el usuario es admin
-        const currentUser = localStorage.getItem('currentUser');
-        const { data, error } = await supabase.from('usuarios').select('admin').eq('username', currentUser);
-        if (error || !data || data.length === 0 || data[0].admin !== true) {
-          window.location.href = 'index.html';
-          return;
-        }
-      })();
     </script>
 </body>
 </html>
