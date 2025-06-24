@@ -46,8 +46,8 @@
                 <input type="text" id="pin" required maxlength="4" minlength="4" pattern="[0-9]{4}" title="Debe ser exactamente 4 dígitos" inputmode="numeric" autocomplete="one-time-code">
             </div>
             <div class="form-group">
-                <label for="telefono">Teléfono <span style="font-weight:normal; color:#888;">(11 números)</span></label>
-                <input type="text" id="telefono" required maxlength="11" minlength="11" pattern="[0-9]{11}" title="Debe ser exactamente 11 números" inputmode="tel" autocomplete="tel">
+                <label for="telefono">Teléfono <span style="font-weight:normal; color:#888;">(10 números)</span></label>
+                <input type="text" id="telefono" required maxlength="10" minlength="10" pattern="[0-9]{10}" title="Debe ser exactamente 10 números" inputmode="tel" autocomplete="tel">
             </div>
             <button type="submit" class="btn">Agregar Usuario</button>
         </form>
@@ -154,7 +154,7 @@
             </td>
             <td><input type="text" value="${user.username}" data-username="${user.username}" class="edit-username" disabled></td>
             <td><input type="text" value="${user.pin}" data-username="${user.username}" class="edit-pin" maxlength="6" disabled inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{4}"></td>
-            <td><input type="text" value="${user.telefono || ''}" data-username="${user.username}" class="edit-telefono" maxlength="15" disabled inputmode="tel" autocomplete="tel" pattern="[0-9]{10}"></td>
+            <td><input type="text" value="${user.telefono || ''}" data-username="${user.username}" class="edit-telefono" maxlength="10" disabled inputmode="tel" autocomplete="tel" pattern="[0-9]{10}"></td>
             <td><select data-username="${user.username}" class="edit-numero" disabled>${selectOptions}</select></td>
             <td class="actions">
               <button onclick="enableEdit('${user.username}')">Modificar</button>
@@ -202,8 +202,8 @@
           showNotification('El PIN debe ser exactamente 4 dígitos.', 'error');
           return;
         }
-        if (!telefono.match(/^\d{11}$/)) {
-          showNotification('El teléfono debe ser exactamente 11 números.', 'error');
+        if (!telefono.match(/^\d{10}$/)) {
+          showNotification('El teléfono debe ser exactamente 10 números.', 'error');
           return;
         }
         // Verifica si ya existe el usuario
