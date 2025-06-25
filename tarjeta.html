@@ -306,29 +306,29 @@
         </div>
         <!-- Back of the card -->
         <div class="card card-back">
-            <div class="palm-logo blurred" id="back-logo" style="opacity: 0.3; transform: scaleX(-1); right: 10px; left: auto;">
+            <div class="palm-logo sharp" id="back-logo" style="opacity: 0.3; transform: scaleX(-1); right: 10px; left: auto;">
                 <img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" />
             </div>
-            <div class="title blurred" id="back-title" style="transform: scaleX(-1);">BAHIA CHILL</div>
+            <div class="title sharp" id="back-title" style="transform: scaleX(-1);">BAHIA CHILL</div>
             <div class="stamps stamps-back">
-                <div class="stamp blurred"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp blurred"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp blurred"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp blurred"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp blurred"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
+                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
+                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
+                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
+                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
+                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
             </div>
             <!-- Signo de pregunta centrado -->
             <div class="question-circle sharp" id="back-question" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scaleX(-1);width:80px;height:80px;display:flex;justify-content:center;align-items:center;background:rgba(255,255,255,0.10);box-shadow:0 0 8px 1px rgba(0,0,0,0.10);border-radius:50%;border:2px solid #fff;cursor:pointer;z-index:2;">
                 <i class="fa-solid fa-question" style="color:#fff;opacity:0.95;font-size:60px;"></i>
             </div>
             <div class="stamps stamps-back" style="margin-top: 10px;">
-                <div class="stamp blurred"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp blurred"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp blurred"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp blurred"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp blurred"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
+                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
+                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
+                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
+                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
+                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
             </div>
-            <div class="footer blurred" id="back-footer" style="transform: scaleX(-1);">
+            <div class="footer sharp" id="back-footer" style="transform: scaleX(-1);">
                 SOLO TE FALTAN <span class="highlight">3 PALMAS</span> PARA RECLAMAR TU REGALO
             </div>
         </div>
@@ -471,22 +471,16 @@
           if (modalOpen) return;
           card.classList.toggle('flipped');
           const isFlipped = card.classList.contains('flipped');
-          // Quita el blur de la parte trasera cuando está girada
-          document.querySelectorAll('.card-back .blurred, .card-back .sharp').forEach(el => {
-            el.style.filter = isFlipped ? 'none' : '';
-          });
-          // ...resto de la lógica de giro...
-          const cards = card.querySelectorAll('.card');
-          cards.forEach(cardEl => {
-            cardEl.classList.remove('shine-reset');
-            void cardEl.offsetWidth;
-            cardEl.classList.add('shine-reset');
-          });
+          // Solo aplica blur a la parte frontal cuando está girada
           document.querySelectorAll('.card .sharp').forEach(el => {
             el.style.filter = isFlipped ? 'blur(2px)' : 'none';
           });
           document.querySelectorAll('.card .blurred').forEach(el => {
             el.style.filter = isFlipped ? 'none' : 'blur(2px)';
+          });
+          // La parte trasera siempre legible
+          document.querySelectorAll('.card-back .sharp').forEach(el => {
+            el.style.filter = 'none';
           });
         }
         card.removeEventListener('click', handleCardClick);
@@ -529,10 +523,8 @@
           document.querySelectorAll('.card .blurred').forEach(el => {
             el.style.filter = 'blur(2px)';
           });
+          // La parte trasera siempre legible
           document.querySelectorAll('.card-back .sharp').forEach(el => {
-            el.style.filter = 'blur(2px)';
-          });
-          document.querySelectorAll('.card-back .blurred').forEach(el => {
             el.style.filter = 'none';
           });
         });
