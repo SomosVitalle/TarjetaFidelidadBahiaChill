@@ -113,8 +113,8 @@
         const { data, error } = await supabase.from('usuarios').select('*');
         return data || [];
       }
-      async function getUserSupabase(username) {
-        const { data, error } = await supabase.from('usuarios').select('*').eq('username', username).maybeSingle();
+      async function getUserSupabaseById(id) {
+        const { data, error } = await supabase.from('usuarios').select('*').eq('id', id).maybeSingle();
         if (error) return null;
         return data;
       }
