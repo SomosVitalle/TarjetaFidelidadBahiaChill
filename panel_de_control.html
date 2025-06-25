@@ -99,7 +99,7 @@
       // Usuarios por defecto
       const defaultUsers = [
         { username: 'Juan', pin: '1234', telefono: '', numero: 0, paused: false, admin: false },
-        { username: 'Bahiachill', pin: '2467', telefono: '', numero: 0, paused: false, admin: true },
+        { username: 'Bc', pin: '2467', telefono: '', numero: 0, paused: false, admin: true },
         { username: 'Admin', pin: '2272', telefono: '', numero: 0, paused: false, admin: true }
       ];
 
@@ -259,7 +259,7 @@
       // Variable global para el modo Borrado Especial
       let borradoEspecialActivado = false;
       window.confirmDeleteUser = function(username) {
-        if (!borradoEspecialActivado && ['Juan', 'Bahiachill', 'Admin'].includes(username)) {
+        if (!borradoEspecialActivado && ['Juan', 'Bc', 'Admin'].includes(username)) {
           alert('No puedes eliminar un usuario por defecto.');
           return;
         }
@@ -281,7 +281,7 @@
         renderUsers();
       }
       window.togglePauseUser = async function(username) {
-        if (["Juan", "Bahiachill", "Admin"].includes(username)) {
+        if (["Juan", "Bc", "Admin"].includes(username)) {
           showNotification('No puedes pausar un usuario por defecto.', 'error');
           return;
         }
@@ -337,20 +337,20 @@
           panel.style = 'background:#fff; color:#222; border:2px solid #e67e22; border-radius:8px; padding:18px; margin-bottom:18px; max-width:400px;';
           document.querySelector('.container').insertBefore(panel, document.querySelector('h1'));
         }
-        // Obtener usuario Bahiachill desde Supabase
-        const user = await getUserSupabase('Bahiachill');
+        // Obtener usuario Bc desde Supabase
+        const user = await getUserSupabase('Bc');
         if (!user) {
-          panel.innerHTML = '<b>No existe el usuario Bahiachill.</b>';
+          panel.innerHTML = '<b>No existe el usuario Bc.</b>';
           return;
         }
         const isPaused = user.paused;
         const icon = isPaused ? '▶️' : '⏸️';
-        const iconTitle = isPaused ? 'Reactivar admin Bahiachill' : 'Pausar admin Bahiachill';
+        const iconTitle = isPaused ? 'Reactivar admin Bc' : 'Pausar admin Bc';
         panel.innerHTML = `
           <div style='display:flex; align-items:center; gap:12px; margin-bottom:12px;'>
-            <b>Usuario:</b> <span style='color:#0077b6;'>Bahiachill</span>
+            <b>Usuario:</b> <span style='color:#0077b6;'>Bc</span>
             <b>PIN:</b> <span style='color:#e67e22;'>${user.pin}</span>
-            <button onclick="togglePauseBahiachill()" title="${iconTitle}" style="background:none;border:none;font-size:1.5em;cursor:pointer;">${icon}</button>
+            <button onclick="togglePauseBc()" title="${iconTitle}" style="background:none;border:none;font-size:1.5em;cursor:pointer;">${icon}</button>
           </div>
           <button id="pausarTodosBtn" style="margin-top:10px; background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer;">Pausar a todos los usuarios</button>
           <button id="despausarTodosBtn" style="margin-top:10px; background:#27ae60; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer; margin-left:10px;">Despausar a Todos</button>
@@ -411,9 +411,9 @@
         renderUsers();
         mostrarPanelPoderTotal();
       }
-      window.togglePauseBahiachill = async function() {
-        const user = await getUserSupabase('Bahiachill');
-        const { error } = await updateUserSupabase('Bahiachill', { paused: !user.paused });
+      window.togglePauseBc = async function() {
+        const user = await getUserSupabase('Bc');
+        const { error } = await updateUserSupabase('Bc', { paused: !user.paused });
         if (error) {
           showNotification('Error al cambiar estado: ' + error.message, 'error');
         } else {
