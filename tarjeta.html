@@ -285,6 +285,10 @@
     </style>
 </head>
 <body style="display:none;" id="body-block">
+    <!-- Texto flotante de ayuda -->
+    <div id="tap-hint" style="position:fixed;top:18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.82);color:#fff;padding:10px 22px;border-radius:22px;font-size:1.08em;z-index:1001;box-shadow:0 2px 12px 0 rgba(0,0,0,0.13);font-weight:bold;opacity:1;transition:opacity 0.7s;pointer-events:none;">
+      <i class="fa fa-hand-pointer" style="margin-right:7px;"></i> Toca la tarjeta para ver información
+    </div>
     <div class="card-container" id="card">
         <!-- Animación de regalo -->
         <div id="gift-anim" class="gift-anim" style="display:none;">🎁</div>
@@ -445,31 +449,44 @@
         window.location.href = 'index.html';
       }, 5 * 60 * 1000);
 
-      // Lógica de la tarjeta y giro (sin QR)
+      // Mostrar y ocultar el texto de ayuda
+      function hideTapHint() {
+        const hint = document.getElementById('tap-hint');
+        if (hint && hint.style.opacity !== '0') {
+          hint.style.opacity = '0';
+          setTimeout(() => { if(hint) hint.style.display = 'none'; }, 800);
+        }
+      }
+      window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(hideTapHint, 8000);
+        const card = document.getElementById('card');
+        card.addEventListener('click', hideTapHint, { once: true });
+      });
+
+      // Asegura que la parte trasera sea legible al girar la tarjeta
       function setupCardUI() {
         const card = document.getElementById('card');
         let modalOpen = false;
         function handleCardClick(e) {
           if (modalOpen) return;
           card.classList.toggle('flipped');
+          const isFlipped = card.classList.contains('flipped');
+          // Quita el blur de la parte trasera cuando está girada
+          document.querySelectorAll('.card-back .blurred, .card-back .sharp').forEach(el => {
+            el.style.filter = isFlipped ? 'none' : '';
+          });
+          // ...resto de la lógica de giro...
           const cards = card.querySelectorAll('.card');
           cards.forEach(cardEl => {
             cardEl.classList.remove('shine-reset');
             void cardEl.offsetWidth;
             cardEl.classList.add('shine-reset');
           });
-          const isFlipped = card.classList.contains('flipped');
           document.querySelectorAll('.card .sharp').forEach(el => {
             el.style.filter = isFlipped ? 'blur(2px)' : 'none';
           });
           document.querySelectorAll('.card .blurred').forEach(el => {
             el.style.filter = isFlipped ? 'none' : 'blur(2px)';
-          });
-          document.querySelectorAll('.card-back .sharp').forEach(el => {
-            el.style.filter = isFlipped ? 'none' : 'blur(2px)';
-          });
-          document.querySelectorAll('.card-back .blurred').forEach(el => {
-            el.style.filter = isFlipped ? 'blur(2px)' : 'none';
           });
         }
         card.removeEventListener('click', handleCardClick);
