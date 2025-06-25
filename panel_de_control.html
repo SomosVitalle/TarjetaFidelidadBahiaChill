@@ -46,6 +46,10 @@
                 <input type="text" id="pin" required maxlength="4" minlength="4" pattern="[0-9]{4}" title="Debe ser exactamente 4 dígitos" inputmode="numeric" autocomplete="one-time-code">
             </div>
             <div class="form-group">
+                <label for="documento">Documento <span style="font-weight:normal; color:#888;">(10 dígitos)</span></label>
+                <input type="text" id="documento" required maxlength="10" minlength="10" pattern="[0-9]{10}" title="Debe ser exactamente 10 dígitos" inputmode="numeric" autocomplete="off">
+            </div>
+            <div class="form-group">
                 <label for="telefono">Teléfono <span style="font-weight:normal; color:#888;">(10 números)</span></label>
                 <input type="text" id="telefono" required maxlength="10" minlength="10" pattern="[0-9]{10}" title="Debe ser exactamente 10 números" inputmode="tel" autocomplete="tel">
             </div>
@@ -62,6 +66,7 @@
                     <th></th>
                     <th>Usuario</th>
                     <th>PIN</th>
+                    <th>Doc.</th>
                     <th>Tel.</th>
                     <th>Número</th>
                     <th>Acciones</th>
@@ -98,9 +103,9 @@
 
       // Usuarios por defecto
       const defaultUsers = [
-        { username: 'Juan', pin: '1234', telefono: '', numero: 0, paused: false, admin: false },
-        { username: 'Bc', pin: '2467', telefono: '', numero: 0, paused: false, admin: true },
-        { username: 'Admin', pin: '2272', telefono: '', numero: 0, paused: false, admin: true }
+        { username: 'Juan', pin: '1234', documento: '1234561234', telefono: '', numero: 0, paused: false, admin: false },
+        { username: 'Bc', pin: '2467', documento: '2467892467', telefono: '', numero: 0, paused: false, admin: true },
+        { username: 'Admin', pin: '2272', documento: '2272222272', telefono: '', numero: 0, paused: false, admin: true }
       ];
 
       // CRUD Supabase
@@ -154,6 +159,7 @@
             </td>
             <td><input type="text" value="${user.username}" data-username="${user.username}" class="edit-username" disabled></td>
             <td><input type="text" value="${user.pin}" data-username="${user.username}" class="edit-pin" maxlength="6" disabled inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{4}"></td>
+            <td><input type="text" value="${user.documento || ''}" data-username="${user.username}" class="edit-documento" maxlength="10" disabled inputmode="numeric" autocomplete="off" pattern="[0-9]{10}"></td>
             <td><input type="text" value="${user.telefono || ''}" data-username="${user.username}" class="edit-telefono" maxlength="10" disabled inputmode="tel" autocomplete="tel" pattern="[0-9]{10}"></td>
             <td><select data-username="${user.username}" class="edit-numero" disabled>${selectOptions}</select></td>
             <td class="actions">
@@ -191,6 +197,7 @@
         e.preventDefault();
         const username = document.getElementById('username').value.trim();
         const pin = document.getElementById('pin').value.trim();
+        const documento = document.getElementById('documento').value.trim();
         const telefono = document.getElementById('telefono').value.trim();
         const numero = 0;
         // Validaciones estrictas
@@ -200,6 +207,10 @@
         }
         if (!pin.match(/^\d{4}$/)) {
           showNotification('El PIN debe ser exactamente 4 dígitos.', 'error');
+          return;
+        }
+        if (!documento.match(/^\d{10}$/)) {
+          showNotification('El documento debe ser exactamente 10 dígitos.', 'error');
           return;
         }
         if (!telefono.match(/^\d{10}$/)) {
@@ -217,7 +228,7 @@
           return;
         }
         // Intenta crear el usuario
-        const { error } = await supabase.from('usuarios').insert([{ username, pin, telefono, numero, paused: false, admin: false }]);
+        const { error } = await supabase.from('usuarios').insert([{ username, pin, documento, telefono, numero, paused: false, admin: false }]);
         if (error) {
           showNotification('Error al crear usuario: ' + error.message, 'error');
           return;
@@ -231,6 +242,7 @@
       window.enableEdit = function(username) {
         document.querySelector(`.edit-username[data-username='${username}']`).disabled = false;
         document.querySelector(`.edit-pin[data-username='${username}']`).disabled = false;
+        document.querySelector(`.edit-documento[data-username='${username}']`).disabled = false;
         document.querySelector(`.edit-telefono[data-username='${username}']`).disabled = false;
         document.querySelector(`.edit-numero[data-username='${username}']`).disabled = false;
         const tr = Array.from(document.querySelectorAll('#usersTable tbody tr')).find(tr => tr.querySelector(`.edit-username[data-username='${username}']`));
@@ -242,10 +254,12 @@
       window.saveUser = async function(username) {
         const usernameVal = document.querySelector(`.edit-username[data-username='${username}']`).value.trim();
         const pin = document.querySelector(`.edit-pin[data-username='${username}']`).value.trim();
+        const documento = document.querySelector(`.edit-documento[data-username='${username}']`).value.trim();
         const telefono = document.querySelector(`.edit-telefono[data-username='${username}']`).value.trim();
         const numero = parseInt(document.querySelector(`.edit-numero[data-username='${username}']`).value, 10);
         if (isNaN(numero) || numero < 0 || numero > 10) return showNotification('El número debe estar entre 0 y 10', 'error');
-        const { error } = await updateUserSupabase(username, { username: usernameVal, pin, telefono, numero });
+        if (!documento.match(/^\d{10}$/)) return showNotification('El documento debe ser exactamente 10 dígitos', 'error');
+        const { error } = await updateUserSupabase(username, { username: usernameVal, pin, documento, telefono, numero });
         if (error) {
           showNotification('Error al modificar usuario: ' + error.message, 'error');
         } else {
