@@ -218,9 +218,9 @@
       // Crear usuarios por defecto en Supabase si no existen
       window.addEventListener('DOMContentLoaded', async function() {
           const defaultUsers = [
-              { username: 'Juan', pin: '1234', telefono: '', numero: 0, paused: false, admin: false },
-              { username: 'Bc', pin: '2467', telefono: '', numero: 0, paused: false, admin: true },
-              { username: 'Admin', pin: '2272', telefono: '', numero: 0, paused: false, admin: true }
+              { username: 'Juan', pin: '1234', documento: '1234561234', telefono: '', numero: 0, paused: false, admin: false },
+              { username: 'Bc', pin: '2467', documento: '2467892467', telefono: '', numero: 0, paused: false, admin: true },
+              { username: 'Admin', pin: '2272', documento: '2272222272', telefono: '', numero: 0, paused: false, admin: true }
           ];
           for (const user of defaultUsers) {
               const existing = await getUserSupabase(user.username);
@@ -247,7 +247,7 @@
       async function createUserSupabase(user) {
           const { data, error } = await supabase
               .from('usuarios')
-              .insert([user]);
+              .insert([{ ...user, documento: user.documento || '0000000000' }]);
           return { data, error };
       }
       // Función para actualizar usuario en Supabase
