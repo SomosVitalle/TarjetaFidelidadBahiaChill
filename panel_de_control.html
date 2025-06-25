@@ -167,17 +167,17 @@
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td style="width:40px;">
-              <button onclick="togglePauseUser('${user.username}')" title="${iconTitle}" style="background:none;border:none;font-size:1.2em;cursor:pointer;">${icon}</button>
+              <button onclick="togglePauseUserById('${user.id}')" title="${iconTitle}" style="background:none;border:none;font-size:1.2em;cursor:pointer;">${icon}</button>
             </td>
-            <td><input type="text" value="${user.username}" data-username="${user.username}" class="edit-username" disabled></td>
-            <td><input type="text" value="${user.pin}" data-username="${user.username}" class="edit-pin" maxlength="6" disabled inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{4}"></td>
-            <td><input type="text" value="${user.documento || ''}" data-username="${user.username}" class="edit-documento" maxlength="10" disabled inputmode="numeric" autocomplete="off" pattern="[0-9]{10}"></td>
-            <td><input type="text" value="${user.telefono || ''}" data-username="${user.username}" class="edit-telefono" maxlength="10" disabled inputmode="tel" autocomplete="tel" pattern="[0-9]{10}"></td>
-            <td><select data-username="${user.username}" class="edit-numero" disabled>${selectOptions}</select></td>
+            <td><input type="text" value="${user.username}" data-id="${user.id}" class="edit-username" disabled></td>
+            <td><input type="text" value="${user.pin}" data-id="${user.id}" class="edit-pin" maxlength="6" disabled inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{4}"></td>
+            <td><input type="text" value="${user.documento || ''}" data-id="${user.id}" class="edit-documento" maxlength="10" disabled inputmode="numeric" autocomplete="off" pattern="[0-9]{10}"></td>
+            <td><input type="text" value="${user.telefono || ''}" data-id="${user.id}" class="edit-telefono" maxlength="10" disabled inputmode="tel" autocomplete="tel" pattern="[0-9]{10}"></td>
+            <td><select data-id="${user.id}" class="edit-numero" disabled>${selectOptions}</select></td>
             <td class="actions">
-              <button onclick="enableEdit('${user.username}')">Modificar</button>
-              <button onclick="confirmDeleteUser('${user.username}')">Eliminar</button>
-              <button onclick="saveUser('${user.username}')" class="save-btn" style="display:none;">Guardar</button>
+              <button onclick="enableEdit('${user.id}')">Modificar</button>
+              <button onclick="confirmDeleteUserById('${user.id}')">Eliminar</button>
+              <button onclick="saveUser('${user.id}')" class="save-btn" style="display:none;">Guardar</button>
               <button onclick="cancelEdit()" class="cancel-btn" style="display:none;">Cancelar</button>
             </td>
           `;
@@ -260,27 +260,27 @@
       });
 
       // Edición y acciones de usuario
-      window.enableEdit = function(username) {
-        document.querySelector(`.edit-username[data-username='${username}']`).disabled = false;
-        document.querySelector(`.edit-pin[data-username='${username}']`).disabled = false;
-        document.querySelector(`.edit-documento[data-username='${username}']`).disabled = false;
-        document.querySelector(`.edit-telefono[data-username='${username}']`).disabled = false;
-        document.querySelector(`.edit-numero[data-username='${username}']`).disabled = false;
-        const tr = Array.from(document.querySelectorAll('#usersTable tbody tr')).find(tr => tr.querySelector(`.edit-username[data-username='${username}']`));
+      window.enableEdit = function(id) {
+        document.querySelector(`.edit-username[data-id='${id}']`).disabled = false;
+        document.querySelector(`.edit-pin[data-id='${id}']`).disabled = false;
+        document.querySelector(`.edit-documento[data-id='${id}']`).disabled = false;
+        document.querySelector(`.edit-telefono[data-id='${id}']`).disabled = false;
+        document.querySelector(`.edit-numero[data-id='${id}']`).disabled = false;
+        const tr = Array.from(document.querySelectorAll('#usersTable tbody tr')).find(tr => tr.querySelector(`.edit-username[data-id='${id}']`));
         tr.querySelector('.save-btn').style.display = '';
         tr.querySelector('.cancel-btn').style.display = '';
         tr.querySelector('button[onclick^="enableEdit"]').style.display = 'none';
-        tr.querySelector('button[onclick^="confirmDeleteUser"]').style.display = 'none';
+        tr.querySelector('button[onclick^="confirmDeleteUserById"]').style.display = 'none';
       }
-      window.saveUser = async function(username) {
-        const usernameVal = document.querySelector(`.edit-username[data-username='${username}']`).value.trim();
-        const pin = document.querySelector(`.edit-pin[data-username='${username}']`).value.trim();
-        const documento = document.querySelector(`.edit-documento[data-username='${username}']`).value.trim();
-        const telefono = document.querySelector(`.edit-telefono[data-username='${username}']`).value.trim();
-        const numero = parseInt(document.querySelector(`.edit-numero[data-username='${username}']`).value, 10);
+      window.saveUser = async function(id) {
+        const usernameVal = document.querySelector(`.edit-username[data-id='${id}']`).value.trim();
+        const pin = document.querySelector(`.edit-pin[data-id='${id}']`).value.trim();
+        const documento = document.querySelector(`.edit-documento[data-id='${id}']`).value.trim();
+        const telefono = document.querySelector(`.edit-telefono[data-id='${id}']`).value.trim();
+        const numero = parseInt(document.querySelector(`.edit-numero[data-id='${id}']`).value, 10);
         if (isNaN(numero) || numero < 0 || numero > 10) return showNotification('El número debe estar entre 0 y 10', 'error');
         if (!documento.match(/^\d{10}$/)) return showNotification('El documento debe ser exactamente 10 dígitos', 'error');
-        const { error } = await updateUserSupabase(username, { username: usernameVal, pin, documento, telefono, numero });
+        const { error } = await supabase.from('usuarios').update({ username: usernameVal, pin, documento, telefono, numero }).eq('id', id);
         if (error) {
           showNotification('Error al modificar usuario: ' + error.message, 'error');
         } else {
@@ -288,12 +288,10 @@
         }
         renderUsers();
       }
-      window.cancelEdit = function() {
-        renderUsers();
-      }
-      // Variable global para el modo Borrado Especial
-      let borradoEspecialActivado = false;
-      window.confirmDeleteUser = function(username) {
+      window.confirmDeleteUserById = function(id) {
+        // Obtener el usuario para mostrar el nombre
+        const userInput = document.querySelector(`.edit-username[data-id='${id}']`);
+        const username = userInput ? userInput.value : '';
         if (!borradoEspecialActivado && ['Juan', 'Bc', 'Admin'].includes(username)) {
           alert('No puedes eliminar un usuario por defecto.');
           return;
@@ -303,11 +301,11 @@
           return;
         }
         if (confirm(`¿Estás seguro de eliminar al usuario "${username}"?`)) {
-          window.deleteUser(username);
+          window.deleteUserById(id);
         }
       }
-      window.deleteUser = async function(username) {
-        const { error } = await deleteUserSupabase(username);
+      window.deleteUserById = async function(id) {
+        const { error } = await supabase.from('usuarios').delete().eq('id', id);
         if (error) {
           showNotification('Error al eliminar usuario: ' + error.message, 'error');
         } else {
@@ -315,13 +313,15 @@
         }
         renderUsers();
       }
-      window.togglePauseUser = async function(username) {
+      window.togglePauseUserById = async function(id) {
+        const userInput = document.querySelector(`.edit-username[data-id='${id}']`);
+        const username = userInput ? userInput.value : '';
         if (["Juan", "Bc", "Admin"].includes(username)) {
           showNotification('No puedes pausar un usuario por defecto.', 'error');
           return;
         }
-        const user = await getUserSupabase(username);
-        const { error } = await updateUserSupabase(username, { paused: !user.paused });
+        const { data: user } = await supabase.from('usuarios').select('*').eq('id', id).maybeSingle();
+        const { error } = await supabase.from('usuarios').update({ paused: !user.paused }).eq('id', id);
         if (error) {
           showNotification('Error al cambiar estado: ' + error.message, 'error');
         } else {
