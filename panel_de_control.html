@@ -137,7 +137,10 @@
         const filtro = (document.getElementById('busquedaUsuarios')?.value || '').toLowerCase();
         const tbody = document.querySelector('#usersTable tbody');
         tbody.innerHTML = '';
+        // Ocultar Admin si el usuario actual es Bc
+        const currentUser = localStorage.getItem('currentUser');
         users.filter(user => {
+          if (currentUser === 'Bc' && user.username === 'Admin') return false;
           if (!filtro) return true;
           return (
             (user.username && user.username.toLowerCase().includes(filtro)) ||
