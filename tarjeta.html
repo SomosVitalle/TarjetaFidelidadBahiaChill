@@ -310,49 +310,17 @@
                 <img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" />
             </div>
             <div class="title sharp" id="back-title" style="transform: scaleX(-1);">BAHIA CHILL</div>
-            <div class="stamps stamps-back">
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-            </div>
-            <!-- Signo de pregunta centrado -->
-            <div class="question-circle sharp" id="back-question" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scaleX(-1);width:80px;height:80px;display:flex;justify-content:center;align-items:center;background:rgba(255,255,255,0.10);box-shadow:0 0 8px 1px rgba(0,0,0,0.10);border-radius:50%;border:2px solid #fff;cursor:pointer;z-index:2;">
-                <i class="fa-solid fa-question" style="color:#fff;opacity:0.95;font-size:60px;"></i>
-            </div>
-            <div class="stamps stamps-back" style="margin-top: 10px;">
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-                <div class="stamp sharp"><img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" /></div>
-            </div>
-            <div class="footer sharp" id="back-footer" style="transform: scaleX(-1);">
-                SOLO TE FALTAN <span class="highlight">3 PALMAS</span> PARA RECLAMAR TU REGALO
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;margin-top:30px;">
+              <div id="user-name" style="font-size:1.15em;font-weight:bold;margin-bottom:12px;letter-spacing:1px;"></div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:1.05em;letter-spacing:2px;">Documento:</span>
+                <span id="user-doc" style="font-size:1.05em;letter-spacing:2px;font-family:monospace;"></span>
+                <button id="toggle-doc-visibility" style="background:none;border:none;outline:none;cursor:pointer;color:#fff;font-size:1.1em;display:flex;align-items:center;">
+                  <i id="eye-icon" class="fa-regular fa-eye-slash"></i>
+                </button>
+              </div>
             </div>
         </div>
-    </div>
-    <!-- MODAL FAQ -->
-    <div id="faq-modal" aria-visible="false">
-      <div>
-        <div style="width:100%;display:flex;justify-content:flex-end;margin-bottom:8px;">
-          <button id="faq-close" style="background:none;border:none;color:#fff;font-size:28px;cursor:pointer;line-height:1;opacity:0.8;">&times;</button>
-        </div>
-        <div style="text-align:center;font-weight:bold;font-size:1.25rem;margin-bottom:18px;">Preguntas frecuentes</div>
-        <div style="width:100%;margin-bottom:16px;">
-          <div style="font-weight:bold;margin-bottom:4px;">¿A que tengo acceso con mi Tarjeta Blue Pass?</div>
-          <div style="margin-bottom:12px;">Tienes derecho a un beneficio exclusivo para nuestros unicos 200 usuarios, cada mes cambia. Pueden ser regalos en bebidas de diferentes categorias, regalos sorpresa o descuentos. Revisa nuestras redes <a href="https://www.instagram.com/bahia.chill.bar/" target="_blank" style="color:#60aaff;text-decoration:underline;font-weight:500;">@bahia.chill.bar</a> para saber a que tienes acceso este mes.</div>
-          <div style="font-weight:bold;margin-bottom:4px;">Un amigo (o familia) quiere tener su propia tarjeta, ¿Cómo lo puede hacer?</div>
-          <div style="margin-bottom:12px;">Muy facil, al final de esta informacion verás un boton de contacto, al hacer click te llevara con nuestros auxiliares de Tarjeta y puedes <b>escribirles tu</b> los datos que te solicitan o <b>compartirle el numero</b> a la persona interesada para que ellos mismo hagan su aplicación.</div>
-          <div style="font-weight:bold;margin-bottom:4px;">¿Puedo prestarle mi tarjeta a alguien?</div>
-          <div style="margin-bottom:12px;">No, todos nuestros usuarios aceptaron que su tarjeta sea unica e intraferible. Al momento de solicitar un sticker o de querer reclamar un regalo debera hacerlo el dueño de la tarjeta.</div>
-        </div>
-        <div style="text-align:center;font-weight:bold;margin-bottom:10px;">¿Tienes más preguntas?, nuestro equipo esta listo para reponder a todas tus inquietudes</div>
-        <a href="https://wa.link/l0zt0d" target="_blank" style="display:flex;align-items:center;justify-content:center;background:#25d366;border-radius:50px;padding:10px 22px;color:#fff;font-weight:bold;font-size:1.1rem;text-decoration:none;gap:10px;box-shadow:0 2px 8px 0 rgba(0,0,0,0.10);transition:background 0.2s;">
-          <i class="fa-brands fa-whatsapp" style="font-size:1.5rem;"></i> Contactar por WhatsApp
-        </a>
-      </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
@@ -482,40 +450,14 @@
           document.querySelectorAll('.card-back .sharp').forEach(el => {
             el.style.filter = 'none';
           });
+          // Al girar, si está mostrando la parte trasera, actualiza la info del usuario
+          if (isFlipped) {
+            renderUserBackInfo();
+          }
         }
         card.removeEventListener('click', handleCardClick);
         card.addEventListener('click', handleCardClick);
-        // FAQ Modal logic
-        const faqModal = document.getElementById('faq-modal');
-        const faqClose = document.getElementById('faq-close');
-        const questionBtn = document.getElementById('back-question');
-        if (questionBtn) {
-          questionBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            faqModal.setAttribute('aria-visible', 'true');
-            faqModal.style.display = 'flex';
-            modalOpen = true;
-          });
-        }
-        if (faqClose) {
-          faqClose.addEventListener('click', function(e) {
-            e.stopPropagation();
-            faqModal.setAttribute('aria-visible', 'false');
-            faqModal.style.display = 'none';
-            modalOpen = false;
-          });
-        }
-        faqModal.addEventListener('click', function(e) {
-          if (e.target === faqModal) {
-            faqModal.setAttribute('aria-visible', 'false');
-            faqModal.style.display = 'none';
-            modalOpen = false;
-          }
-        });
-        // Evita que el click en el signo de pregunta gire la tarjeta
-        if (questionBtn) {
-          questionBtn.addEventListener('mousedown', function(e) { e.stopPropagation(); });
-        }
+        // El resto de la lógica de modal FAQ eliminada
         window.addEventListener('DOMContentLoaded', () => {
           document.querySelectorAll('.card .sharp').forEach(el => {
             el.style.filter = 'none';
@@ -530,6 +472,34 @@
         });
       }
 
+      // Renderiza la información del usuario en la parte trasera
+      async function renderUserBackInfo() {
+        const username = localStorage.getItem('currentUser');
+        const user = await getUserSupabase(username);
+        if (!user) return;
+        document.getElementById('user-name').textContent = user.username || '';
+        // Documento: mostrar ****** + últimos 4 dígitos (ocultos por defecto)
+        let doc = user.documento ? String(user.documento) : '';
+        if (doc.length !== 10) {
+          doc = doc.padStart(10, '*');
+        }
+        const last4 = doc.slice(-4);
+        let hidden = true;
+        function updateDoc() {
+          document.getElementById('user-doc').textContent = '******' + (hidden ? '••••' : last4);
+          document.getElementById('eye-icon').className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+        }
+        updateDoc();
+        const btn = document.getElementById('toggle-doc-visibility');
+        if (btn) {
+          btn.onclick = function(e) {
+            e.stopPropagation();
+            hidden = !hidden;
+            updateDoc();
+          };
+        }
+      }
+
       // Secuencia principal: check login, render UI
       window.addEventListener('DOMContentLoaded', async function() {
         const ok = await checkAndRedirect();
@@ -537,6 +507,10 @@
         document.getElementById('body-block').style.display = '';
         await renderStickers();
         setupCardUI();
+        // Si la tarjeta ya está girada al cargar, renderiza la info
+        if (document.getElementById('card').classList.contains('flipped')) {
+          renderUserBackInfo();
+        }
       });
     </script>
 </body>
