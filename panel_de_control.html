@@ -42,12 +42,12 @@
                 <input type="text" id="username" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+$" title="Solo el primer nombre, sin espacios ni números">
             </div>
             <div class="form-group">
-                <label for="pin">PIN <span style="font-weight:normal; color:#888;">(ultimos 4 digitos de la cedula)</span></label>
-                <input type="text" id="pin" required maxlength="4" minlength="4" pattern="[0-9]{4}" title="Debe ser exactamente 4 dígitos" inputmode="numeric" autocomplete="one-time-code">
-            </div>
-            <div class="form-group">
                 <label for="documento">Documento <span style="font-weight:normal; color:#888;">(10 dígitos)</span></label>
                 <input type="text" id="documento" required maxlength="10" minlength="10" pattern="[0-9]{10}" title="Debe ser exactamente 10 dígitos" inputmode="numeric" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="pin">PIN <span style="font-weight:normal; color:#888;">(últimos 4 dígitos del documento, se autocompleta)</span></label>
+                <input type="text" id="pin" required maxlength="4" minlength="4" pattern="[0-9]{4}" title="Debe ser exactamente 4 dígitos" inputmode="numeric" autocomplete="one-time-code" readonly style="background:#f4f4f4;cursor:not-allowed;">
             </div>
             <div class="form-group">
                 <label for="telefono">Teléfono <span style="font-weight:normal; color:#888;">(10 números)</span></label>
@@ -196,8 +196,8 @@
       document.getElementById('userForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const username = document.getElementById('username').value.trim();
-        const pin = document.getElementById('pin').value.trim();
         const documento = document.getElementById('documento').value.trim();
+        const pin = document.getElementById('pin').value.trim();
         const telefono = document.getElementById('telefono').value.trim();
         const numero = 0;
         // Validaciones estrictas
@@ -205,25 +205,31 @@
           showNotification('El usuario debe ser solo el primer nombre, sin espacios ni números.', 'error');
           return;
         }
-        if (!pin.match(/^\d{4}$/)) {
-          showNotification('El PIN debe ser exactamente 4 dígitos.', 'error');
-          return;
-        }
         if (!documento.match(/^\d{10}$/)) {
           showNotification('El documento debe ser exactamente 10 dígitos.', 'error');
+          return;
+        }
+        if (!pin.match(/^\d{4}$/)) {
+          showNotification('El PIN debe ser exactamente 4 dígitos.', 'error');
           return;
         }
         if (!telefono.match(/^\d{10}$/)) {
           showNotification('El teléfono debe ser exactamente 10 números.', 'error');
           return;
         }
-        // Verifica si ya existe el usuario
-        const { data: existing, error: errorGet } = await supabase.from('usuarios').select('id').eq('username', username);
+        // Verifica si ya existe el usuario con mismo nombre y pin
+        const { data: existing, error: errorGet } = await supabase.from('usuarios').select('id').eq('username', username).eq('pin', pin);
         if (errorGet) {
           showNotification('Error de conexión con Supabase: ' + errorGet.message, 'error');
           return;
         }
         if (existing && existing.length > 0) {
+          showNotification(`Ups, alguien ya tiene el nombre ${username} y el PIN ${pin}. Intenta registrarlo con el primer apellido.`, 'error');
+          return;
+        }
+        // Verifica si ya existe el usuario solo por nombre
+        const { data: existingName } = await supabase.from('usuarios').select('id').eq('username', username);
+        if (existingName && existingName.length > 0) {
           showNotification('El usuario ya existe', 'error');
           return;
         }
@@ -236,6 +242,7 @@
         showNotification('Añadido con éxito', 'success');
         await renderUsers();
         this.reset();
+        document.getElementById('pin').value = '';
       });
 
       // Edición y acciones de usuario
@@ -448,6 +455,16 @@
           window.location.href = 'index.html';
         }
       }
+      // Autocompletar PIN al terminar documento
+      document.getElementById('documento').addEventListener('input', function() {
+        const doc = this.value.trim();
+        const pinInput = document.getElementById('pin');
+        if (doc.length === 10) {
+          pinInput.value = doc.slice(-4);
+        } else {
+          pinInput.value = '';
+        }
+      });
     </script>
 </body>
 </html>
