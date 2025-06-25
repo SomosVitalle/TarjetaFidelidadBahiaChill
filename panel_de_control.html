@@ -373,7 +373,8 @@
           document.querySelector('.container').insertBefore(panel, document.querySelector('h1'));
         }
         // Obtener usuario Bc desde Supabase
-        const user = await getUserSupabase('Bc');
+        const { data: users } = await supabase.from('usuarios').select('*').eq('username', 'Bc');
+        const user = users && users.length > 0 ? users[0] : null;
         if (!user) {
           panel.innerHTML = '<b>No existe el usuario Bc.</b>';
           return;
@@ -385,7 +386,7 @@
           <div style='display:flex; align-items:center; gap:12px; margin-bottom:12px;'>
             <b>Usuario:</b> <span style='color:#0077b6;'>Bc</span>
             <b>PIN:</b> <span style='color:#e67e22;'>${user.pin}</span>
-            <button onclick="togglePauseBc()" title="${iconTitle}" style="background:none;border:none;font-size:1.5em;cursor:pointer;">${icon}</button>
+            <button onclick="togglePauseBc('${user.id}')" title="${iconTitle}" style="background:none;border:none;font-size:1.5em;cursor:pointer;">${icon}</button>
           </div>
           <button id="pausarTodosBtn" style="margin-top:10px; background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer;">Pausar a todos los usuarios</button>
           <button id="despausarTodosBtn" style="margin-top:10px; background:#27ae60; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer; margin-left:10px;">Despausar a Todos</button>
@@ -404,7 +405,7 @@
       }
       async function pausarTodosMenosAdminYJuan() {
         // Pausa todos los usuarios excepto Admin y Juan
-        const { data, error } = await supabase.from('usuarios').select('username, paused');
+        const { data, error } = await supabase.from('usuarios').select('id, username, paused');
         if (error) {
           showNotification('Error al obtener usuarios: ' + error.message, 'error');
           return;
@@ -414,8 +415,8 @@
           showNotification('No hay usuarios activos para pausar.', 'success');
           return;
         }
-        const usernames = usuariosAPausar.map(u => u.username);
-        const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: true }).in('username', usernames);
+        const ids = usuariosAPausar.map(u => u.id);
+        const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: true }).in('id', ids);
         if (errorUpdate) {
           showNotification('Error al pausar usuarios: ' + errorUpdate.message, 'error');
         } else {
@@ -426,7 +427,7 @@
       }
       async function despausarTodosMenosAdminYJuan() {
         if (!confirm('Al aplicar esta función, todos (incluidos los que estaban bloqueados antes de la pausa masiva) serán despausados, ¿desea continuar?')) return;
-        const { data, error } = await supabase.from('usuarios').select('username, paused');
+        const { data, error } = await supabase.from('usuarios').select('id, username, paused');
         if (error) {
           showNotification('Error al obtener usuarios: ' + error.message, 'error');
           return;
@@ -436,8 +437,8 @@
           showNotification('No hay usuarios pausados para despausar.', 'success');
           return;
         }
-        const usernames = usuariosADespausar.map(u => u.username);
-        const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: false }).in('username', usernames);
+        const ids = usuariosADespausar.map(u => u.id);
+        const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: false }).in('id', ids);
         if (errorUpdate) {
           showNotification('Error al despausar usuarios: ' + errorUpdate.message, 'error');
         } else {
@@ -446,9 +447,9 @@
         renderUsers();
         mostrarPanelPoderTotal();
       }
-      window.togglePauseBc = async function() {
-        const user = await getUserSupabase('Bc');
-        const { error } = await updateUserSupabase('Bc', { paused: !user.paused });
+      window.togglePauseBc = async function(id) {
+        const { data: user } = await supabase.from('usuarios').select('*').eq('id', id).maybeSingle();
+        const { error } = await supabase.from('usuarios').update({ paused: !user.paused }).eq('id', id);
         if (error) {
           showNotification('Error al cambiar estado: ' + error.message, 'error');
         } else {
