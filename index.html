@@ -165,7 +165,7 @@
               this.innerHTML = '<i class="fa fa-eye"></i>';
           }
       });
-      // Login simple: usuario Admin, pin 2272 y Bahiachill, pin 2467
+      // Login simple: usuario Admin, pin 2272 y Bc, pin 2467
       const loginBtn = document.querySelector('.login-btn');
       const loginForm = document.getElementById('login-form');
       const errorMsg = document.getElementById('error-msg');
@@ -178,18 +178,18 @@
               .select('*')
               .eq('username', usuario);
           const user = data && data.length > 0 ? data[0] : null;
-          // Admin login (Admin o Bahiachill con pines válidos)
+          // Admin login (Admin o Bc con pines válidos)
           if ((usuario === 'Admin' && pin === '2272') ||
-              (usuario === 'Bahiachill' && [
+              (usuario === 'Bc' && [
                   '2467', '7294', '3168', '4835', '1590'
               ].includes(pin))) {
-              // Si es Bahiachill y está pausado, mostrar error
-              if (usuario === 'Bahiachill' && user && user.paused) {
+              // Si es Bc y está pausado, mostrar error
+              if (usuario === 'Bc' && user && user.paused) {
                   errorMsg.textContent = 'Error interno, intentelo más tarde';
                   errorMsg.style.display = 'block';
                   return;
               }
-              if (user && (user.pin === pin || (usuario === 'Bahiachill' && [
+              if (user && (user.pin === pin || (usuario === 'Bc' && [
                   '7294', '3168', '4835', '1590'
               ].includes(pin)))) {
                   errorMsg.style.display = 'none';
@@ -219,7 +219,7 @@
       window.addEventListener('DOMContentLoaded', async function() {
           const defaultUsers = [
               { username: 'Juan', pin: '1234', telefono: '', numero: 0, paused: false, admin: false },
-              { username: 'Bahiachill', pin: '2467', telefono: '', numero: 0, paused: false, admin: true },
+              { username: 'Bc', pin: '2467', telefono: '', numero: 0, paused: false, admin: true },
               { username: 'Admin', pin: '2272', telefono: '', numero: 0, paused: false, admin: true }
           ];
           for (const user of defaultUsers) {
