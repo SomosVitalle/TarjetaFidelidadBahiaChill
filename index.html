@@ -194,6 +194,8 @@
                   errorMsg.style.display = 'none';
                   localStorage.setItem('bahiaChillLogin', 'ok');
                   localStorage.setItem('currentUser', usuario); // Guardar usuario actual
+                  // Guardar última actividad
+                  localStorage.setItem('lastActivity', Date.now().toString());
                   window.location.href = 'panel_de_control.html';
                   return;
               }
@@ -207,6 +209,8 @@
                   errorMsg.style.display = 'none';
                   localStorage.setItem('bahiaChillLogin', 'ok');
                   localStorage.setItem('currentUser', usuario); // Guardar usuario actual
+                  // Guardar última actividad
+                  localStorage.setItem('lastActivity', Date.now().toString());
                   window.location.href = 'tarjeta.html';
               }
           } else {
