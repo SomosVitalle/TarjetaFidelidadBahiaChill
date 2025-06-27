@@ -285,6 +285,14 @@
     <button id="help-btn" aria-label="Ayuda" style="position:fixed;top:18px;right:18px;z-index:1002;background:rgba(0,0,0,0.18);border:none;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px 0 rgba(0,0,0,0.13);cursor:pointer;outline:none;">
       <i class="fa fa-question" style="color:#fff;font-size:1.7em;"></i>
     </button>
+    <!-- Mostrar solo la información de usuario arriba a la izquierda, sin fondo ni títulos -->
+    <div id="user-info-bar" style="position:fixed;top:18px;left:18px;z-index:1002;color:#fff;font-size:1.08em;font-weight:bold;display:flex;align-items:center;gap:10px;">
+      <span id="user-info-nombre"></span>
+      <span id="user-info-doc" style="font-family:monospace;font-size:0.98em;letter-spacing:2px;"></span>
+      <button id="toggle-doc-visibility-bar" style="background:none;border:none;outline:none;cursor:pointer;color:#fff;font-size:1.1em;display:flex;align-items:center;padding:0 0 0 4px;">
+        <i id="eye-icon-bar" class="fa-regular fa-eye-slash"></i>
+      </button>
+    </div>
     <div class="card-container" id="card">
         <!-- Animación de regalo -->
         <div id="gift-anim" class="gift-anim" style="display:none;">🎁</div>
@@ -592,29 +600,77 @@
         }
       }
 
-      // Secuencia principal: check login, render UI
-      window.addEventListener('DOMContentLoaded', async function() {
-        const ok = await checkAndRedirect();
-        if (!ok) return;
-        document.getElementById('body-block').style.display = '';
-        await renderStickers();
-        setupCardUI();
-        // Renderiza SIEMPRE la info de usuario al cargar
-        renderUserBackInfo();
-        // Si la tarjeta ya está girada al cargar, vuelve a renderizar (opcional, pero seguro)
-        if (document.getElementById('card').classList.contains('flipped')) {
-          renderUserBackInfo();
+      // Mostrar datos de usuario en la barra superior (sin fondo ni títulos)
+      async function mostrarDatosUsuarioBarra() {
+        const username = localStorage.getItem('currentUser');
+        if (!username) return;
+        let doc = '';
+        if (window.supabase) {
+          try {
+            const { data } = await window.supabase
+              .createClient(
+                'https://senqhfrzhsvrwiqschuf.supabase.co',
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbnFoZnJ6aHN2cndpcXNjaHVmIiwicm9zZSI6ImFub24iLCJpYXQiOjE3NTAxMTA3MzksImV4cCI6MjA2NTY4NjczOX0.SoQUuDrUtIObkHMTn6HOOR74MvYTI5bgy4-PDU4p-dg'
+              )
+              .from('usuarios')
+              .select('*')
+              .eq('username', username)
+              .maybeSingle();
+            if (data) {
+              document.getElementById('user-info-nombre').textContent = data.username;
+              doc = data.documento ? String(data.documento) : '';
+            }
+          } catch (e) {}
         }
-      });
+        if (!doc) {
+          document.getElementById('user-info-nombre').textContent = username;
+          doc = '';
+        }
+        let hidden = true;
+        function updateDocBar() {
+          document.getElementById('user-info-doc').textContent = doc ? '******' + (hidden ? '••••' : doc.slice(-4)) : '';
+          const eyeIcon = document.getElementById('eye-icon-bar');
+          if (eyeIcon) eyeIcon.className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+        }
+        updateDocBar();
+        const btnBar = document.getElementById('toggle-doc-visibility-bar');
+        if (btnBar) {
+          btnBar.onclick = function(e) {
+            e.stopPropagation();
+            hidden = !hidden;
+            updateDocBar();
+          };
+        }
+      }
 
-      // Accesibilidad y ayuda: botón de ayuda
-      document.getElementById('help-btn').addEventListener('click', function(e) {
-        e.stopPropagation();
-        // Obtener datos del usuario actual de localStorage
-        const nombre = localStorage.getItem('currentUser') || '';
-        // Aquí podrías obtener el documento y vencimiento de Supabase si lo deseas
-        // Para ejemplo simple, solo pasamos el nombre por query string
-        window.location.href = `datos_tarjeta.html?nombre=${encodeURIComponent(nombre)}`;
+      // Al cargar, verificar y redirigir si es necesario
+      window.addEventListener('DOMContentLoaded', async () => {
+        const body = document.getElementById('body-block');
+        body.style.display = 'flex';
+        const card = document.getElementById('card');
+        card.classList.remove('flipped');
+        // Esperar a que la tarjeta esté lista para el primer render
+        await new Promise(resolve => setTimeout(resolve, 50));
+        // Verifica y redirige si es necesario
+        const isLoggedIn = await checkAndRedirect();
+        if (!isLoggedIn) return;
+        // Mostrar datos de usuario en la barra superior
+        mostrarDatosUsuarioBarra();
+        // Renderizar stickers
+        renderStickers();
+        // Configurar la interfaz de la tarjeta
+        setupCardUI();
+        // Mostrar la parte trasera de la tarjeta si es necesario (por el estado de la sesión)
+        const currentUser = localStorage.getItem('currentUser');
+        if (currentUser && currentUser !== 'bc') {
+          const user = await getUserSupabase(currentUser);
+          if (user && user.numero > 0) {
+            card.classList.add('flipped');
+            // Forzar el renderizado de la información del usuario en la parte trasera
+            await new Promise(resolve => setTimeout(resolve, 50));
+            renderUserBackInfo();
+          }
+        }
       });
     </script>
 </body>
