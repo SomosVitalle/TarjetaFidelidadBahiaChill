@@ -287,8 +287,12 @@
 <body style="display:none;" id="body-block">
     <!-- Texto flotante de ayuda -->
     <div id="tap-hint" style="position:fixed;top:18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.82);color:#fff;padding:10px 22px;border-radius:22px;font-size:1.08em;z-index:1001;box-shadow:0 2px 12px 0 rgba(0,0,0,0.13);font-weight:bold;opacity:1;transition:opacity 0.7s;pointer-events:none;">
-      <i class="fa fa-hand-pointer" style="margin-right:7px;"></i> Toca la tarjeta para ver información
+      <i class="fa fa-question-circle" style="margin-right:7px;"></i> Toca el signo de ? para más información
     </div>
+    <!-- Botón de ayuda (signo de pregunta) -->
+    <button id="help-btn" aria-label="Ayuda" style="position:fixed;top:18px;right:18px;z-index:1002;background:rgba(0,0,0,0.18);border:none;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px 0 rgba(0,0,0,0.13);cursor:pointer;outline:none;">
+      <i class="fa fa-question" style="color:#fff;font-size:1.7em;"></i>
+    </button>
     <div class="card-container" id="card">
         <!-- Animación de regalo -->
         <div id="gift-anim" class="gift-anim" style="display:none;">🎁</div>
@@ -605,6 +609,12 @@
         if (document.getElementById('card').classList.contains('flipped')) {
           renderUserBackInfo();
         }
+      });
+
+      // Accesibilidad y ayuda: botón de ayuda
+      document.getElementById('help-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        window.location.href = 'tarjetaVIP.html';
       });
     </script>
 </body>
