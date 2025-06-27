@@ -46,7 +46,7 @@
             padding: 15px;
             display: flex;
             flex-direction: column;
-            color: white;
+            color: white; /* Asegura que el color del texto es blanco */
             overflow: hidden;
         }
         
@@ -285,14 +285,11 @@
     </style>
 </head>
 <body style="display:none;" id="body-block">
-    <!-- Texto flotante de ayuda -->
     <div id="tap-hint" style="position:fixed;top:18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.82);color:#fff;padding:10px 22px;border-radius:22px;font-size:1.08em;z-index:1001;box-shadow:0 2px 12px 0 rgba(0,0,0,0.13);font-weight:bold;opacity:1;transition:opacity 0.7s;pointer-events:none;">
       <i class="fa fa-hand-pointer" style="margin-right:7px;"></i> Toca la tarjeta para ver información
     </div>
     <div class="card-container" id="card">
-        <!-- Animación de regalo -->
         <div id="gift-anim" class="gift-anim" style="display:none;">🎁</div>
-        <!-- Front of the card -->
         <div class="card">
             <div class="palm-logo sharp" id="front-logo">
                 <img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" />
@@ -304,7 +301,6 @@
                 SOLO TE FALTAN <span class="highlight">3 PALMAS</span> PARA RECLAMAR TU REGALO
             </div>
         </div>
-        <!-- Back of the card -->
         <div class="card card-back">
             <div class="palm-logo sharp" id="back-logo" style="opacity: 0.3; transform: scaleX(-1); right: 10px; left: auto;">
                 <img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" />
@@ -462,39 +458,51 @@
       // Asegura que la parte trasera sea legible al girar la tarjeta
       function setupCardUI() {
         const card = document.getElementById('card');
-        let modalOpen = false;
+        let modalOpen = false; // Asumiendo que esta variable es relevante para evitar conflictos con modales
         function handleCardClick(e) {
           if (modalOpen) return;
           card.classList.toggle('flipped');
           const isFlipped = card.classList.contains('flipped');
-          // Solo aplica blur a la parte frontal cuando está girada
-          document.querySelectorAll('.card .sharp').forEach(el => {
+          
+          // Aplica blur y nitidez a la parte frontal
+          document.querySelectorAll('.card:not(.card-back) .sharp').forEach(el => {
             el.style.filter = isFlipped ? 'blur(2px)' : 'none';
           });
-          document.querySelectorAll('.card .blurred').forEach(el => {
+          document.querySelectorAll('.card:not(.card-back) .blurred').forEach(el => {
             el.style.filter = isFlipped ? 'none' : 'blur(2px)';
           });
-          // La parte trasera siempre legible
+          
+          // La parte trasera siempre legible (asegurando que no haya blur accidental)
           document.querySelectorAll('.card-back .sharp').forEach(el => {
             el.style.filter = 'none';
           });
-          // Al girar, si está mostrando la parte trasera, actualiza la info del usuario
+          document.querySelectorAll('.card-back .blurred').forEach(el => {
+            el.style.filter = 'none'; /* Asegura que la parte trasera no tenga blur */
+          });
+
+          // **IMPORTANTE: Renderizar la información del usuario cuando la tarjeta se voltea**
           if (isFlipped) {
             renderUserBackInfo();
           }
         }
+        
+        // Remueve el listener para evitar duplicados si se llama varias veces (buenas prácticas)
         card.removeEventListener('click', handleCardClick);
         card.addEventListener('click', handleCardClick);
-        // El resto de la lógica de modal FAQ eliminada
+        
+        // Asegura que los estados iniciales de blur/sharp son correctos al cargar
         window.addEventListener('DOMContentLoaded', () => {
-          document.querySelectorAll('.card .sharp').forEach(el => {
+          const isFlipped = card.classList.contains('flipped'); // Verifica el estado inicial
+          document.querySelectorAll('.card:not(.card-back) .sharp').forEach(el => {
+            el.style.filter = isFlipped ? 'blur(2px)' : 'none';
+          });
+          document.querySelectorAll('.card:not(.card-back) .blurred').forEach(el => {
+            el.style.filter = isFlipped ? 'none' : 'blur(2px)';
+          });
+          document.querySelectorAll('.card-back .sharp').forEach(el => {
             el.style.filter = 'none';
           });
-          document.querySelectorAll('.card .blurred').forEach(el => {
-            el.style.filter = 'blur(2px)';
-          });
-          // La parte trasera siempre legible
-          document.querySelectorAll('.card-back .sharp').forEach(el => {
+          document.querySelectorAll('.card-back .blurred').forEach(el => {
             el.style.filter = 'none';
           });
         });
@@ -547,11 +555,12 @@
           debugDiv.textContent += ' | Error interno: elementos no encontrados.';
           return;
         }
-        userNameDiv.textContent = user.username || '';
+        // Asignación de texto a los elementos
+        userNameDiv.textContent = user.username || 'N/A'; // Usar 'N/A' o similar si el username es nulo
         // Documento: mostrar ****** + últimos 4 dígitos (ocultos por defecto)
         let doc = user.documento ? String(user.documento) : '';
-        debugDiv.textContent += ' | Documento: ' + doc;
-        if (doc.length !== 10) {
+        debugDiv.textContent += ' | Documento original: ' + doc;
+        if (doc.length < 10) { // Ajustado a < 10 para documentos más cortos o incompletos
           doc = doc.padStart(10, '*');
         }
         const last4 = doc.slice(-4);
@@ -599,10 +608,12 @@
         document.getElementById('body-block').style.display = '';
         await renderStickers();
         setupCardUI();
-        // Si la tarjeta ya está girada al cargar, renderiza la info
-        if (document.getElementById('card').classList.contains('flipped')) {
-          renderUserBackInfo();
-        }
+        
+        // Ya no necesitamos esta verificación aquí porque handleCardClick llamará a renderUserBackInfo
+        // si la tarjeta se voltea. Si la tarjeta inicia volteada (raro), se renderizará también.
+        // if (document.getElementById('card').classList.contains('flipped')) {
+        //   renderUserBackInfo();
+        // }
       });
     </script>
 </body>
