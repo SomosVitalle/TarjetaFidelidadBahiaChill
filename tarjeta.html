@@ -327,7 +327,7 @@
       // Inicialización global de Supabase
       const SUPABASE_URL = 'https://senqhfrzhsvrwiqschuf.supabase.co';
       const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbnFoZnJ6aHN2cndpcXNjaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMTA3MzksImV4cCI6MjA2NTY4NjczOX0.SoQUuDrUtIObkHMTn6HOOR74MvYTI5bgy4-PDU4p-dg';
-      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
       // Verifica login y existencia de usuario en Supabase
       async function checkAndRedirect() {
