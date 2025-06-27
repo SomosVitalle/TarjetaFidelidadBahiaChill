@@ -89,14 +89,6 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        .palm-logo {
-            position: absolute;
-            top: 7.5px;
-            left: 7.5px;
-            opacity: 0.7;
-            font-size: 21px;
-        }
-        
         .title {
             font-family: 'Playfair Display', serif;
             text-align: center;
@@ -298,21 +290,22 @@
         <div id="gift-anim" class="gift-anim" style="display:none;">🎁</div>
         <!-- Front of the card -->
         <div class="card">
-            <div class="palm-logo sharp" id="front-logo">
-                <img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Logo Bahía Chill" />
-            </div>
+            <!-- Quitar logo de la palma en el frente -->
             <div class="title sharp" id="front-title">BAHIA CHILL</div>
             <div class="stamps" id="stamps-row-1"></div>
             <div class="stamps" id="stamps-row-2"></div>
+            <!-- Cambiar el QR por la imagen de la palmera blanca sin fondo -->
+            <div class="qr-code blurred" id="front-qr">
+                <img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Palmera blanca" style="height: 60px; width: auto; opacity: 0.8;" />
+            </div>
             <div class="footer sharp" id="front-footer">
                 SOLO TE FALTAN <span class="highlight">3 PALMAS</span> PARA RECLAMAR TU REGALO
             </div>
         </div>
         <!-- Back of the card -->
         <div class="card card-back">
-            <!-- Eliminar logo superior -->
+            <!-- Quitar logo de la palma en el reverso -->
             <div class="title sharp" id="back-title" style="transform: scaleX(-1);">BAHIA CHILL</div>
-            <!-- Nombre y documento como en tarjetaVIP -->
             <div style="transform: scaleX(-1); display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;margin-top:30px;">
               <div id="user-name" style="font-size:1.15em;font-weight:bold;margin-bottom:12px;letter-spacing:1px;"></div>
               <div style="display:flex;align-items:center;gap:10px;">
@@ -322,6 +315,10 @@
                   <i id="eye-icon" class="fa-regular fa-eye-slash"></i>
                 </button>
               </div>
+            </div>
+            <!-- Cambiar el QR por la imagen de la palmera blanca sin fondo en el reverso -->
+            <div class="qr-code qr-code-back sharp" id="back-qr">
+                <img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Palmera blanca" style="height: 60px; width: auto; opacity: 0.8;" />
             </div>
         </div>
     </div>
@@ -503,32 +500,57 @@
         });
       }
 
-      // Renderiza la información del usuario en la parte trasera (como en tarjetaVIP)
+      // Renderiza la información del usuario en la parte trasera
       async function renderUserBackInfo() {
-        const userNameDiv = document.getElementById('user-name');
-        const userDocSpan = document.getElementById('user-doc');
-        if (!userNameDiv || !userDocSpan) return;
+        const debugDiv = (() => {
+          let d = document.getElementById('debug-tarjeta');
+          if (!d) {
+            d = document.createElement('div');
+            d.id = 'debug-tarjeta';
+            d.style = 'color:#ffbaba;font-size:0.95em;margin-top:8px;text-align:center;word-break:break-all;';
+            const parent = document.getElementById('user-name')?.parentElement;
+            if (parent) parent.appendChild(d);
+          }
+          return d;
+        })();
+        debugDiv.textContent = 'Iniciando renderUserBackInfo...';
         const username = localStorage.getItem('currentUser');
+        debugDiv.textContent = 'Usuario en localStorage: ' + username;
         if (!username) {
-          userNameDiv.textContent = '';
-          userDocSpan.textContent = '';
+          console.error('No hay usuario en localStorage');
+          mostrarErrorTarjeta('No hay usuario en sesión.');
+          debugDiv.textContent += ' | No hay usuario en sesión.';
           return;
         }
         let user;
         try {
           user = await getUserSupabase(username);
+          debugDiv.textContent += ' | Resultado getUserSupabase: ' + JSON.stringify(user);
         } catch (e) {
-          userNameDiv.textContent = '';
-          userDocSpan.textContent = '';
+          console.error('Error al consultar Supabase:', e);
+          mostrarErrorTarjeta('Error de conexión con Supabase.');
+          debugDiv.textContent += ' | Error de conexión con Supabase.';
           return;
         }
         if (!user) {
-          userNameDiv.textContent = '';
-          userDocSpan.textContent = '';
+          console.warn('Usuario no encontrado en Supabase:', username);
+          mostrarErrorTarjeta('Usuario no encontrado.');
+          debugDiv.textContent += ' | Usuario no encontrado en Supabase.';
+          return;
+        }
+        const userNameDiv = document.getElementById('user-name');
+        const userDocSpan = document.getElementById('user-doc');
+        debugDiv.textContent += ' | userNameDiv: ' + !!userNameDiv + ', userDocSpan: ' + !!userDocSpan;
+        if (!userNameDiv || !userDocSpan) {
+          console.error('No se encuentran los elementos user-name o user-doc en el DOM');
+          mostrarErrorTarjeta('Error interno: elementos no encontrados.');
+          debugDiv.textContent += ' | Error interno: elementos no encontrados.';
           return;
         }
         userNameDiv.textContent = user.username || '';
+        // Documento: mostrar ****** + últimos 4 dígitos (ocultos por defecto)
         let doc = user.documento ? String(user.documento) : '';
+        debugDiv.textContent += ' | Documento: ' + doc;
         if (doc.length !== 10) {
           doc = doc.padStart(10, '*');
         }
@@ -537,41 +559,58 @@
         function updateDoc() {
           userDocSpan.textContent = '******' + (hidden ? '••••' : last4);
           const eyeIcon = document.getElementById('eye-icon');
-          if (eyeIcon) {
-            eyeIcon.className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
-          }
+          if (eyeIcon) eyeIcon.className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
         }
         updateDoc();
-        userDocSpan.style.cursor = 'pointer';
-        userDocSpan.onclick = function() {
-          hidden = !hidden;
-          updateDoc();
-        };
+        const btn = document.getElementById('toggle-doc-visibility');
+        if (btn) {
+          btn.onclick = function(e) {
+            e.stopPropagation();
+            hidden = !hidden;
+            updateDoc();
+          };
+        }
+        debugDiv.textContent += ' | Renderizado finalizado.';
+      }
+      // Muestra un mensaje de error en la parte trasera de la tarjeta
+      function mostrarErrorTarjeta(msg) {
+        const userNameDiv = document.getElementById('user-name');
+        const userDocSpan = document.getElementById('user-doc');
+        if (userNameDiv) userNameDiv.textContent = '';
+        if (userDocSpan) userDocSpan.textContent = '';
+        // Busca el contenedor central
+        const parent = userNameDiv ? userNameDiv.parentElement : null;
+        if (parent) {
+          let errorDiv = parent.querySelector('.error-tarjeta');
+          if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'error-tarjeta';
+            errorDiv.style = 'color:#ffbaba;font-size:1em;margin-top:10px;text-align:center;';
+            parent.appendChild(errorDiv);
+          }
+          errorDiv.textContent = msg;
+        }
       }
 
-      // Al cargar, verifica y redirige si es necesario
-      window.addEventListener('DOMContentLoaded', async () => {
-        const body = document.getElementById('body-block');
-        body.style.display = 'flex';
-        const isLoggedIn = await checkAndRedirect();
-        if (isLoggedIn) {
-          const username = localStorage.getItem('currentUser');
-          renderStickers();
-          // Solo para pruebas: establecer nombre de usuario en la parte trasera
-          const userNameDiv = document.getElementById('user-name');
-          if (userNameDiv) {
-            userNameDiv.textContent = username;
-          }
+      // Secuencia principal: check login, render UI
+      window.addEventListener('DOMContentLoaded', async function() {
+        const ok = await checkAndRedirect();
+        if (!ok) return;
+        document.getElementById('body-block').style.display = '';
+        await renderStickers();
+        setupCardUI();
+        // Renderiza SIEMPRE la info de usuario al cargar
+        renderUserBackInfo();
+        // Si la tarjeta ya está girada al cargar, vuelve a renderizar (opcional, pero seguro)
+        if (document.getElementById('card').classList.contains('flipped')) {
+          renderUserBackInfo();
         }
       });
 
-      // FAQ Modal: mejora de accesibilidad y cierre con Esc
-      document.addEventListener('keydown', function(event) {
-        const modal = document.getElementById('faq-modal');
-        if (event.key === 'Escape' && modal && modal.style.display === 'flex') {
-          modal.style.display = 'none';
-          modal.setAttribute('aria-visible', 'false');
-        }
+      // Accesibilidad y ayuda: botón de ayuda
+      document.getElementById('help-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        window.location.href = 'tarjetaVIP.html';
       });
     </script>
 </body>
