@@ -610,7 +610,11 @@
       // Accesibilidad y ayuda: botón de ayuda
       document.getElementById('help-btn').addEventListener('click', function(e) {
         e.stopPropagation();
-        window.location.href = 'tarjetaVIP.html';
+        // Obtener datos del usuario actual de localStorage
+        const nombre = localStorage.getItem('currentUser') || '';
+        // Aquí podrías obtener el documento y vencimiento de Supabase si lo deseas
+        // Para ejemplo simple, solo pasamos el nombre por query string
+        window.location.href = `datos_tarjeta.html?nombre=${encodeURIComponent(nombre)}`;
       });
     </script>
 </body>
