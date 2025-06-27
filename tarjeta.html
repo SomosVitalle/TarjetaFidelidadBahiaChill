@@ -502,35 +502,55 @@
 
       // Renderiza la información del usuario en la parte trasera
       async function renderUserBackInfo() {
+        const debugDiv = (() => {
+          let d = document.getElementById('debug-tarjeta');
+          if (!d) {
+            d = document.createElement('div');
+            d.id = 'debug-tarjeta';
+            d.style = 'color:#ffbaba;font-size:0.95em;margin-top:8px;text-align:center;word-break:break-all;';
+            const parent = document.getElementById('user-name')?.parentElement;
+            if (parent) parent.appendChild(d);
+          }
+          return d;
+        })();
+        debugDiv.textContent = 'Iniciando renderUserBackInfo...';
         const username = localStorage.getItem('currentUser');
+        debugDiv.textContent = 'Usuario en localStorage: ' + username;
         if (!username) {
           console.error('No hay usuario en localStorage');
           mostrarErrorTarjeta('No hay usuario en sesión.');
+          debugDiv.textContent += ' | No hay usuario en sesión.';
           return;
         }
         let user;
         try {
           user = await getUserSupabase(username);
+          debugDiv.textContent += ' | Resultado getUserSupabase: ' + JSON.stringify(user);
         } catch (e) {
           console.error('Error al consultar Supabase:', e);
           mostrarErrorTarjeta('Error de conexión con Supabase.');
+          debugDiv.textContent += ' | Error de conexión con Supabase.';
           return;
         }
         if (!user) {
           console.warn('Usuario no encontrado en Supabase:', username);
           mostrarErrorTarjeta('Usuario no encontrado.');
+          debugDiv.textContent += ' | Usuario no encontrado en Supabase.';
           return;
         }
         const userNameDiv = document.getElementById('user-name');
         const userDocSpan = document.getElementById('user-doc');
+        debugDiv.textContent += ' | userNameDiv: ' + !!userNameDiv + ', userDocSpan: ' + !!userDocSpan;
         if (!userNameDiv || !userDocSpan) {
           console.error('No se encuentran los elementos user-name o user-doc en el DOM');
           mostrarErrorTarjeta('Error interno: elementos no encontrados.');
+          debugDiv.textContent += ' | Error interno: elementos no encontrados.';
           return;
         }
         userNameDiv.textContent = user.username || '';
         // Documento: mostrar ****** + últimos 4 dígitos (ocultos por defecto)
         let doc = user.documento ? String(user.documento) : '';
+        debugDiv.textContent += ' | Documento: ' + doc;
         if (doc.length !== 10) {
           doc = doc.padStart(10, '*');
         }
@@ -550,6 +570,7 @@
             updateDoc();
           };
         }
+        debugDiv.textContent += ' | Renderizado finalizado.';
       }
       // Muestra un mensaje de error en la parte trasera de la tarjeta
       function mostrarErrorTarjeta(msg) {
