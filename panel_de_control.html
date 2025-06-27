@@ -393,19 +393,23 @@
           </div>
           <div id="borradoEspecialMsg" style="margin-top:6px; color:#c0392b; font-size:0.98em;"></div>
           <hr style='margin:22px 0 16px 0;border:0;border-top:1.5px solid #e67e22;'>
-          <div id="faqEditPanel">
-            <h3 style="margin-bottom:10px;color:#e67e22;">Editar FAQ</h3>
-            <form id="faqForm">
-              ${[1,2,3,4,5].map(i => `
-                <div style='margin-bottom:12px;'>
-                  <label style='font-weight:bold;color:#0077b6;'>Pregunta ${i}</label>
-                  <input type='text' name='pregunta${i}' id='pregunta${i}' style='width:100%;padding:7px 10px;border-radius:5px;border:1px solid #ccc;margin-bottom:5px;'>
-                  <textarea name='respuesta${i}' id='respuesta${i}' rows='2' style='width:100%;padding:7px 10px;border-radius:5px;border:1px solid #ccc;resize:vertical;'></textarea>
-                </div>
-              `).join('')}
-              <button type="submit" class="btn" style="background:#e67e22;">Guardar FAQ</button>
-            </form>
-            <div id="faqSaveMsg" style="margin-top:10px;font-weight:bold;"></div>
+          <div id="faqEditPanel" style="margin-bottom:10px;">
+            <button id="faqEditToggle" style="width:100%;background:#e67e22;color:#fff;font-weight:bold;padding:10px 0;border:none;border-radius:6px;font-size:1.1em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+              <span>Editar FAQ</span> <span id="faqEditArrow" style="transition:transform 0.3s;font-size:1.2em;">&#9660;</span>
+            </button>
+            <div id="faqEditContent" style="display:none;animation:fadeIn 0.3s;">
+              <form id="faqForm">
+                ${[1,2,3,4,5].map(i => `
+                  <div style='margin-bottom:12px;'>
+                    <label style='font-weight:bold;color:#0077b6;'>Pregunta ${i}</label>
+                    <input type='text' name='pregunta${i}' id='pregunta${i}' style='width:100%;padding:7px 10px;border-radius:5px;border:1px solid #ccc;margin-bottom:5px;'>
+                    <textarea name='respuesta${i}' id='respuesta${i}' rows='2' style='width:100%;padding:7px 10px;border-radius:5px;border:1px solid #ccc;resize:vertical;'></textarea>
+                  </div>
+                `).join('')}
+                <button type="submit" class="btn" style="background:#e67e22;">Guardar FAQ</button>
+              </form>
+              <div id="faqSaveMsg" style="margin-top:10px;font-weight:bold;"></div>
+            </div>
           </div>
         `;
         document.getElementById('pausarTodosBtn').onclick = pausarTodosMenosAdminYJuan;
@@ -414,6 +418,17 @@
           borradoEspecialActivado = !borradoEspecialActivado;
           mostrarPanelPoderTotal();
         };
+        // FAQ: menú desplegable
+        const faqEditToggle = document.getElementById('faqEditToggle');
+        const faqEditContent = document.getElementById('faqEditContent');
+        const faqEditArrow = document.getElementById('faqEditArrow');
+        if (faqEditToggle && faqEditContent && faqEditArrow) {
+          faqEditToggle.onclick = function() {
+            const open = faqEditContent.style.display === 'block';
+            faqEditContent.style.display = open ? 'none' : 'block';
+            faqEditArrow.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+          };
+        }
         // FAQ: Cargar y guardar (solo UI, sin conexión a Supabase aún)
         const faqForm = document.getElementById('faqForm');
         if (faqForm) {
