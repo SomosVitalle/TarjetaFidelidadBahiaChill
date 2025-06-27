@@ -88,6 +88,15 @@
 
       // Redirigir a login si no está autenticado o no es admin
       (async function() {
+        // Refuerzo de seguridad: comprobar expiración de sesión por última actividad
+        const lastActivityLS = localStorage.getItem('lastActivity');
+        if (lastActivityLS && Date.now() - parseInt(lastActivityLS, 10) > 15 * 60 * 1000) {
+          localStorage.removeItem('bahiaChillLogin');
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('lastActivity');
+          window.location.replace('index.html');
+          return;
+        }
         if (localStorage.getItem('bahiaChillLogin') !== 'ok' || !localStorage.getItem('currentUser')) {
           window.location.replace('index.html');
           return;
@@ -468,6 +477,24 @@
           pinInput.value = '';
         }
       });
+      // Cierre de sesión automático tras 15 minutos de inactividad
+      let lastActivity = Date.now();
+      function resetInactivityTimer() {
+        lastActivity = Date.now();
+        localStorage.setItem('lastActivity', lastActivity.toString());
+      }
+      document.addEventListener('mousemove', resetInactivityTimer);
+      document.addEventListener('keydown', resetInactivityTimer);
+      document.addEventListener('mousedown', resetInactivityTimer);
+      document.addEventListener('touchstart', resetInactivityTimer);
+      setInterval(function() {
+        if (Date.now() - lastActivity > 15 * 60 * 1000) {
+          localStorage.removeItem('bahiaChillLogin');
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('lastActivity');
+          window.location.href = 'index.html';
+        }
+      }, 60000);
     </script>
 </body>
 </html>
