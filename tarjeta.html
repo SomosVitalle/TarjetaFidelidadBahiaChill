@@ -331,6 +331,15 @@
 
       // Verifica login y existencia de usuario en Supabase
       async function checkAndRedirect() {
+        // Refuerzo de seguridad: comprobar expiración de sesión por última actividad
+        const lastActivityLS = localStorage.getItem('lastActivity');
+        if (lastActivityLS && Date.now() - parseInt(lastActivityLS, 10) > 15 * 60 * 1000) {
+          localStorage.removeItem('bahiaChillLogin');
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('lastActivity');
+          window.location.href = 'index.html';
+          return false;
+        }
         if (localStorage.getItem('bahiaChillLogin') !== 'ok' || !localStorage.getItem('currentUser')) {
           window.location.href = 'index.html';
           return false;
@@ -430,6 +439,25 @@
         const card = document.getElementById('card');
         card.addEventListener('click', hideTapHint, { once: true });
       });
+
+      // Cierre de sesión automático tras 15 minutos de inactividad
+      let lastActivity = Date.now();
+      function resetInactivityTimer() {
+        lastActivity = Date.now();
+        localStorage.setItem('lastActivity', lastActivity.toString());
+      }
+      document.addEventListener('mousemove', resetInactivityTimer);
+      document.addEventListener('keydown', resetInactivityTimer);
+      document.addEventListener('mousedown', resetInactivityTimer);
+      document.addEventListener('touchstart', resetInactivityTimer);
+      setInterval(function() {
+        if (Date.now() - lastActivity > 15 * 60 * 1000) {
+          localStorage.removeItem('bahiaChillLogin');
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('lastActivity');
+          window.location.href = 'index.html';
+        }
+      }, 60000);
 
       // Asegura que la parte trasera sea legible al girar la tarjeta
       function setupCardUI() {
