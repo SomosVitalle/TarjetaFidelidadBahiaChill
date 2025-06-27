@@ -503,9 +503,32 @@
       // Renderiza la información del usuario en la parte trasera
       async function renderUserBackInfo() {
         const username = localStorage.getItem('currentUser');
-        const user = await getUserSupabase(username);
-        if (!user) return;
-        document.getElementById('user-name').textContent = user.username || '';
+        if (!username) {
+          console.error('No hay usuario en localStorage');
+          mostrarErrorTarjeta('No hay usuario en sesión.');
+          return;
+        }
+        let user;
+        try {
+          user = await getUserSupabase(username);
+        } catch (e) {
+          console.error('Error al consultar Supabase:', e);
+          mostrarErrorTarjeta('Error de conexión con Supabase.');
+          return;
+        }
+        if (!user) {
+          console.warn('Usuario no encontrado en Supabase:', username);
+          mostrarErrorTarjeta('Usuario no encontrado.');
+          return;
+        }
+        const userNameDiv = document.getElementById('user-name');
+        const userDocSpan = document.getElementById('user-doc');
+        if (!userNameDiv || !userDocSpan) {
+          console.error('No se encuentran los elementos user-name o user-doc en el DOM');
+          mostrarErrorTarjeta('Error interno: elementos no encontrados.');
+          return;
+        }
+        userNameDiv.textContent = user.username || '';
         // Documento: mostrar ****** + últimos 4 dígitos (ocultos por defecto)
         let doc = user.documento ? String(user.documento) : '';
         if (doc.length !== 10) {
@@ -514,8 +537,9 @@
         const last4 = doc.slice(-4);
         let hidden = true;
         function updateDoc() {
-          document.getElementById('user-doc').textContent = '******' + (hidden ? '••••' : last4);
-          document.getElementById('eye-icon').className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+          userDocSpan.textContent = '******' + (hidden ? '••••' : last4);
+          const eyeIcon = document.getElementById('eye-icon');
+          if (eyeIcon) eyeIcon.className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
         }
         updateDoc();
         const btn = document.getElementById('toggle-doc-visibility');
@@ -525,6 +549,25 @@
             hidden = !hidden;
             updateDoc();
           };
+        }
+      }
+      // Muestra un mensaje de error en la parte trasera de la tarjeta
+      function mostrarErrorTarjeta(msg) {
+        const userNameDiv = document.getElementById('user-name');
+        const userDocSpan = document.getElementById('user-doc');
+        if (userNameDiv) userNameDiv.textContent = '';
+        if (userDocSpan) userDocSpan.textContent = '';
+        // Busca el contenedor central
+        const parent = userNameDiv ? userNameDiv.parentElement : null;
+        if (parent) {
+          let errorDiv = parent.querySelector('.error-tarjeta');
+          if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'error-tarjeta';
+            errorDiv.style = 'color:#ffbaba;font-size:1em;margin-top:10px;text-align:center;';
+            parent.appendChild(errorDiv);
+          }
+          errorDiv.textContent = msg;
         }
       }
 
