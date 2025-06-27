@@ -392,6 +392,21 @@
             <button id="borradoEspecialSwitch" style="background:none; border:none; font-size:1.1em; cursor:pointer; font-weight:bold; color:${borradoEspecialActivado ? '#27ae60' : '#c0392b'};">${borradoEspecialActivado ? '✅ Activado' : '❌ Desactivado'}</button>
           </div>
           <div id="borradoEspecialMsg" style="margin-top:6px; color:#c0392b; font-size:0.98em;"></div>
+          <hr style='margin:22px 0 16px 0;border:0;border-top:1.5px solid #e67e22;'>
+          <div id="faqEditPanel">
+            <h3 style="margin-bottom:10px;color:#e67e22;">Editar FAQ</h3>
+            <form id="faqForm">
+              ${[1,2,3,4,5].map(i => `
+                <div style='margin-bottom:12px;'>
+                  <label style='font-weight:bold;color:#0077b6;'>Pregunta ${i}</label>
+                  <input type='text' name='pregunta${i}' id='pregunta${i}' style='width:100%;padding:7px 10px;border-radius:5px;border:1px solid #ccc;margin-bottom:5px;'>
+                  <textarea name='respuesta${i}' id='respuesta${i}' rows='2' style='width:100%;padding:7px 10px;border-radius:5px;border:1px solid #ccc;resize:vertical;'></textarea>
+                </div>
+              `).join('')}
+              <button type="submit" class="btn" style="background:#e67e22;">Guardar FAQ</button>
+            </form>
+            <div id="faqSaveMsg" style="margin-top:10px;font-weight:bold;"></div>
+          </div>
         `;
         document.getElementById('pausarTodosBtn').onclick = pausarTodosMenosAdminYJuan;
         document.getElementById('despausarTodosBtn').onclick = despausarTodosMenosAdminYJuan;
@@ -399,6 +414,15 @@
           borradoEspecialActivado = !borradoEspecialActivado;
           mostrarPanelPoderTotal();
         };
+        // FAQ: Cargar y guardar (solo UI, sin conexión a Supabase aún)
+        const faqForm = document.getElementById('faqForm');
+        if (faqForm) {
+          faqForm.onsubmit = function(e) {
+            e.preventDefault();
+            document.getElementById('faqSaveMsg').textContent = 'Guardado localmente (demo, falta conexión a Supabase)';
+            setTimeout(()=>{document.getElementById('faqSaveMsg').textContent='';}, 2000);
+          };
+        }
       }
       async function pausarTodosMenosAdminYJuan() {
         // Pausa todos los usuarios excepto Admin y Juan
