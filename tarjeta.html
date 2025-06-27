@@ -605,6 +605,7 @@
         const username = localStorage.getItem('currentUser');
         if (!username) return;
         let doc = '';
+        let nombre = username;
         if (window.supabase) {
           try {
             const { data } = await window.supabase
@@ -617,17 +618,14 @@
               .eq('username', username)
               .maybeSingle();
             if (data) {
-              document.getElementById('user-info-nombre').textContent = data.username;
+              nombre = data.username;
               doc = data.documento ? String(data.documento) : '';
             }
           } catch (e) {}
         }
-        if (!doc) {
-          document.getElementById('user-info-nombre').textContent = username;
-          doc = '';
-        }
         let hidden = true;
         function updateDocBar() {
+          document.getElementById('user-info-nombre').textContent = nombre;
           document.getElementById('user-info-doc').textContent = doc ? '******' + (hidden ? '••••' : doc.slice(-4)) : '';
           const eyeIcon = document.getElementById('eye-icon-bar');
           if (eyeIcon) eyeIcon.className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
@@ -642,7 +640,10 @@
           };
         }
       }
-
+      document.getElementById('help-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        window.location.href = 'datos_tarjeta.html';
+      });
       // Al cargar, verificar y redirigir si es necesario
       window.addEventListener('DOMContentLoaded', async () => {
         const body = document.getElementById('body-block');
@@ -660,17 +661,8 @@
         renderStickers();
         // Configurar la interfaz de la tarjeta
         setupCardUI();
-        // Mostrar la parte trasera de la tarjeta si es necesario (por el estado de la sesión)
-        const currentUser = localStorage.getItem('currentUser');
-        if (currentUser && currentUser !== 'bc') {
-          const user = await getUserSupabase(currentUser);
-          if (user && user.numero > 0) {
-            card.classList.add('flipped');
-            // Forzar el renderizado de la información del usuario en la parte trasera
-            await new Promise(resolve => setTimeout(resolve, 50));
-            renderUserBackInfo();
-          }
-        }
+        // Corregir giro automático de la tarjeta al iniciar sesión
+        // Mostrar la parte trasera de la tarjeta solo si el usuario la gira manualmente
       });
     </script>
 </body>
