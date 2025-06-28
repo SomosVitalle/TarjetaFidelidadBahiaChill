@@ -203,6 +203,7 @@
                   errorMsg.style.display = 'none';
                   localStorage.setItem('bahiaChillLogin', 'ok');
                   localStorage.setItem('currentUser', user.documento);
+                  localStorage.setItem('currentUserDoc', user.documento);
                   localStorage.setItem('lastActivity', Date.now().toString());
                   window.location.href = 'panel_de_control.html';
                   return;
@@ -224,6 +225,7 @@
               errorMsg.style.display = 'none';
               localStorage.setItem('bahiaChillLogin', 'ok');
               localStorage.setItem('currentUser', user.documento);
+              localStorage.setItem('currentUserDoc', user.documento);
               localStorage.setItem('lastActivity', Date.now().toString());
               if (user.admin) {
                   window.location.href = 'panel_de_control.html';
