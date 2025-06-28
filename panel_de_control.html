@@ -411,13 +411,16 @@
 window.confirmDeleteUser = async function(username) {
   // Buscar datos completos del usuario a eliminar (por documento)
   const users = await getAllUsersSupabase();
+  // Si hay más de un usuario con el mismo username, pedir documento
   let userToDelete = null;
-  // Permitir borrar Admin solo si borradoEspecialActivado está activo
   if (!borradoEspecialActivado && ['Juan', 'Bc', 'Admin'].includes(username)) {
     alert('No puedes eliminar un usuario por defecto.');
     return;
   }
-  // Si borrado especial está activo, permitir borrar Admin, pero solo uno a uno (por documento)
+  if (username === 'Admin') {
+    alert('No puedes eliminar el usuario Admin.');
+    return;
+  }
   const matchingUsers = users.filter(u => u.username === username);
   if (matchingUsers.length > 1) {
     const doc = prompt('Hay varios usuarios con ese nombre. Por favor, ingresa el número de documento del usuario a eliminar:');
@@ -428,11 +431,6 @@ window.confirmDeleteUser = async function(username) {
     }
   } else {
     userToDelete = matchingUsers[0];
-  }
-  // Si no hay usuario a eliminar, salir
-  if (!userToDelete) {
-    alert('No se encontró el usuario a eliminar.');
-    return;
   }
   let nombreCompleto = userToDelete && userToDelete.nombreCompleto ? userToDelete.nombreCompleto : username;
   let documento = userToDelete && userToDelete.documento ? userToDelete.documento : '';
