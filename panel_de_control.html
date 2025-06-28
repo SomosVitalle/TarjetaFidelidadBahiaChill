@@ -327,12 +327,42 @@
         document.querySelector(`.edit-nombreCompleto[data-username='${username}']`).disabled = false;
         document.querySelector(`.edit-documento[data-username='${username}']`).disabled = false;
         document.querySelector(`.edit-telefono[data-username='${username}']`).disabled = false;
+        document.querySelector(`.edit-numero[data-username='${username}']`).disabled = false;
+        const tr = Array.from(document.querySelectorAll('#usersTable tbody tr')).find(tr => tr.querySelector(`.edit-username[data-username='${username}']`));
         if (!isBc) {
           document.querySelector(`.edit-username[data-username='${username}']`).disabled = false;
           document.querySelector(`.edit-pin[data-username='${username}']`).disabled = false;
+        } else {
+          // Bloquear edición de user y pin para Bc (mensaje claro y bloqueo total)
+          const usernameInput = tr.querySelector('.edit-username');
+          const pinInput = tr.querySelector('.edit-pin');
+          if (usernameInput) {
+            usernameInput.disabled = true;
+            usernameInput.style.background = '#f4f4f4';
+            usernameInput.style.cursor = 'not-allowed';
+            usernameInput.addEventListener('focus', function(e) {
+              alert('No puedes editar el usuario de Bc.');
+              this.blur();
+            });
+            usernameInput.addEventListener('click', function(e) {
+              alert('No puedes editar el usuario de Bc.');
+              this.blur();
+            });
+          }
+          if (pinInput) {
+            pinInput.disabled = true;
+            pinInput.style.background = '#f4f4f4';
+            pinInput.style.cursor = 'not-allowed';
+            pinInput.addEventListener('focus', function(e) {
+              alert('No puedes editar el PIN de Bc.');
+              this.blur();
+            });
+            pinInput.addEventListener('click', function(e) {
+              alert('No puedes editar el PIN de Bc.');
+              this.blur();
+            });
+          }
         }
-        document.querySelector(`.edit-numero[data-username='${username}']`).disabled = false;
-        const tr = Array.from(document.querySelectorAll('#usersTable tbody tr')).find(tr => tr.querySelector(`.edit-username[data-username='${username}']`));
         tr.querySelector('.save-btn').style.display = '';
         tr.querySelector('.cancel-btn').style.display = '';
         tr.querySelector('button[onclick^="enableEdit"]').style.display = 'none';
@@ -340,7 +370,7 @@
         // Autocompletar usuario al editar nombre completo
         const nombreInput = tr.querySelector('.edit-nombreCompleto');
         const usernameInput = tr.querySelector('.edit-username');
-        if (nombreInput && usernameInput) {
+        if (nombreInput && usernameInput && !isBc) {
           nombreInput.addEventListener('input', function() {
             const nombreCompleto = this.value.trim();
             const primerNombre = nombreCompleto.split(' ')[0] || '';
