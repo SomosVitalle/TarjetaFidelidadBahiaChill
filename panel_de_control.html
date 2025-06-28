@@ -126,6 +126,8 @@
         return data;
       }
       async function createUserSupabase(user) {
+        // Elimina el campo username si existe en el objeto user
+        if ('username' in user) delete user.username;
         const { data, error } = await supabase.from('usuarios').insert([user]);
         return { data, error };
       }
@@ -619,13 +621,7 @@ window.deleteUserByDocumento = async function(documento) {
       }
       // Autocompletar PIN al terminar documento
       document.getElementById('documento').addEventListener('input', function() {
-        const doc = this.value.trim();
-        const pinInput = document.getElementById('pin');
-        if (doc.length === 10) {
-          pinInput.value = doc.slice(-4);
-        } else {
-          pinInput.value = '';
-        }
+        // Ya no se autocompleta el PIN, el admin lo elige manualmente
       });
       // Cierre de sesión automático tras 15 minutos de inactividad
       let lastActivity = Date.now();
