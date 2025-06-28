@@ -427,12 +427,14 @@
       <i class="fa fa-question" style="color:#fff;font-size:1.7em;"></i>
     </button>
     <!-- Mostrar solo la información de usuario arriba a la izquierda, sin fondo ni títulos -->
-    <div id="user-info-bar" style="position:fixed;top:18px;left:18px;z-index:1002;color:#fff;font-size:1.08em;font-weight:bold;display:flex;align-items:center;gap:10px;">
+    <div id="user-info-bar" style="position:fixed;top:18px;left:18px;z-index:1002;color:#fff;font-size:1.08em;font-weight:bold;display:flex;flex-direction:column;align-items:flex-start;gap:2px;">
       <span id="user-info-nombre"></span>
-      <span id="user-info-doc" style="font-family:monospace;font-size:0.98em;letter-spacing:2px;"></span>
-      <button id="toggle-doc-visibility-bar" style="background:none;border:none;outline:none;cursor:pointer;color:#fff;font-size:1.1em;display:flex;align-items:center;padding:0 0 0 4px;">
-        <i id="eye-icon-bar" class="fa-regular fa-eye-slash"></i>
-      </button>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:2px;width:100%;">
+        <span id="user-info-doc" style="font-family:monospace;font-size:0.98em;letter-spacing:2px;"></span>
+        <button id="toggle-doc-visibility-bar" style="background:none;border:none;outline:none;cursor:pointer;color:#fff;font-size:1.1em;display:flex;align-items:center;padding:0 0 0 4px;">
+          <i id="eye-icon-bar" class="fa-regular fa-eye-slash"></i>
+        </button>
+      </div>
     </div>
     <div class="card-container" id="card">
         <!-- Animación de regalo -->
@@ -795,7 +797,11 @@
         let hidden = true;
         function updateDocBar() {
           document.getElementById('user-info-nombre').textContent = nombre;
-          document.getElementById('user-info-doc').textContent = doc ? '******' + (hidden ? '••••' : doc.slice(-4)) : '';
+          // Mostrar el documento debajo del nombre, no a la derecha
+          const docSpan = document.getElementById('user-info-doc');
+          if (docSpan) {
+            docSpan.textContent = doc ? (hidden ? '*'.repeat(10) : doc) : '';
+          }
           const eyeIcon = document.getElementById('eye-icon-bar');
           if (eyeIcon) eyeIcon.className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
         }
