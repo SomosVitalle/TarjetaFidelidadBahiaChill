@@ -97,6 +97,16 @@
             letter-spacing: 2px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
+        /* Unificación de tipografía para nombre, documento y frase de palmas */
+        .nombre-tarjeta, .documento-tarjeta, .frase-palmas-tarjeta {
+            font-family: 'Playfair Display', serif !important;
+            font-weight: 700 !important;
+            letter-spacing: 1px;
+            color: white;
+        }
+        .frase-palmas-tarjeta { font-size: 1.08em !important; }
+        .nombre-tarjeta { font-size: 1.15em !important; }
+        .documento-tarjeta { font-size: 1.05em !important; }
         
         .stamps {
             display: flex;
@@ -145,6 +155,7 @@
             font-size: 9px;
             margin-top: auto;
             opacity: 0.9;
+            font-family: 'Playfair Display', serif;
         }
         
         .highlight {
@@ -450,20 +461,19 @@
             <div class="qr-code blurred" id="front-qr">
                 <img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Palmera blanca" style="height: 60px; width: auto; opacity: 0.8;" />
             </div>
-            <div class="footer sharp" id="front-footer">
+            <div class="footer sharp frase-palmas-tarjeta" id="front-footer">
                 SOLO TE FALTAN <span class="highlight">PALMAS</span> PARA RECLAMAR TU REGALO
             </div>
         </div>
         <!-- Back of the card -->
         <div class="card card-back">
-            <!-- Quitar logo de la palma en el reverso -->
             <div class="title sharp" id="back-title" style="transform: scaleX(-1);">BAHIA CHILL</div>
             <div style="transform: scaleX(-1); display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;margin-top:30px;">
-              <div id="user-name" style="font-size:1.15em;font-weight:bold;margin-bottom:8px;letter-spacing:1px;"></div>
+              <div id="user-name" class="nombre-tarjeta" style="margin-bottom:8px;"></div>
               <div style="display:flex;align-items:center;gap:10px;margin-bottom:0;"></div>
               <div style="display:flex;align-items:center;gap:8px;flex-direction:row;">
-                <span style="font-size:1.05em;letter-spacing:2px;">Documento:</span>
-                <span id="user-doc" style="font-size:1.05em;letter-spacing:2px;font-family:monospace;"></span>
+                <span class="documento-tarjeta">Documento:</span>
+                <span id="user-doc" class="documento-tarjeta"></span>
                 <button id="toggle-doc-visibility" style="background:none;border:none;outline:none;cursor:pointer;color:#fff;font-size:1.1em;display:flex;align-items:center;">
                   <i id="eye-icon" class="fa-regular fa-eye-slash"></i>
                 </button>
@@ -569,12 +579,13 @@
         const footer = document.getElementById('front-footer');
         if (faltan === 0) {
           footer.innerHTML = 'Ya puedes reclamar tu regalo, ¡Ven Ya por el!';
-          footer.classList.add('gift-claim');
+          footer.classList.add('gift-claim', 'frase-palmas-tarjeta');
           // Animación regalo y vibración
           showGiftAnimation();
         } else {
           footer.innerHTML = `SOLO TE FALTAN <span class="highlight">${faltan} PALMAS</span> PARA RECLAMAR TU REGALO`;
           footer.classList.remove('gift-claim');
+          footer.classList.add('frase-palmas-tarjeta');
         }
       }
 
@@ -741,6 +752,7 @@
           primerApellido = partes[1] || '';
         }
         userNameDiv.textContent = (primerNombre + (primerApellido ? ' ' + primerApellido : '')) || user.username || '';
+        userNameDiv.classList.add('nombre-tarjeta');
         // Documento: mostrar 10 asteriscos por defecto, revelar todo al presionar el ojo
         let doc = user.documento ? String(user.documento) : '';
         debugDiv.textContent += ' | Documento: ' + doc;
@@ -750,6 +762,7 @@
         let hidden = true;
         function updateDoc() {
           userDocSpan.textContent = hidden ? '*'.repeat(10) : doc;
+          userDocSpan.classList.add('documento-tarjeta');
           const eyeIcon = document.getElementById('eye-icon');
           if (eyeIcon) eyeIcon.className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
         }
@@ -822,11 +835,16 @@
         }
         let hidden = true;
         function updateDocBar() {
-          document.getElementById('user-info-nombre').textContent = nombre;
+          const nombreSpan = document.getElementById('user-info-nombre');
+          if (nombreSpan) {
+            nombreSpan.textContent = nombre;
+            nombreSpan.classList.add('nombre-tarjeta');
+          }
           // Mostrar el documento debajo del nombre, no a la derecha
           const docSpan = document.getElementById('user-info-doc');
           if (docSpan) {
             docSpan.textContent = doc ? (hidden ? '*'.repeat(10) : doc) : '';
+            docSpan.classList.add('documento-tarjeta');
           }
           const eyeIcon = document.getElementById('eye-icon-bar');
           if (eyeIcon) eyeIcon.className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
