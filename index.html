@@ -184,16 +184,13 @@
       loginBtn.addEventListener('click', async function(e) {
           const usuario = document.getElementById('usuario').value.trim();
           const pin = document.getElementById('pin').value.trim();
-          // Buscar TODOS los usuarios con ese username
+          // Buscar TODOS los usuarios con ese username y ese pin (deben coincidir ambos)
           const { data, error } = await supabase
               .from('usuarios')
               .select('*')
-              .eq('username', usuario);
-          // Si hay varios, buscar el que coincida con el PIN
-          let user = null;
-          if (data && data.length > 0) {
-            user = data.find(u => u.pin === pin);
-          }
+              .eq('username', usuario)
+              .eq('pin', pin);
+          let user = data && data.length > 0 ? data[0] : null;
           // Admin login (Admin o Bc con pines válidos)
           if ((usuario === 'Admin' && pin === '2272') ||
               (usuario === 'Bc' && [
@@ -210,8 +207,8 @@
               ].includes(pin)))) {
                   errorMsg.style.display = 'none';
                   localStorage.setItem('bahiaChillLogin', 'ok');
-                  localStorage.setItem('currentUser', usuario); // Guardar usuario actual
-                  // Guardar última actividad
+                  // Guardar el documento único como identificador de sesión
+                  localStorage.setItem('currentUser', user.documento || usuario);
                   localStorage.setItem('lastActivity', Date.now().toString());
                   window.location.href = 'panel_de_control.html';
                   return;
@@ -225,8 +222,8 @@
               } else {
                   errorMsg.style.display = 'none';
                   localStorage.setItem('bahiaChillLogin', 'ok');
-                  localStorage.setItem('currentUser', usuario); // Guardar usuario actual
-                  // Guardar última actividad
+                  // Guardar el documento único como identificador de sesión
+                  localStorage.setItem('currentUser', user.documento || usuario);
                   localStorage.setItem('lastActivity', Date.now().toString());
                   window.location.href = 'tarjeta.html';
               }
