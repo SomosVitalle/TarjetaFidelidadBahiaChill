@@ -237,14 +237,20 @@
       });
       // Crear usuarios por defecto en Supabase si no existen
       window.addEventListener('DOMContentLoaded', async function() {
+          // Solo crear usuarios por defecto si NO existe ya un usuario con ese username Y ese documento
           const defaultUsers = [
               { username: 'Juan', pin: '1234', documento: '1234561234', telefono: '', numero: 0, paused: false, admin: false },
               { username: 'Bc', pin: '2467', documento: '2467892467', telefono: '', numero: 0, paused: false, admin: true },
               { username: 'Admin', pin: '2272', documento: '2272222272', telefono: '', numero: 0, paused: false, admin: true }
           ];
           for (const user of defaultUsers) {
-              const existing = await getUserSupabase(user.username);
-              if (!existing) {
+              // Buscar por username Y documento
+              const { data, error } = await supabase
+                  .from('usuarios')
+                  .select('*')
+                  .eq('username', user.username)
+                  .eq('documento', user.documento);
+              if (!data || data.length === 0) {
                   await createUserSupabase(user);
               }
           }
