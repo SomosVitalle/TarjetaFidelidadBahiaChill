@@ -274,6 +274,125 @@
             font-size: 0.9em !important;
             font-weight: bold !important;
         }
+
+        /* MODAL FAQ INTEGRADO */
+        .faq-modal-integrado {
+          position: fixed;
+          top: 0; left: 0; width: 100vw; height: 100vh;
+          background: rgba(0,0,0,0.35);
+          backdrop-filter: blur(2px);
+          z-index: 99999;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          transition: transform 0.5s cubic-bezier(.7,1.7,.5,1), opacity 0.4s;
+          opacity: 0;
+          pointer-events: none;
+        }
+        .faq-modal-integrado[aria-visible="true"] {
+          opacity: 1;
+          pointer-events: auto;
+          transform: translateX(0);
+        }
+        .faq-modal-integrado.faq-slide-in {
+          transform: translateX(100vw);
+          opacity: 0;
+        }
+        .faq-modal-integrado.faq-slide-in-active {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        .faq-modal-integrado.faq-slide-out {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        .faq-modal-integrado.faq-slide-out-active {
+          transform: translateX(100vw);
+          opacity: 0;
+        }
+        .faq-modal-content {
+          background: linear-gradient(135deg,#3d819d 0%,#25647a 100%);
+          border-radius: 18px;
+          box-shadow: 0 8px 32px 0 rgba(0,0,0,0.25);
+          padding: 32px 20px 24px 20px;
+          max-width: 370px;
+          width: 90vw;
+          max-height: 90vh;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          position: relative;
+        }
+        .faq-close-btn {
+          position: absolute;
+          top: 12px;
+          right: 18px;
+          background: none;
+          border: none;
+          color: #fff;
+          font-size: 2em;
+          font-weight: bold;
+          cursor: pointer;
+          z-index: 1001;
+        }
+        .faq-title {
+          color: #fff;
+          font-size: 2em;
+          font-weight: bold;
+          text-align: center;
+          margin-top: 18px;
+          margin-bottom: 32px;
+          letter-spacing: 1px;
+        }
+        .faq-block {
+          width: 90vw;
+          max-width: 320px;
+          background: rgba(255,255,255,0.08);
+          border-radius: 16px;
+          margin-bottom: 18px;
+          box-shadow: 0 2px 12px 0 rgba(0,0,0,0.13);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          cursor: pointer;
+          transition: box-shadow 0.2s;
+          padding: 0;
+          overflow: hidden;
+        }
+        .faq-block-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 18px 22px 18px 18px;
+          font-size: 1.13em;
+          font-weight: bold;
+          color: #fff;
+          user-select: none;
+        }
+        .faq-block-header .triangle {
+          margin-left: 18px;
+          transition: transform 0.3s;
+          font-size: 1.2em;
+          color: #fff;
+        }
+        .faq-block.open .faq-block-header .triangle {
+          transform: rotate(180deg);
+        }
+        .faq-block-content {
+          padding: 0 22px 18px 18px;
+          color: #fff;
+          font-size: 1em;
+          display: none;
+          animation: fadeIn 0.3s;
+          font-weight: normal;
+        }
+        .faq-block.open .faq-block-content {
+          display: block;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
     </style>
 </head>
 <body style="display:none;" id="body-block">
@@ -329,6 +448,25 @@
                 <img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Palmera blanca" style="height: 120px; width: auto; opacity: 1; background: none; box-shadow: none; border: none;" />
             </div>
         </div>
+    </div>
+    <!-- MODAL FAQ INTEGRADO -->
+    <div id="faq-modal-integrado" class="faq-modal-integrado" aria-visible="false">
+      <div class="faq-modal-content">
+        <button id="faq-close-btn" class="faq-close-btn" aria-label="Cerrar FAQ">&times;</button>
+        <div class="faq-title">FAQ</div>
+        <div class="faq-block">
+          <div class="faq-block-header">¿Qué beneficios tiene esta tarjeta? <span class="triangle">&#9660;</span></div>
+          <div class="faq-block-content">¡Mensualmente podrás recibir diferentes tipos de regalos, asegúrate de tener los 10 stickers!</div>
+        </div>
+        <div class="faq-block">
+          <div class="faq-block-header">¿Cómo obtengo un sticker? <span class="triangle">&#9660;</span></div>
+          <div class="faq-block-content">Cada vez que realices una compra o consumas en el local, solicita que te sellen tu tarjeta digital. ¡Acumula 10 y reclama tu regalo!</div>
+        </div>
+        <div class="faq-block">
+          <div class="faq-block-header">¿Puedo transferir mis stickers a otra persona? <span class="triangle">&#9660;</span></div>
+          <div class="faq-block-content">No, los stickers y beneficios son personales e intransferibles.</div>
+        </div>
+      </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
@@ -642,7 +780,33 @@
       }
       document.getElementById('help-btn').addEventListener('click', function(e) {
         e.stopPropagation();
-        window.location.href = 'datos_tarjeta.html';
+        const modal = document.getElementById('faq-modal-integrado');
+        modal.setAttribute('aria-visible', 'true');
+        modal.classList.remove('faq-slide-out', 'faq-slide-out-active');
+        modal.classList.add('faq-slide-in');
+        setTimeout(() => {
+          modal.classList.add('faq-slide-in-active');
+        }, 10);
+        document.body.style.overflow = 'hidden';
+      });
+      document.getElementById('faq-close-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        const modal = document.getElementById('faq-modal-integrado');
+        modal.classList.remove('faq-slide-in', 'faq-slide-in-active');
+        modal.classList.add('faq-slide-out');
+        setTimeout(() => {
+          modal.classList.add('faq-slide-out-active');
+        }, 10);
+        setTimeout(() => {
+          modal.setAttribute('aria-visible', 'false');
+          modal.classList.remove('faq-slide-out', 'faq-slide-out-active');
+          document.body.style.overflow = '';
+        }, 400);
+      });
+      document.querySelectorAll('.faq-block').forEach(block => {
+        block.addEventListener('click', function() {
+          this.classList.toggle('open');
+        });
       });
       // Al cargar, verificar y redirigir si es necesario
       window.addEventListener('DOMContentLoaded', async () => {
