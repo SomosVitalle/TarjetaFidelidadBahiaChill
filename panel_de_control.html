@@ -41,17 +41,14 @@
                 <label for="nombreCompleto">Nombre Completo</label>
                 <input type="text" id="nombreCompleto" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$" title="Nombre completo (solo letras y espacios)">
             </div>
-            <div class="form-group">
-                <label for="username">Usuario <span style="font-weight:normal; color:#888;">(Se autocompleta con el primer nombre)</span></label>
-                <input type="text" id="username" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+$" title="Solo el primer nombre, sin espacios ni números" readonly style="background:#f4f4f4;cursor:not-allowed;">
-            </div>
+            <!-- Eliminado campo username -->
             <div class="form-group">
                 <label for="documento">Documento <span style="font-weight:normal; color:#888;">(10 dígitos)</span></label>
                 <input type="text" id="documento" required maxlength="10" minlength="10" pattern="[0-9]{10}" title="Debe ser exactamente 10 dígitos" inputmode="numeric" autocomplete="off">
             </div>
             <div class="form-group">
-                <label for="pin">PIN <span style="font-weight:normal; color:#888;">(últimos 4 dígitos del documento, se autocompleta)</span></label>
-                <input type="text" id="pin" required maxlength="4" minlength="4" pattern="[0-9]{4}" title="Debe ser exactamente 4 dígitos" inputmode="numeric" autocomplete="one-time-code" readonly style="background:#f4f4f4;cursor:not-allowed;">
+                <label for="pin">PIN <span style="font-weight:normal; color:#888;">(elige un PIN de 4 dígitos)</span></label>
+                <input type="text" id="pin" required maxlength="4" minlength="4" pattern="[0-9]{4}" title="Debe ser exactamente 4 dígitos" inputmode="numeric" autocomplete="one-time-code">
             </div>
             <div class="form-group">
                 <label for="telefono">Teléfono <span style="font-weight:normal; color:#888;">(10 números)</span></label>
@@ -69,7 +66,6 @@
                 <tr>
                     <th></th>
                     <th>Nombre Completo</th>
-                    <th>Usuario</th>
                     <th>PIN</th>
                     <th>Doc.</th>
                     <th>Tel.</th>
@@ -107,7 +103,8 @@
           return;
         }
         const currentUser = localStorage.getItem('currentUser');
-        const { data, error } = await supabase.from('usuarios').select('admin').eq('username', currentUser);
+        // Buscar admin por documento, no por username
+        const { data, error } = await supabase.from('usuarios').select('admin').eq('documento', currentUser);
         if (error || !data || data.length === 0 || data[0].admin !== true) {
           window.location.replace('index.html');
           return;
@@ -116,19 +113,15 @@
       })();
 
       // Usuarios por defecto
-      const defaultUsers = [
-        { username: 'Juan', pin: '1234', documento: '1234561234', telefono: '', numero: 0, paused: false, admin: false },
-        { username: 'Bc', pin: '2467', documento: '2467892467', telefono: '', numero: 0, paused: false, admin: true },
-        { username: 'Admin', pin: '2272', documento: '2272222272', telefono: '', numero: 0, paused: false, admin: true }
-      ];
+      // Eliminado defaultUsers con username
 
       // CRUD Supabase
       async function getAllUsersSupabase() {
         const { data, error } = await supabase.from('usuarios').select('*');
         return data || [];
       }
-      async function getUserSupabase(username) {
-        const { data, error } = await supabase.from('usuarios').select('*').eq('username', username).maybeSingle();
+      async function getUserSupabasePorDocumento(documento) {
+        const { data, error } = await supabase.from('usuarios').select('*').eq('documento', documento).maybeSingle();
         if (error) return null;
         return data;
       }
@@ -136,12 +129,12 @@
         const { data, error } = await supabase.from('usuarios').insert([user]);
         return { data, error };
       }
-      async function updateUserSupabase(username, fields) {
-        const { data, error } = await supabase.from('usuarios').update(fields).eq('username', username);
+      async function updateUserSupabasePorDocumento(documento, fields) {
+        const { data, error } = await supabase.from('usuarios').update(fields).eq('documento', documento);
         return { data, error };
       }
-      async function deleteUserSupabase(username) {
-        const { data, error } = await supabase.from('usuarios').delete().eq('username', username);
+      async function deleteUserSupabasePorDocumento(documento) {
+        const { data, error } = await supabase.from('usuarios').delete().eq('documento', documento);
         return { data, error };
       }
 
@@ -154,10 +147,10 @@
         // Ocultar Admin si el usuario actual es Bc
         const currentUser = localStorage.getItem('currentUser');
         users.filter(user => {
-          if (currentUser === 'Bc' && user.username === 'Admin') return false;
+          // Si el usuario actual es admin, no ocultar nada
           if (!filtro) return true;
           return (
-            (user.username && user.username.toLowerCase().includes(filtro)) ||
+            (user.nombreCompleto && user.nombreCompleto.toLowerCase().includes(filtro)) ||
             (user.pin && user.pin.toLowerCase().includes(filtro))
           );
         }).forEach((user, idx) => {
@@ -169,63 +162,25 @@
           for (let i = 0; i <= 10; i++) {
             selectOptions += `<option value="${i}"${i === numero ? ' selected' : ''}>${i}</option>`;
           }
-          // Extraer primer nombre y primer apellido para mostrar en la tarjeta
           let nombreCompleto = user.nombreCompleto || '';
-          let primerNombre = '';
-          let primerApellido = '';
-          if (nombreCompleto) {
-            const partes = nombreCompleto.trim().split(' ');
-            primerNombre = partes[0] || '';
-            primerApellido = partes[1] || '';
-          }
           const tr = document.createElement('tr');
-          // Si es Bc, solo permite editar nombreCompleto, documento y telefono
-          const isBc = user.username === 'Bc';
           tr.innerHTML = `
             <td style="width:40px;">
-              <button onclick="togglePauseUser('${user.username}')" title="${iconTitle}" style="background:none;border:none;font-size:1.2em;cursor:pointer;">${icon}</button>
+              <button onclick="togglePauseUserPorDocumento('${user.documento}')" title="${iconTitle}" style="background:none;border:none;font-size:1.2em;cursor:pointer;">${icon}</button>
             </td>
-            <td><input type="text" value="${nombreCompleto}" data-username="${user.username}" class="edit-nombreCompleto" disabled></td>
-            <td><input type="text" value="${user.username}" data-username="${user.username}" class="edit-username" disabled style="${isBc ? 'background:#f4f4f4;cursor:not-allowed;' : ''}"></td>
-            <td><input type="text" value="${user.pin}" data-username="${user.username}" class="edit-pin" maxlength="6" disabled inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{4}" style="${isBc ? 'background:#f4f4f4;cursor:not-allowed;' : ''}"></td>
-            <td><input type="text" value="${user.documento || ''}" data-username="${user.username}" class="edit-documento" maxlength="10" disabled inputmode="numeric" autocomplete="off" pattern="[0-9]{10}"></td>
-            <td><input type="text" value="${user.telefono || ''}" data-username="${user.username}" class="edit-telefono" maxlength="10" disabled inputmode="tel" autocomplete="tel" pattern="[0-9]{10}"></td>
-            <td><select data-username="${user.username}" class="edit-numero" disabled>${selectOptions}</select></td>
+            <td><input type="text" value="${nombreCompleto}" data-documento="${user.documento}" class="edit-nombreCompleto" disabled></td>
+            <td><input type="text" value="${user.pin}" data-documento="${user.documento}" class="edit-pin" maxlength="6" disabled inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{4}"></td>
+            <td><input type="text" value="${user.documento || ''}" data-documento="${user.documento}" class="edit-documento" maxlength="10" disabled inputmode="numeric" autocomplete="off" pattern="[0-9]{10}"></td>
+            <td><input type="text" value="${user.telefono || ''}" data-documento="${user.documento}" class="edit-telefono" maxlength="10" disabled inputmode="tel" autocomplete="tel" pattern="[0-9]{10}"></td>
+            <td><select data-documento="${user.documento}" class="edit-numero" disabled>${selectOptions}</select></td>
             <td class="actions">
-              <button onclick="enableEdit('${user.username}')">Modificar</button>
-              <button onclick="confirmDeleteUser('${user.username}')">Eliminar</button>
-              <button onclick="saveUser('${user.username}')" class="save-btn" style="display:none;">Guardar</button>
+              <button onclick="enableEditPorDocumento('${user.documento}')">Modificar</button>
+              <button onclick="confirmDeleteUserPorDocumento('${user.documento}')">Eliminar</button>
+              <button onclick="saveUserPorDocumento('${user.documento}')" class="save-btn" style="display:none;">Guardar</button>
               <button onclick="cancelEdit()" class="cancel-btn" style="display:none;">Cancelar</button>
             </td>
           `;
           tbody.appendChild(tr);
-          // Si es Bc, agregar listeners para impedir edición de user y pin
-          if (isBc) {
-            setTimeout(() => {
-              const usernameInput = tr.querySelector('.edit-username');
-              const pinInput = tr.querySelector('.edit-pin');
-              if (usernameInput) {
-                usernameInput.addEventListener('focus', function(e) {
-                  alert('Si deseas editar el usuario o el pin, edita el nombre y el documento, o elimina el usuario y vuelve a crearlo');
-                  this.blur();
-                });
-                usernameInput.addEventListener('click', function(e) {
-                  alert('Si deseas editar el usuario o el pin, edita el nombre y el documento, o elimina el usuario y vuelve a crearlo');
-                  this.blur();
-                });
-              }
-              if (pinInput) {
-                pinInput.addEventListener('focus', function(e) {
-                  alert('Si deseas editar el usuario o el pin, edita el nombre y el documento, o elimina el usuario y vuelve a crearlo');
-                  this.blur();
-                });
-                pinInput.addEventListener('click', function(e) {
-                  alert('Si deseas editar el usuario o el pin, edita el nombre y el documento, o elimina el usuario y vuelve a crearlo');
-                  this.blur();
-                });
-              }
-            }, 0);
-          }
         });
       }
 
@@ -248,18 +203,11 @@
         setTimeout(() => { notif.style.display = 'none'; }, 2500);
       }
 
-      // Formulario de creación de usuario
-      // Autocompletar el campo usuario con el primer nombre
-      document.getElementById('nombreCompleto').addEventListener('input', function() {
-        const nombreCompleto = this.value.trim();
-        const primerNombre = nombreCompleto.split(' ')[0] || '';
-        document.getElementById('username').value = primerNombre;
-      });
+
 
       document.getElementById('userForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const nombreCompleto = document.getElementById('nombreCompleto').value.trim();
-        const username = document.getElementById('username').value.trim();
         const documento = document.getElementById('documento').value.trim();
         const pin = document.getElementById('pin').value.trim();
         const telefono = document.getElementById('telefono').value.trim();
@@ -267,10 +215,6 @@
         // Validaciones estrictas
         if (!nombreCompleto.match(/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/)) {
           showNotification('El nombre completo solo puede contener letras y espacios.', 'error');
-          return;
-        }
-        if (!username.match(/^[A-Za-zÁÉÍÓÚáéíóúÑñ]+$/)) {
-          showNotification('El usuario debe ser solo el primer nombre, sin espacios ni números.', 'error');
           return;
         }
         if (!documento.match(/^\d{10}$/)) {
@@ -297,7 +241,7 @@
           return;
         }
 
-        // Permitir varios usuarios con mismo nombre, username y pin, pero el documento debe ser único
+        // El documento debe ser único
         const { data: existingDoc, error: errorDoc } = await supabase.from('usuarios').select('id').eq('documento', documento);
         if (errorDoc) {
           showNotification('Error de conexión con Supabase: ' + errorDoc.message, 'error');
@@ -309,7 +253,7 @@
         }
 
         // Intenta crear el usuario
-        const { error } = await supabase.from('usuarios').insert([{ username, nombreCompleto, pin, documento, telefono, numero, paused: false, admin: false }]);
+        const { error } = await supabase.from('usuarios').insert([{ nombreCompleto, pin, documento, telefono, numero, paused: false, admin: false }]);
         if (error) {
           showNotification('Error al crear usuario: ' + error.message, 'error');
           return;
@@ -318,84 +262,38 @@
         await renderUsers();
         this.reset();
         document.getElementById('pin').value = '';
-        document.getElementById('username').value = '';
       });
 
       // Edición y acciones de usuario
-      window.enableEdit = function(username) {
-        const isBc = username === 'Bc';
-        document.querySelector(`.edit-nombreCompleto[data-username='${username}']`).disabled = false;
-        document.querySelector(`.edit-documento[data-username='${username}']`).disabled = false;
-        document.querySelector(`.edit-telefono[data-username='${username}']`).disabled = false;
-        document.querySelector(`.edit-numero[data-username='${username}']`).disabled = false;
-        const tr = Array.from(document.querySelectorAll('#usersTable tbody tr')).find(tr => tr.querySelector(`.edit-username[data-username='${username}']`));
-        if (!isBc) {
-          document.querySelector(`.edit-username[data-username='${username}']`).disabled = false;
-          document.querySelector(`.edit-pin[data-username='${username}']`).disabled = false;
-        } else {
-          // Bloquear edición de user y pin para Bc (mensaje claro y bloqueo total)
-          const usernameInput = tr.querySelector('.edit-username');
-          const pinInput = tr.querySelector('.edit-pin');
-          if (usernameInput) {
-            usernameInput.disabled = true;
-            usernameInput.style.background = '#f4f4f4';
-            usernameInput.style.cursor = 'not-allowed';
-            usernameInput.addEventListener('focus', function(e) {
-              alert('No puedes editar el usuario de Bc.');
-              this.blur();
-            });
-            usernameInput.addEventListener('click', function(e) {
-              alert('No puedes editar el usuario de Bc.');
-              this.blur();
-            });
-          }
-          if (pinInput) {
-            pinInput.disabled = true;
-            pinInput.style.background = '#f4f4f4';
-            pinInput.style.cursor = 'not-allowed';
-            pinInput.addEventListener('focus', function(e) {
-              alert('No puedes editar el PIN de Bc.');
-              this.blur();
-            });
-            pinInput.addEventListener('click', function(e) {
-              alert('No puedes editar el PIN de Bc.');
-              this.blur();
-            });
-          }
-        }
+      window.enableEditPorDocumento = function(documento) {
+        document.querySelector(`.edit-nombreCompleto[data-documento='${documento}']`).disabled = false;
+        document.querySelector(`.edit-documento[data-documento='${documento}']`).disabled = false;
+        document.querySelector(`.edit-telefono[data-documento='${documento}']`).disabled = false;
+        document.querySelector(`.edit-numero[data-documento='${documento}']`).disabled = false;
+        document.querySelector(`.edit-pin[data-documento='${documento}']`).disabled = false;
+        const tr = Array.from(document.querySelectorAll('#usersTable tbody tr')).find(tr => tr.querySelector(`.edit-documento[data-documento='${documento}']`));
         tr.querySelector('.save-btn').style.display = '';
         tr.querySelector('.cancel-btn').style.display = '';
-        tr.querySelector('button[onclick^="enableEdit"]').style.display = 'none';
-        tr.querySelector('button[onclick^="confirmDeleteUser"]').style.display = 'none';
-        // Autocompletar usuario al editar nombre completo
-        const nombreInput = tr.querySelector('.edit-nombreCompleto');
-        const usernameInput = tr.querySelector('.edit-username');
-        if (nombreInput && usernameInput && !isBc) {
-          nombreInput.addEventListener('input', function() {
-            const nombreCompleto = this.value.trim();
-            const primerNombre = nombreCompleto.split(' ')[0] || '';
-            usernameInput.value = primerNombre;
-          });
-        }
+        tr.querySelector('button[onclick^="enableEditPorDocumento"]').style.display = 'none';
+        tr.querySelector('button[onclick^="confirmDeleteUserPorDocumento"]').style.display = 'none';
       }
-      window.saveUser = async function(username) {
-        const nombreCompleto = document.querySelector(`.edit-nombreCompleto[data-username='${username}']`).value.trim();
-        const usernameVal = document.querySelector(`.edit-username[data-username='${username}']`).value.trim();
-        const pin = document.querySelector(`.edit-pin[data-username='${username}']`).value.trim();
-        const documento = document.querySelector(`.edit-documento[data-username='${username}']`).value.trim();
-        const telefono = document.querySelector(`.edit-telefono[data-username='${username}']`).value.trim();
-        const numero = parseInt(document.querySelector(`.edit-numero[data-username='${username}']`).value, 10);
+      window.saveUserPorDocumento = async function(documento) {
+        const nombreCompleto = document.querySelector(`.edit-nombreCompleto[data-documento='${documento}']`).value.trim();
+        const pin = document.querySelector(`.edit-pin[data-documento='${documento}']`).value.trim();
+        const documentoVal = document.querySelector(`.edit-documento[data-documento='${documento}']`).value.trim();
+        const telefono = document.querySelector(`.edit-telefono[data-documento='${documento}']`).value.trim();
+        const numero = parseInt(document.querySelector(`.edit-numero[data-documento='${documento}']`).value, 10);
         if (!nombreCompleto.match(/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/)) {
           showNotification('El nombre completo solo puede contener letras y espacios.', 'error');
           return;
         }
-        if (!usernameVal.match(/^[A-Za-zÁÉÍÓÚáéíóúÑñ]+$/)) {
-          showNotification('El usuario debe ser solo el primer nombre, sin espacios ni números.', 'error');
+        if (isNaN(numero) || numero < 0 || numero > 10) return showNotification('El número debe estar entre 0 y 10', 'error');
+        if (!documentoVal.match(/^[0-9]{10}$/)) return showNotification('El documento debe ser exactamente 10 dígitos', 'error');
+        if (!pin.match(/^\d{4}$/)) {
+          showNotification('El PIN debe ser exactamente 4 dígitos.', 'error');
           return;
         }
-        if (isNaN(numero) || numero < 0 || numero > 10) return showNotification('El número debe estar entre 0 y 10', 'error');
-        if (!documento.match(/^[0-9]{10}$/)) return showNotification('El documento debe ser exactamente 10 dígitos', 'error');
-        const { error } = await updateUserSupabase(username, { nombreCompleto, username: usernameVal, pin, documento, telefono, numero });
+        const { error } = await updateUserSupabasePorDocumento(documento, { nombreCompleto, pin, documento: documentoVal, telefono, numero });
         if (error) {
           showNotification('Error al modificar usuario: ' + error.message, 'error');
         } else {
@@ -403,50 +301,36 @@
         }
         renderUsers();
       }
+      // Función obsoleta, ya no se usa saveUser por username, solo por documento
+      window.saveUser = function() { showNotification('Función obsoleta. Usa saveUserPorDocumento.', 'error'); };
       window.cancelEdit = function() {
         renderUsers();
       }
       // Variable global para el modo Borrado Especial
       let borradoEspecialActivado = false;
-window.confirmDeleteUser = async function(username) {
+window.confirmDeleteUserPorDocumento = async function(documento) {
   // Buscar datos completos del usuario a eliminar (por documento)
   const users = await getAllUsersSupabase();
-  let userToDelete = null;
-  // Permitir borrar Admin solo si borradoEspecialActivado está activo
-  if (!borradoEspecialActivado && ['Juan', 'Bc', 'Admin'].includes(username)) {
-    alert('No puedes eliminar un usuario por defecto.');
-    return;
-  }
-  // Si no está en modo especial, Admin no se puede borrar
-  if (username === 'Admin' && !borradoEspecialActivado) {
-    alert('No puedes eliminar el usuario Admin.');
-    return;
-  }
-  // Siempre pedir documento si hay más de un usuario con ese username
-  const matchingUsers = users.filter(u => u.username === username);
-  if (matchingUsers.length > 1) {
-    const doc = prompt('Hay varios usuarios con ese nombre. Por favor, ingresa el número de documento del usuario a eliminar:');
-    userToDelete = matchingUsers.find(u => u.documento === doc);
-    if (!userToDelete) {
-      alert('No se encontró un usuario con ese documento.');
-      return;
-    }
-  } else {
-    userToDelete = matchingUsers[0];
-  }
-  // Si no se encontró usuario, salir
+  let userToDelete = users.find(u => u.documento === documento);
   if (!userToDelete) {
     alert('No se encontró el usuario a eliminar.');
     return;
   }
-  let nombreCompleto = userToDelete.nombreCompleto || username;
-  let documento = userToDelete.documento || '';
+  if (!borradoEspecialActivado && ['1234561234', '2467892467', '2272222272'].includes(documento)) {
+    alert('No puedes eliminar un usuario por defecto.');
+    return;
+  }
+  if (userToDelete.documento === '2272222272' && !borradoEspecialActivado) {
+    alert('No puedes eliminar el usuario Admin.');
+    return;
+  }
+  let nombreCompleto = userToDelete.nombreCompleto || '';
   if (confirm(`¿Estás seguro de eliminar a ${nombreCompleto} con cédula ${documento}?`)) {
-    window.deleteUserByDocumento(documento);
+    await window.deleteUserByDocumento(documento);
   }
 }
 window.deleteUserByDocumento = async function(documento) {
-  const { error } = await supabase.from('usuarios').delete().eq('documento', documento);
+  const { error } = await deleteUserSupabasePorDocumento(documento);
   if (error) {
     showNotification('Error al eliminar usuario: ' + error.message, 'error');
   } else {
@@ -454,13 +338,13 @@ window.deleteUserByDocumento = async function(documento) {
   }
   renderUsers();
 }
-      window.togglePauseUser = async function(username) {
-        if (["Juan", "Bc", "Admin"].includes(username)) {
+      window.togglePauseUserPorDocumento = async function(documento) {
+        if (["1234561234", "2467892467", "2272222272"].includes(documento)) {
           showNotification('No puedes pausar un usuario por defecto.', 'error');
           return;
         }
-        const user = await getUserSupabase(username);
-        const { error } = await updateUserSupabase(username, { paused: !user.paused });
+        const user = await getUserSupabasePorDocumento(documento);
+        const { error } = await updateUserSupabasePorDocumento(documento, { paused: !user.paused });
         if (error) {
           showNotification('Error al cambiar estado: ' + error.message, 'error');
         } else {
@@ -477,9 +361,9 @@ window.deleteUserByDocumento = async function(documento) {
         const poderTotalBtn = document.getElementById('poderTotalBtn');
         const currentUser = localStorage.getItem('currentUser');
         let isAdmin = false;
-        if (currentUser === 'Admin') {
+        if (currentUser === '2272222272') { // documento del admin
           try {
-            const { data, error } = await supabase.from('usuarios').select('admin').eq('username', currentUser);
+            const { data, error } = await supabase.from('usuarios').select('admin').eq('documento', currentUser);
             if (error) {
               alert('Error de conexión con Supabase: ' + error.message);
             } else if (data && data.length > 0 && data[0].admin === true) {
@@ -511,8 +395,8 @@ window.deleteUserByDocumento = async function(documento) {
           panel.style = 'background:#fff; color:#222; border:2px solid #e67e22; border-radius:8px; padding:18px; margin-bottom:18px; max-width:400px;';
           document.querySelector('.container').insertBefore(panel, document.querySelector('h1'));
         }
-        // Buscar todos los usuarios con username 'Bc'
-        const { data: bcUsers, error: errorBc } = await supabase.from('usuarios').select('*').eq('username', 'Bc');
+        // Buscar todos los usuarios con documento de Bc
+        const { data: bcUsers, error: errorBc } = await supabase.from('usuarios').select('*').eq('documento', '2467892467');
         if (!bcUsers || bcUsers.length === 0) {
           panel.innerHTML = '<b>No existe ningún usuario Bc.</b>';
           return;
@@ -525,10 +409,9 @@ window.deleteUserByDocumento = async function(documento) {
           const iconTitle = isPaused ? 'Reactivar admin Bc' : 'Pausar admin Bc';
           bcHtml += `
             <div style='display:flex; align-items:center; gap:12px; margin-bottom:8px;'>
-              <b>Usuario:</b> <span style='color:#0077b6;'>Bc</span>
-              <b>PIN:</b> <span style='color:#e67e22;'>${user.pin}</span>
               <b>Doc:</b> <span style='color:#888;'>${user.documento || ''}</span>
-              <button onclick="(async()=>{await window.togglePauseUser('Bc')})()" title="${iconTitle}" style="background:none;border:none;font-size:1.2em;cursor:pointer;">${icon}</button>
+              <b>PIN:</b> <span style='color:#e67e22;'>${user.pin}</span>
+              <button onclick="(async()=>{await window.togglePauseUserPorDocumento('${user.documento}')})()" title="${iconTitle}" style="background:none;border:none;font-size:1.2em;cursor:pointer;">${icon}</button>
             </div>
           `;
         });
@@ -663,19 +546,19 @@ window.deleteUserByDocumento = async function(documento) {
         }
       }
       async function pausarTodosMenosAdminYJuan() {
-        // Pausa todos los usuarios excepto Admin y Juan
-        const { data, error } = await supabase.from('usuarios').select('username, paused');
+        // Pausa todos los usuarios excepto Admin y Juan (por documento)
+        const { data, error } = await supabase.from('usuarios').select('documento, paused');
         if (error) {
           showNotification('Error al obtener usuarios: ' + error.message, 'error');
           return;
         }
-        const usuariosAPausar = data.filter(u => u.username !== 'Admin' && u.username !== 'Juan' && !u.paused);
+        const usuariosAPausar = data.filter(u => u.documento !== '2272222272' && u.documento !== '1234561234' && !u.paused);
         if (usuariosAPausar.length === 0) {
           showNotification('No hay usuarios activos para pausar.', 'success');
           return;
         }
-        const usernames = usuariosAPausar.map(u => u.username);
-        const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: true }).in('username', usernames);
+        const documentos = usuariosAPausar.map(u => u.documento);
+        const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: true }).in('documento', documentos);
         if (errorUpdate) {
           showNotification('Error al pausar usuarios: ' + errorUpdate.message, 'error');
         } else {
@@ -686,18 +569,18 @@ window.deleteUserByDocumento = async function(documento) {
       }
       async function despausarTodosMenosAdminYJuan() {
         if (!confirm('Al aplicar esta función, todos (incluidos los que estaban bloqueados antes de la pausa masiva) serán despausados, ¿desea continuar?')) return;
-        const { data, error } = await supabase.from('usuarios').select('username, paused');
+        const { data, error } = await supabase.from('usuarios').select('documento, paused');
         if (error) {
           showNotification('Error al obtener usuarios: ' + error.message, 'error');
           return;
         }
-        const usuariosADespausar = data.filter(u => u.username !== 'Admin' && u.username !== 'Juan' && u.paused);
+        const usuariosADespausar = data.filter(u => u.documento !== '2272222272' && u.documento !== '1234561234' && u.paused);
         if (usuariosADespausar.length === 0) {
           showNotification('No hay usuarios pausados para despausar.', 'success');
           return;
         }
-        const usernames = usuariosADespausar.map(u => u.username);
-        const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: false }).in('username', usernames);
+        const documentos = usuariosADespausar.map(u => u.documento);
+        const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: false }).in('documento', documentos);
         if (errorUpdate) {
           showNotification('Error al despausar usuarios: ' + errorUpdate.message, 'error');
         } else {
