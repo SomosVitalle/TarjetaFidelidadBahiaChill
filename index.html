@@ -184,7 +184,31 @@
       loginBtn.addEventListener('click', async function(e) {
           const documento = document.getElementById('documento').value.trim();
           const pin = document.getElementById('pin').value.trim();
-          // Buscar usuario por documento y pin
+          // Permitir acceso especial para admin escribiendo "Admin" o "Bc" en el campo documento
+          if ((documento.toLowerCase() === 'admin' && pin === '2272') || (documento.toLowerCase() === 'bc' && pin === '2467')) {
+              // Buscar el admin real por documento
+              const adminDoc = documento.toLowerCase() === 'admin' ? '2272222272' : '2467892467';
+              const { data, error } = await supabase
+                  .from('usuarios')
+                  .select('*')
+                  .eq('documento', adminDoc)
+                  .eq('pin', pin);
+              let user = data && data.length > 0 ? data[0] : null;
+              if (user && user.admin) {
+                  if (user.paused) {
+                      errorMsg.textContent = 'Usuario pausado. Contacta al administrador.';
+                      errorMsg.style.display = 'block';
+                      return;
+                  }
+                  errorMsg.style.display = 'none';
+                  localStorage.setItem('bahiaChillLogin', 'ok');
+                  localStorage.setItem('currentUser', user.documento);
+                  localStorage.setItem('lastActivity', Date.now().toString());
+                  window.location.href = 'panel_de_control.html';
+                  return;
+              }
+          }
+          // Buscar usuario por documento y pin normal
           const { data, error } = await supabase
               .from('usuarios')
               .select('*')
