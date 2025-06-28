@@ -337,9 +337,10 @@
           border-radius: 18px;
           box-shadow: 0 8px 32px 0 rgba(0,0,0,0.25);
           padding: 32px 20px 24px 20px;
-          max-width: 370px;
-          width: 90vw;
-          max-height: 90vh;
+          max-width: 470px;
+          width: 98vw;
+          min-height: 480px;
+          max-height: 98vh;
           overflow-y: auto;
           display: flex;
           flex-direction: column;
@@ -450,7 +451,7 @@
                 <img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Palmera blanca" style="height: 60px; width: auto; opacity: 0.8;" />
             </div>
             <div class="footer sharp" id="front-footer">
-                SOLO TE FALTAN <span class="highlight">3 PALMAS</span> PARA RECLAMAR TU REGALO
+                SOLO TE FALTAN <span class="highlight">PALMAS</span> PARA RECLAMAR TU REGALO
             </div>
         </div>
         <!-- Back of the card -->
@@ -478,7 +479,12 @@
     <div id="faq-modal-integrado" class="faq-modal-integrado" aria-visible="false">
       <div class="faq-modal-content">
         <button id="faq-close-btn" class="faq-close-btn" aria-label="Cerrar FAQ">&times;</button>
-        <div class="faq-title">FAQ</div>
+        <div style="display:flex;align-items:center;width:100%;justify-content:center;gap:18px;">
+          <a href="https://wa.link/7rpuhl" target="_blank" title="Contactar por WhatsApp" style="display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.13);border-radius:50%;width:48px;height:48px;box-shadow:0 2px 8px 0 rgba(0,0,0,0.13);margin-right:0;transition:background 0.2s;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" style="width:32px;height:32px;filter:drop-shadow(0 1px 2px #0002);">
+          </a>
+          <div class="faq-title" style="margin:0;">FAQ</div>
+        </div>
         <div class="faq-block">
           <div class="faq-block-header">¿Qué beneficios tiene esta tarjeta? <span class="triangle">&#9660;</span></div>
           <div class="faq-block-content">¡Mensualmente podrás recibir diferentes tipos de regalos, asegúrate de tener los 10 stickers!</div>
@@ -725,7 +731,16 @@
           debugDiv.textContent += ' | Error interno: elementos no encontrados.';
           return;
         }
-        userNameDiv.textContent = user.username || '';
+        // Mostrar primer nombre y primer apellido
+        let nombreCompleto = user.nombreCompleto || '';
+        let primerNombre = '';
+        let primerApellido = '';
+        if (nombreCompleto) {
+          const partes = nombreCompleto.trim().split(' ');
+          primerNombre = partes[0] || '';
+          primerApellido = partes[1] || '';
+        }
+        userNameDiv.textContent = (primerNombre + (primerApellido ? ' ' + primerApellido : '')) || user.username || '';
         // Documento: mostrar 10 asteriscos por defecto, revelar todo al presionar el ojo
         let doc = user.documento ? String(user.documento) : '';
         debugDiv.textContent += ' | Documento: ' + doc;
