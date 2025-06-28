@@ -417,12 +417,7 @@ window.confirmDeleteUser = async function(username) {
     alert('No puedes eliminar un usuario por defecto.');
     return;
   }
-  // Si no está en modo especial, Admin no se puede borrar
-  if (username === 'Admin' && !borradoEspecialActivado) {
-    alert('No puedes eliminar el usuario Admin.');
-    return;
-  }
-  // Siempre pedir documento si hay más de un usuario con ese username (incluido Admin)
+  // Si borrado especial está activo, permitir borrar Admin, pero solo uno a uno (por documento)
   const matchingUsers = users.filter(u => u.username === username);
   if (matchingUsers.length > 1) {
     const doc = prompt('Hay varios usuarios con ese nombre. Por favor, ingresa el número de documento del usuario a eliminar:');
@@ -434,7 +429,7 @@ window.confirmDeleteUser = async function(username) {
   } else {
     userToDelete = matchingUsers[0];
   }
-  // Si no hay usuario a borrar, salir
+  // Si no hay usuario a eliminar, salir
   if (!userToDelete) {
     alert('No se encontró el usuario a eliminar.');
     return;
@@ -442,7 +437,6 @@ window.confirmDeleteUser = async function(username) {
   let nombreCompleto = userToDelete && userToDelete.nombreCompleto ? userToDelete.nombreCompleto : username;
   let documento = userToDelete && userToDelete.documento ? userToDelete.documento : '';
   if (confirm(`¿Estás seguro de eliminar a ${nombreCompleto} con cédula ${documento}?`)) {
-    // Solo borrar uno a uno, nunca en lote
     window.deleteUserByDocumento(documento);
   }
 }
