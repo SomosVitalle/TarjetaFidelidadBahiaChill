@@ -523,21 +523,24 @@
         if (lastActivityLS && Date.now() - parseInt(lastActivityLS, 10) > 15 * 60 * 1000) {
           localStorage.removeItem('bahiaChillLogin');
           localStorage.removeItem('currentUser');
+          localStorage.removeItem('currentUserDoc');
           localStorage.removeItem('lastActivity');
           window.location.href = 'index.html';
           return false;
         }
-        if (localStorage.getItem('bahiaChillLogin') !== 'ok' || !localStorage.getItem('currentUser')) {
+        if (localStorage.getItem('bahiaChillLogin') !== 'ok' || !localStorage.getItem('currentUserDoc')) {
           window.location.href = 'index.html';
           return false;
         }
+        const currentUserDoc = localStorage.getItem('currentUserDoc');
+        // Si es Bc, redirige a panel de control (por username, opcional)
         const currentUser = localStorage.getItem('currentUser');
-        // Si es Bc, redirige a panel de control
         if (currentUser && currentUser.toLowerCase() === 'bc') {
           window.location.href = 'panel_de_control.html';
           return false;
         }
-        const { data, error } = await supabase.from('usuarios').select('username').eq('username', currentUser);
+        // Buscar por documento
+        const { data, error } = await supabase.from('usuarios').select('documento').eq('documento', currentUserDoc);
         if (error || !data || data.length === 0) {
           window.location.href = 'index.html';
           return false;
@@ -546,16 +549,16 @@
       }
 
       // Obtiene datos del usuario actual
-      async function getUserSupabase(username) {
-        const { data, error } = await supabase.from('usuarios').select('*').eq('username', username).maybeSingle();
+      async function getUserSupabase(documento) {
+        const { data, error } = await supabase.from('usuarios').select('*').eq('documento', documento).maybeSingle();
         if (error) return null;
         return data;
       }
 
       // Renderiza los stickers según el campo numero
       async function renderStickers() {
-        const username = localStorage.getItem('currentUser');
-        const user = await getUserSupabase(username);
+        const documento = localStorage.getItem('currentUserDoc');
+        const user = await getUserSupabase(documento);
         let numero = 0;
         if (user && typeof user.numero === 'number' && user.numero >= 0 && user.numero <= 10) {
           numero = user.numero;
@@ -649,6 +652,7 @@
         if (Date.now() - lastActivity > 15 * 60 * 1000) {
           localStorage.removeItem('bahiaChillLogin');
           localStorage.removeItem('currentUser');
+          localStorage.removeItem('currentUserDoc');
           localStorage.removeItem('lastActivity');
           window.location.href = 'index.html';
         }
@@ -709,17 +713,17 @@
           return d;
         })();
         debugDiv.textContent = 'Iniciando renderUserBackInfo...';
-        const username = localStorage.getItem('currentUser');
-        debugDiv.textContent = 'Usuario en localStorage: ' + username;
-        if (!username) {
-          console.error('No hay usuario en localStorage');
-          mostrarErrorTarjeta('No hay usuario en sesión.');
-          debugDiv.textContent += ' | No hay usuario en sesión.';
+        const documento = localStorage.getItem('currentUserDoc');
+        debugDiv.textContent = 'Documento en localStorage: ' + documento;
+        if (!documento) {
+          console.error('No hay documento en localStorage');
+          mostrarErrorTarjeta('No hay documento en sesión.');
+          debugDiv.textContent += ' | No hay documento en sesión.';
           return;
         }
         let user;
         try {
-          user = await getUserSupabase(username);
+          user = await getUserSupabase(documento);
           debugDiv.textContent += ' | Resultado getUserSupabase: ' + JSON.stringify(user);
         } catch (e) {
           console.error('Error al consultar Supabase:', e);
@@ -728,7 +732,7 @@
           return;
         }
         if (!user) {
-          console.warn('Usuario no encontrado en Supabase:', username);
+          console.warn('Usuario no encontrado en Supabase:', documento);
           mostrarErrorTarjeta('Usuario no encontrado.');
           debugDiv.textContent += ' | Usuario no encontrado en Supabase.';
           return;
@@ -751,7 +755,7 @@
           primerNombre = partes[0] || '';
           primerApellido = partes[1] || '';
         }
-        userNameDiv.textContent = (primerNombre + (primerApellido ? ' ' + primerApellido : '')) || user.username || '';
+        userNameDiv.textContent = (primerNombre + (primerApellido ? ' ' + primerApellido : '')) || '';
         userNameDiv.classList.add('nombre-tarjeta');
         // Documento: mostrar 10 asteriscos por defecto, revelar todo al presionar el ojo
         let doc = user.documento ? String(user.documento) : '';
@@ -799,16 +803,16 @@
 
       // Mostrar datos de usuario en la barra superior (sin fondo ni títulos)
       async function mostrarDatosUsuarioBarra() {
-        const username = localStorage.getItem('currentUser');
-        if (!username) return;
+        const documento = localStorage.getItem('currentUserDoc');
+        if (!documento) return;
         let doc = '';
-        let nombre = username;
+        let nombre = '';
         let primerNombre = '';
         let primerApellido = '';
         if (window.supabase) {
           try {
             const { data, error } = await fetch(
-              `https://senqhfrzhsvrwiqschuf.supabase.co/rest/v1/usuarios?username=eq.${encodeURIComponent(username)}&select=*`,
+              `https://senqhfrzhsvrwiqschuf.supabase.co/rest/v1/usuarios?documento=eq.${encodeURIComponent(documento)}&select=*`,
               {
                 headers: {
                   'apikey': SUPABASE_KEY,
