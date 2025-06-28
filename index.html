@@ -184,12 +184,16 @@
       loginBtn.addEventListener('click', async function(e) {
           const usuario = document.getElementById('usuario').value.trim();
           const pin = document.getElementById('pin').value.trim();
-          // Buscar usuario en Supabase
+          // Buscar TODOS los usuarios con ese username
           const { data, error } = await supabase
               .from('usuarios')
               .select('*')
               .eq('username', usuario);
-          const user = data && data.length > 0 ? data[0] : null;
+          // Si hay varios, buscar el que coincida con el PIN
+          let user = null;
+          if (data && data.length > 0) {
+            user = data.find(u => u.pin === pin);
+          }
           // Admin login (Admin o Bc con pines válidos)
           if ((usuario === 'Admin' && pin === '2272') ||
               (usuario === 'Bc' && [
