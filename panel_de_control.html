@@ -316,6 +316,11 @@ window.confirmDeleteUserPorDocumento = async function(documento) {
     alert('No se encontró el usuario a eliminar.');
     return;
   }
+  // Impedir eliminación de admins especiales (documento y teléfono 0000000000)
+  if (userToDelete.documento === '0000000000' && userToDelete.telefono === '0000000000') {
+    alert('No puedes eliminar este usuario especial.');
+    return;
+  }
   if (!borradoEspecialActivado && ['1234561234', '2467892467', '2272222272'].includes(documento)) {
     alert('No puedes eliminar un usuario por defecto.');
     return;
