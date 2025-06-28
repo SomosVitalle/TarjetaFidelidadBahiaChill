@@ -533,9 +533,8 @@
           return false;
         }
         const currentUserDoc = localStorage.getItem('currentUserDoc');
-        // Si es Bc, redirige a panel de control (por username, opcional)
-        const currentUser = localStorage.getItem('currentUser');
-        if (currentUser && currentUser.toLowerCase() === 'bc') {
+        // Si el campo documento es 'Admin' o 'Bc', redirigir a panel de control
+        if (currentUserDoc && (currentUserDoc.toLowerCase() === 'admin' || currentUserDoc.toLowerCase() === 'bc')) {
           window.location.href = 'panel_de_control.html';
           return false;
         }
