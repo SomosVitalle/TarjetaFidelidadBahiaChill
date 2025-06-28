@@ -724,7 +724,7 @@
           return;
         }
         userNameDiv.textContent = user.username || '';
-        // Documento: mostrar ****** + últimos 4 dígitos (ocultos por defecto), revelar todo al presionar el ojo
+        // Documento: mostrar 10 asteriscos por defecto, revelar todo al presionar el ojo
         let doc = user.documento ? String(user.documento) : '';
         debugDiv.textContent += ' | Documento: ' + doc;
         if (doc.length !== 10) {
@@ -732,7 +732,7 @@
         }
         let hidden = true;
         function updateDoc() {
-          userDocSpan.textContent = hidden ? '**********' : doc;
+          userDocSpan.textContent = hidden ? '*'.repeat(10) : doc;
           const eyeIcon = document.getElementById('eye-icon');
           if (eyeIcon) eyeIcon.className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
         }
