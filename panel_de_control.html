@@ -179,13 +179,15 @@
             primerApellido = partes[1] || '';
           }
           const tr = document.createElement('tr');
+          // Si es Bc, solo permite editar nombreCompleto, documento y telefono
+          const isBc = user.username === 'Bc';
           tr.innerHTML = `
             <td style="width:40px;">
               <button onclick="togglePauseUser('${user.username}')" title="${iconTitle}" style="background:none;border:none;font-size:1.2em;cursor:pointer;">${icon}</button>
             </td>
             <td><input type="text" value="${nombreCompleto}" data-username="${user.username}" class="edit-nombreCompleto" disabled></td>
-            <td><input type="text" value="${user.username}" data-username="${user.username}" class="edit-username" disabled></td>
-            <td><input type="text" value="${user.pin}" data-username="${user.username}" class="edit-pin" maxlength="6" disabled inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{4}"></td>
+            <td><input type="text" value="${user.username}" data-username="${user.username}" class="edit-username" disabled style="${isBc ? 'background:#f4f4f4;cursor:not-allowed;' : ''}"></td>
+            <td><input type="text" value="${user.pin}" data-username="${user.username}" class="edit-pin" maxlength="6" disabled inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{4}" style="${isBc ? 'background:#f4f4f4;cursor:not-allowed;' : ''}"></td>
             <td><input type="text" value="${user.documento || ''}" data-username="${user.username}" class="edit-documento" maxlength="10" disabled inputmode="numeric" autocomplete="off" pattern="[0-9]{10}"></td>
             <td><input type="text" value="${user.telefono || ''}" data-username="${user.username}" class="edit-telefono" maxlength="10" disabled inputmode="tel" autocomplete="tel" pattern="[0-9]{10}"></td>
             <td><select data-username="${user.username}" class="edit-numero" disabled>${selectOptions}</select></td>
@@ -197,6 +199,33 @@
             </td>
           `;
           tbody.appendChild(tr);
+          // Si es Bc, agregar listeners para impedir edición de user y pin
+          if (isBc) {
+            setTimeout(() => {
+              const usernameInput = tr.querySelector('.edit-username');
+              const pinInput = tr.querySelector('.edit-pin');
+              if (usernameInput) {
+                usernameInput.addEventListener('focus', function(e) {
+                  alert('Si deseas editar el usuario o el pin, edita el nombre y el documento, o elimina el usuario y vuelve a crearlo');
+                  this.blur();
+                });
+                usernameInput.addEventListener('click', function(e) {
+                  alert('Si deseas editar el usuario o el pin, edita el nombre y el documento, o elimina el usuario y vuelve a crearlo');
+                  this.blur();
+                });
+              }
+              if (pinInput) {
+                pinInput.addEventListener('focus', function(e) {
+                  alert('Si deseas editar el usuario o el pin, edita el nombre y el documento, o elimina el usuario y vuelve a crearlo');
+                  this.blur();
+                });
+                pinInput.addEventListener('click', function(e) {
+                  alert('Si deseas editar el usuario o el pin, edita el nombre y el documento, o elimina el usuario y vuelve a crearlo');
+                  this.blur();
+                });
+              }
+            }, 0);
+          }
         });
       }
 
@@ -268,14 +297,14 @@
           return;
         }
 
-        // Permitir varios usuarios con mismo nombre y username, pero NO con mismo username+pin
-        const { data: existing, error: errorGet } = await supabase.from('usuarios').select('id').eq('username', username).eq('pin', pin);
-        if (errorGet) {
-          showNotification('Error de conexión con Supabase: ' + errorGet.message, 'error');
+        // Permitir varios usuarios con mismo nombre, username y pin, pero el documento debe ser único
+        const { data: existingDoc, error: errorDoc } = await supabase.from('usuarios').select('id').eq('documento', documento);
+        if (errorDoc) {
+          showNotification('Error de conexión con Supabase: ' + errorDoc.message, 'error');
           return;
         }
-        if (existing && existing.length > 0) {
-          showNotification(`Ups, alguien ya tiene el nombre ${username} y el PIN ${pin}. Intenta registrarlo con el primer apellido.`, 'error');
+        if (existingDoc && existingDoc.length > 0) {
+          showNotification('Ya existe un usuario con ese documento.', 'error');
           return;
         }
 
@@ -294,11 +323,14 @@
 
       // Edición y acciones de usuario
       window.enableEdit = function(username) {
+        const isBc = username === 'Bc';
         document.querySelector(`.edit-nombreCompleto[data-username='${username}']`).disabled = false;
-        document.querySelector(`.edit-username[data-username='${username}']`).disabled = false;
-        document.querySelector(`.edit-pin[data-username='${username}']`).disabled = false;
         document.querySelector(`.edit-documento[data-username='${username}']`).disabled = false;
         document.querySelector(`.edit-telefono[data-username='${username}']`).disabled = false;
+        if (!isBc) {
+          document.querySelector(`.edit-username[data-username='${username}']`).disabled = false;
+          document.querySelector(`.edit-pin[data-username='${username}']`).disabled = false;
+        }
         document.querySelector(`.edit-numero[data-username='${username}']`).disabled = false;
         const tr = Array.from(document.querySelectorAll('#usersTable tbody tr')).find(tr => tr.querySelector(`.edit-username[data-username='${username}']`));
         tr.querySelector('.save-btn').style.display = '';
@@ -347,6 +379,10 @@
       // Variable global para el modo Borrado Especial
       let borradoEspecialActivado = false;
 window.confirmDeleteUser = async function(username) {
+  // Buscar datos completos del usuario a eliminar (por documento)
+  const users = await getAllUsersSupabase();
+  // Si hay más de un usuario con el mismo username, pedir documento
+  let userToDelete = null;
   if (!borradoEspecialActivado && ['Juan', 'Bc', 'Admin'].includes(username)) {
     alert('No puedes eliminar un usuario por defecto.');
     return;
@@ -355,23 +391,32 @@ window.confirmDeleteUser = async function(username) {
     alert('No puedes eliminar el usuario Admin.');
     return;
   }
-  // Buscar datos completos del usuario
-  const user = await getUserSupabase(username);
-  let nombreCompleto = user && user.nombreCompleto ? user.nombreCompleto : username;
-  let documento = user && user.documento ? user.documento : '';
+  const matchingUsers = users.filter(u => u.username === username);
+  if (matchingUsers.length > 1) {
+    const doc = prompt('Hay varios usuarios con ese nombre. Por favor, ingresa el número de documento del usuario a eliminar:');
+    userToDelete = matchingUsers.find(u => u.documento === doc);
+    if (!userToDelete) {
+      alert('No se encontró un usuario con ese documento.');
+      return;
+    }
+  } else {
+    userToDelete = matchingUsers[0];
+  }
+  let nombreCompleto = userToDelete && userToDelete.nombreCompleto ? userToDelete.nombreCompleto : username;
+  let documento = userToDelete && userToDelete.documento ? userToDelete.documento : '';
   if (confirm(`¿Estás seguro de eliminar a ${nombreCompleto} con cédula ${documento}?`)) {
-    window.deleteUser(username);
+    window.deleteUserByDocumento(documento);
   }
 }
-      window.deleteUser = async function(username) {
-        const { error } = await deleteUserSupabase(username);
-        if (error) {
-          showNotification('Error al eliminar usuario: ' + error.message, 'error');
-        } else {
-          showNotification('Eliminado con éxito', 'success');
-        }
-        renderUsers();
-      }
+window.deleteUserByDocumento = async function(documento) {
+  const { error } = await supabase.from('usuarios').delete().eq('documento', documento);
+  if (error) {
+    showNotification('Error al eliminar usuario: ' + error.message, 'error');
+  } else {
+    showNotification('Eliminado con éxito', 'success');
+  }
+  renderUsers();
+}
       window.togglePauseUser = async function(username) {
         if (["Juan", "Bc", "Admin"].includes(username)) {
           showNotification('No puedes pausar un usuario por defecto.', 'error');
