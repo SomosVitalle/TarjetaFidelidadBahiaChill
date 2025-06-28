@@ -205,6 +205,12 @@
                   localStorage.setItem('currentUser', user.documento);
                   localStorage.setItem('currentUserDoc', user.documento);
                   localStorage.setItem('lastActivity', Date.now().toString());
+                  // Si es Admin, mostrar panel con poder total
+                  if (user.documento === '2272222272') {
+                    localStorage.setItem('poderTotal', 'ok');
+                  } else {
+                    localStorage.removeItem('poderTotal');
+                  }
                   window.location.href = 'panel_de_control.html';
                   return;
               }
