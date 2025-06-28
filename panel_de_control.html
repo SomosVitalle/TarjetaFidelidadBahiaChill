@@ -411,16 +411,18 @@
 window.confirmDeleteUser = async function(username) {
   // Buscar datos completos del usuario a eliminar (por documento)
   const users = await getAllUsersSupabase();
-  // Si hay más de un usuario con el mismo username, pedir documento
   let userToDelete = null;
+  // Permitir borrar Admin solo si borradoEspecialActivado está activo
   if (!borradoEspecialActivado && ['Juan', 'Bc', 'Admin'].includes(username)) {
     alert('No puedes eliminar un usuario por defecto.');
     return;
   }
-  if (username === 'Admin') {
+  // Si no está en modo especial, Admin no se puede borrar
+  if (username === 'Admin' && !borradoEspecialActivado) {
     alert('No puedes eliminar el usuario Admin.');
     return;
   }
+  // Siempre pedir documento si hay más de un usuario con ese username
   const matchingUsers = users.filter(u => u.username === username);
   if (matchingUsers.length > 1) {
     const doc = prompt('Hay varios usuarios con ese nombre. Por favor, ingresa el número de documento del usuario a eliminar:');
@@ -432,8 +434,13 @@ window.confirmDeleteUser = async function(username) {
   } else {
     userToDelete = matchingUsers[0];
   }
-  let nombreCompleto = userToDelete && userToDelete.nombreCompleto ? userToDelete.nombreCompleto : username;
-  let documento = userToDelete && userToDelete.documento ? userToDelete.documento : '';
+  // Si no se encontró usuario, salir
+  if (!userToDelete) {
+    alert('No se encontró el usuario a eliminar.');
+    return;
+  }
+  let nombreCompleto = userToDelete.nombreCompleto || username;
+  let documento = userToDelete.documento || '';
   if (confirm(`¿Estás seguro de eliminar a ${nombreCompleto} con cédula ${documento}?`)) {
     window.deleteUserByDocumento(documento);
   }
@@ -504,21 +511,29 @@ window.deleteUserByDocumento = async function(documento) {
           panel.style = 'background:#fff; color:#222; border:2px solid #e67e22; border-radius:8px; padding:18px; margin-bottom:18px; max-width:400px;';
           document.querySelector('.container').insertBefore(panel, document.querySelector('h1'));
         }
-        // Obtener usuario Bc desde Supabase
-        const user = await getUserSupabase('Bc');
-        if (!user) {
-          panel.innerHTML = '<b>No existe el usuario Bc.</b>';
+        // Buscar todos los usuarios con username 'Bc'
+        const { data: bcUsers, error: errorBc } = await supabase.from('usuarios').select('*').eq('username', 'Bc');
+        if (!bcUsers || bcUsers.length === 0) {
+          panel.innerHTML = '<b>No existe ningún usuario Bc.</b>';
           return;
         }
-        const isPaused = user.paused;
-        const icon = isPaused ? '▶️' : '⏸️';
-        const iconTitle = isPaused ? 'Reactivar admin Bc' : 'Pausar admin Bc';
+        // Mostrar todos los Bc (si hay varios, mostrar todos)
+        let bcHtml = '';
+        bcUsers.forEach((user, idx) => {
+          const isPaused = user.paused;
+          const icon = isPaused ? '▶️' : '⏸️';
+          const iconTitle = isPaused ? 'Reactivar admin Bc' : 'Pausar admin Bc';
+          bcHtml += `
+            <div style='display:flex; align-items:center; gap:12px; margin-bottom:8px;'>
+              <b>Usuario:</b> <span style='color:#0077b6;'>Bc</span>
+              <b>PIN:</b> <span style='color:#e67e22;'>${user.pin}</span>
+              <b>Doc:</b> <span style='color:#888;'>${user.documento || ''}</span>
+              <button onclick="(async()=>{await window.togglePauseUser('Bc')})()" title="${iconTitle}" style="background:none;border:none;font-size:1.2em;cursor:pointer;">${icon}</button>
+            </div>
+          `;
+        });
         panel.innerHTML = `
-          <div style='display:flex; align-items:center; gap:12px; margin-bottom:12px;'>
-            <b>Usuario:</b> <span style='color:#0077b6;'>Bc</span>
-            <b>PIN:</b> <span style='color:#e67e22;'>${user.pin}</span>
-            <button onclick="togglePauseBc()" title="${iconTitle}" style="background:none;border:none;font-size:1.5em;cursor:pointer;">${icon}</button>
-          </div>
+          ${bcHtml}
           <button id="pausarTodosBtn" style="margin-top:10px; background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer;">Pausar a todos los usuarios</button>
           <button id="despausarTodosBtn" style="margin-top:10px; background:#27ae60; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer; margin-left:10px;">Despausar a Todos</button>
           <div style='margin-top:18px; padding:10px; border-top:1px solid #eee; display:flex; align-items:center; gap:12px;'>
