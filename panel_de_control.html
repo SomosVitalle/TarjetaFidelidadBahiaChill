@@ -256,7 +256,19 @@
           showNotification('El teléfono debe ser exactamente 10 números.', 'error');
           return;
         }
-        // Verifica si ya existe el usuario con mismo nombre y pin
+
+        // Verifica si el teléfono ya fue registrado
+        const { data: existingPhone, error: errorPhone } = await supabase.from('usuarios').select('id').eq('telefono', telefono);
+        if (errorPhone) {
+          showNotification('Error de conexión con Supabase: ' + errorPhone.message, 'error');
+          return;
+        }
+        if (existingPhone && existingPhone.length > 0) {
+          showNotification('El Teléfono ya fué registrado, intente con otro diferente', 'error');
+          return;
+        }
+
+        // Permitir varios usuarios con mismo nombre y username, pero NO con mismo username+pin
         const { data: existing, error: errorGet } = await supabase.from('usuarios').select('id').eq('username', username).eq('pin', pin);
         if (errorGet) {
           showNotification('Error de conexión con Supabase: ' + errorGet.message, 'error');
@@ -266,12 +278,7 @@
           showNotification(`Ups, alguien ya tiene el nombre ${username} y el PIN ${pin}. Intenta registrarlo con el primer apellido.`, 'error');
           return;
         }
-        // Verifica si ya existe el usuario solo por nombre
-        const { data: existingName } = await supabase.from('usuarios').select('id').eq('username', username);
-        if (existingName && existingName.length > 0) {
-          showNotification('El usuario ya existe', 'error');
-          return;
-        }
+
         // Intenta crear el usuario
         const { error } = await supabase.from('usuarios').insert([{ username, nombreCompleto, pin, documento, telefono, numero, paused: false, admin: false }]);
         if (error) {
