@@ -275,9 +275,23 @@
             transform: translate(-50%,-50%) scale(0.7);
             transition: transform 0.35s cubic-bezier(.7,1.7,.5,1);
         }
-        .gift-anim.regrow {
-            transform: translate(-50%,-50%) scale(1.15);
-            transition: transform 0.35s cubic-bezier(.7,1.7,.5,1);
+        .gift-anim.heartbeat {
+            animation: heartbeatGift 1.2s cubic-bezier(.7,1.7,.5,1);
+        }
+        @keyframes heartbeatGift {
+          0% { opacity: 0; transform: translate(-50%,-50%) scale(0.1); }
+          10% { opacity: 1; transform: translate(-50%,-50%) scale(1.1); }
+          20% { opacity: 1; transform: translate(-50%,-50%) scale(0.95); }
+          35% { opacity: 1; transform: translate(-50%,-50%) scale(1.13); }
+          50% { opacity: 1; transform: translate(-50%,-50%) scale(0.92); }
+          65% { opacity: 1; transform: translate(-50%,-50%) scale(1.08); }
+          80% { opacity: 1; transform: translate(-50%,-50%) scale(1.0); }
+          90% { opacity: 1; transform: translate(-50%,-50%) scale(1.0); }
+          100% { opacity: 1; transform: translate(-50%,-50%) scale(1.0); }
+        }
+        .gift-anim.fadeout {
+            opacity: 0 !important;
+            transition: opacity 0.5s;
         }
         .footer.gift-claim {
             font-size: 0.9em !important;
@@ -561,30 +575,26 @@
         const gift = document.getElementById('gift-anim');
         if (!gift) return;
         // Si ya está visible, no repetir
-        if (gift.classList.contains('show')) return;
+        if (gift.classList.contains('heartbeat')) return;
         gift.style.display = 'block';
-        setTimeout(() => {
-          gift.classList.add('show');
-          // Vibración 3 veces por 0.5s
-          if (navigator.vibrate) {
-            navigator.vibrate([500, 200, 500, 200, 500]);
-          }
-          // Animación: crecer -> encoger -> crecer de nuevo -> desaparecer
+        gift.classList.remove('fadeout');
+        // Forzar reflow para reiniciar animación si se repite
+        void gift.offsetWidth;
+        gift.classList.add('heartbeat');
+        // Vibración 3 veces por 0.5s
+        if (navigator.vibrate) {
+          navigator.vibrate([500, 200, 500, 200, 500]);
+        }
+        // Cuando termine la animación heartbeat, difuminar y ocultar
+        gift.addEventListener('animationend', function handler() {
+          gift.removeEventListener('animationend', handler);
+          gift.classList.remove('heartbeat');
+          gift.classList.add('fadeout');
           setTimeout(() => {
-            gift.classList.add('shrink');
-            gift.classList.remove('show');
-            setTimeout(() => {
-              gift.classList.remove('shrink');
-              gift.classList.add('regrow');
-              setTimeout(() => {
-                gift.classList.remove('regrow');
-                setTimeout(() => {
-                  gift.style.display = 'none';
-                }, 400);
-              }, 500); // tiempo de regrow
-            }, 350); // tiempo de shrink
-          }, 1800); // tiempo de show antes de shrink
-        }, 100);
+            gift.style.display = 'none';
+            gift.classList.remove('fadeout');
+          }, 500);
+        });
       }
 
       // Redirigir a login tras 5 minutos
