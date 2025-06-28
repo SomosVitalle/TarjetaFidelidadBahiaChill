@@ -135,7 +135,7 @@
         <div class="card">
             <div class="login-title" style="font-weight:bold; white-space:pre-line;">Bahia Chill<br>Tarjeta VIP</div>
             <form id="login-form" autocomplete="off" style="width:100%;display:flex;flex-direction:column;align-items:center;">
-                <input class="login-input" type="text" id="usuario" name="usuario" placeholder="Usuario" required autocomplete="off" />
+                <input class="login-input" type="text" id="documento" name="documento" placeholder="Documento" required maxlength="10" minlength="10" pattern="[0-9]{10}" autocomplete="off" inputmode="numeric" />
                 <div class="pin-container">
                     <input class="login-input pin-input" type="password" id="pin" name="pin" placeholder="PIN" required maxlength="4" autocomplete="off" inputmode="numeric" autocomplete="one-time-code" />
                     <button type="button" class="eye-btn" id="togglePin"><i class="fa fa-eye"></i></button>
@@ -182,90 +182,46 @@
       const loginForm = document.getElementById('login-form');
       const errorMsg = document.getElementById('error-msg');
       loginBtn.addEventListener('click', async function(e) {
-          const usuario = document.getElementById('usuario').value.trim();
+          const documento = document.getElementById('documento').value.trim();
           const pin = document.getElementById('pin').value.trim();
-          // Buscar TODOS los usuarios con ese username y ese pin (deben coincidir ambos)
+          // Buscar usuario por documento y pin
           const { data, error } = await supabase
               .from('usuarios')
               .select('*')
-              .eq('username', usuario)
+              .eq('documento', documento)
               .eq('pin', pin);
           let user = data && data.length > 0 ? data[0] : null;
-          // Admin login (Admin o Bc con pines válidos)
-          if ((usuario === 'Admin' && pin === '2272') ||
-              (usuario === 'Bc' && [
-                  '2467', '7294', '3168', '4835', '1590'
-              ].includes(pin))) {
-              // Si es Bc y está pausado, mostrar error
-              if (usuario === 'Bc' && user && user.paused) {
-                  errorMsg.textContent = 'Error interno, intentelo más tarde';
-                  errorMsg.style.display = 'block';
-                  return;
-              }
-              if (user && (user.pin === pin || (usuario === 'Bc' && [
-                  '7294', '3168', '4835', '1590'
-              ].includes(pin)))) {
-                  errorMsg.style.display = 'none';
-                  localStorage.setItem('bahiaChillLogin', 'ok');
-                  // Guardar el documento único como identificador de sesión
-                  localStorage.setItem('currentUser', user.documento || usuario);
-                  localStorage.setItem('lastActivity', Date.now().toString());
-                  window.location.href = 'panel_de_control.html';
-                  return;
-              }
-          }
-          // Usuarios normales
           if (user && user.pin === pin) {
               if (user.paused) {
                   errorMsg.textContent = 'Usuario pausado. Contacta al administrador.';
                   errorMsg.style.display = 'block';
+                  return;
+              }
+              errorMsg.style.display = 'none';
+              localStorage.setItem('bahiaChillLogin', 'ok');
+              localStorage.setItem('currentUser', user.documento);
+              localStorage.setItem('lastActivity', Date.now().toString());
+              if (user.admin) {
+                  window.location.href = 'panel_de_control.html';
               } else {
-                  errorMsg.style.display = 'none';
-                  localStorage.setItem('bahiaChillLogin', 'ok');
-                  // Guardar el documento único como identificador de sesión
-                  localStorage.setItem('currentUser', user.documento || usuario);
-                  localStorage.setItem('lastActivity', Date.now().toString());
                   window.location.href = 'tarjeta.html';
               }
-          } else {
-              errorMsg.textContent = 'Usuario o PIN incorrecto';
-              errorMsg.style.display = 'block';
+              return;
           }
+          errorMsg.textContent = 'Documento o PIN incorrectos.';
+          errorMsg.style.display = 'block';
       });
       // Crear usuarios por defecto en Supabase si no existen
       window.addEventListener('DOMContentLoaded', async function() {
           // Solo crear usuarios por defecto si NO existe ya un usuario con ese username Y ese documento
-          const defaultUsers = [
-              { username: 'Juan', pin: '1234', documento: '1234561234', telefono: '', numero: 0, paused: false, admin: false },
-              { username: 'Bc', pin: '2467', documento: '2467892467', telefono: '', numero: 0, paused: false, admin: true },
-              { username: 'Admin', pin: '2272', documento: '2272222272', telefono: '', numero: 0, paused: false, admin: true }
-          ];
-          for (const user of defaultUsers) {
-              // Buscar por username Y documento
-              const { data, error } = await supabase
-                  .from('usuarios')
-                  .select('*')
-                  .eq('username', user.username)
-                  .eq('documento', user.documento);
-              if (!data || data.length === 0) {
-                  await createUserSupabase(user);
-              }
-          }
+          // Eliminado: creación de usuarios por defecto con username
       });
       // Elimina el submit por Enter
       loginForm.addEventListener('submit', function(e) {
           e.preventDefault();
       });
       // Función para obtener usuario desde Supabase
-      async function getUserSupabase(username) {
-          const { data, error } = await supabase
-              .from('usuarios')
-              .select('*')
-              .eq('username', username)
-              .maybeSingle();
-          if (error) return null;
-          return data;
-      }
+      // Eliminada función getUserSupabase por username
       // Función para crear usuario en Supabase
       async function createUserSupabase(user) {
           const { data, error } = await supabase
@@ -274,13 +230,7 @@
           return { data, error };
       }
       // Función para actualizar usuario en Supabase
-      async function updateUserSupabase(username, fields) {
-          const { data, error } = await supabase
-              .from('usuarios')
-              .update(fields)
-              .eq('username', username);
-          return { data, error };
-      }
+      // Eliminada función updateUserSupabase por username
       // Función para obtener todos los usuarios
       async function getAllUsersSupabase() {
           const { data, error } = await supabase
