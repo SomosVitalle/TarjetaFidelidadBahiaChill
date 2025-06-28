@@ -38,8 +38,12 @@
         <h1>Panel de Control - Administrador</h1>
         <form id="userForm">
             <div class="form-group">
-                <label for="username">Usuario <span style="font-weight:normal; color:#888;">(Solo poner el Primer nombre)</span></label>
-                <input type="text" id="username" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+$" title="Solo el primer nombre, sin espacios ni números">
+                <label for="nombreCompleto">Nombre Completo</label>
+                <input type="text" id="nombreCompleto" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$" title="Nombre completo (solo letras y espacios)">
+            </div>
+            <div class="form-group">
+                <label for="username">Usuario <span style="font-weight:normal; color:#888;">(Se autocompleta con el primer nombre)</span></label>
+                <input type="text" id="username" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+$" title="Solo el primer nombre, sin espacios ni números" readonly style="background:#f4f4f4;cursor:not-allowed;">
             </div>
             <div class="form-group">
                 <label for="documento">Documento <span style="font-weight:normal; color:#888;">(10 dígitos)</span></label>
@@ -64,6 +68,7 @@
             <thead>
                 <tr>
                     <th></th>
+                    <th>Nombre Completo</th>
                     <th>Usuario</th>
                     <th>PIN</th>
                     <th>Doc.</th>
@@ -164,11 +169,21 @@
           for (let i = 0; i <= 10; i++) {
             selectOptions += `<option value="${i}"${i === numero ? ' selected' : ''}>${i}</option>`;
           }
+          // Extraer primer nombre y primer apellido para mostrar en la tarjeta
+          let nombreCompleto = user.nombreCompleto || '';
+          let primerNombre = '';
+          let primerApellido = '';
+          if (nombreCompleto) {
+            const partes = nombreCompleto.trim().split(' ');
+            primerNombre = partes[0] || '';
+            primerApellido = partes[1] || '';
+          }
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td style="width:40px;">
               <button onclick="togglePauseUser('${user.username}')" title="${iconTitle}" style="background:none;border:none;font-size:1.2em;cursor:pointer;">${icon}</button>
             </td>
+            <td><input type="text" value="${nombreCompleto}" data-username="${user.username}" class="edit-nombreCompleto" disabled></td>
             <td><input type="text" value="${user.username}" data-username="${user.username}" class="edit-username" disabled></td>
             <td><input type="text" value="${user.pin}" data-username="${user.username}" class="edit-pin" maxlength="6" disabled inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{4}"></td>
             <td><input type="text" value="${user.documento || ''}" data-username="${user.username}" class="edit-documento" maxlength="10" disabled inputmode="numeric" autocomplete="off" pattern="[0-9]{10}"></td>
@@ -205,14 +220,26 @@
       }
 
       // Formulario de creación de usuario
+      // Autocompletar el campo usuario con el primer nombre
+      document.getElementById('nombreCompleto').addEventListener('input', function() {
+        const nombreCompleto = this.value.trim();
+        const primerNombre = nombreCompleto.split(' ')[0] || '';
+        document.getElementById('username').value = primerNombre;
+      });
+
       document.getElementById('userForm').addEventListener('submit', async function(e) {
         e.preventDefault();
+        const nombreCompleto = document.getElementById('nombreCompleto').value.trim();
         const username = document.getElementById('username').value.trim();
         const documento = document.getElementById('documento').value.trim();
         const pin = document.getElementById('pin').value.trim();
         const telefono = document.getElementById('telefono').value.trim();
         const numero = 0;
         // Validaciones estrictas
+        if (!nombreCompleto.match(/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/)) {
+          showNotification('El nombre completo solo puede contener letras y espacios.', 'error');
+          return;
+        }
         if (!username.match(/^[A-Za-zÁÉÍÓÚáéíóúÑñ]+$/)) {
           showNotification('El usuario debe ser solo el primer nombre, sin espacios ni números.', 'error');
           return;
@@ -246,7 +273,7 @@
           return;
         }
         // Intenta crear el usuario
-        const { error } = await supabase.from('usuarios').insert([{ username, pin, documento, telefono, numero, paused: false, admin: false }]);
+        const { error } = await supabase.from('usuarios').insert([{ username, nombreCompleto, pin, documento, telefono, numero, paused: false, admin: false }]);
         if (error) {
           showNotification('Error al crear usuario: ' + error.message, 'error');
           return;
@@ -255,10 +282,12 @@
         await renderUsers();
         this.reset();
         document.getElementById('pin').value = '';
+        document.getElementById('username').value = '';
       });
 
       // Edición y acciones de usuario
       window.enableEdit = function(username) {
+        document.querySelector(`.edit-nombreCompleto[data-username='${username}']`).disabled = false;
         document.querySelector(`.edit-username[data-username='${username}']`).disabled = false;
         document.querySelector(`.edit-pin[data-username='${username}']`).disabled = false;
         document.querySelector(`.edit-documento[data-username='${username}']`).disabled = false;
@@ -269,16 +298,35 @@
         tr.querySelector('.cancel-btn').style.display = '';
         tr.querySelector('button[onclick^="enableEdit"]').style.display = 'none';
         tr.querySelector('button[onclick^="confirmDeleteUser"]').style.display = 'none';
+        // Autocompletar usuario al editar nombre completo
+        const nombreInput = tr.querySelector('.edit-nombreCompleto');
+        const usernameInput = tr.querySelector('.edit-username');
+        if (nombreInput && usernameInput) {
+          nombreInput.addEventListener('input', function() {
+            const nombreCompleto = this.value.trim();
+            const primerNombre = nombreCompleto.split(' ')[0] || '';
+            usernameInput.value = primerNombre;
+          });
+        }
       }
       window.saveUser = async function(username) {
+        const nombreCompleto = document.querySelector(`.edit-nombreCompleto[data-username='${username}']`).value.trim();
         const usernameVal = document.querySelector(`.edit-username[data-username='${username}']`).value.trim();
         const pin = document.querySelector(`.edit-pin[data-username='${username}']`).value.trim();
         const documento = document.querySelector(`.edit-documento[data-username='${username}']`).value.trim();
         const telefono = document.querySelector(`.edit-telefono[data-username='${username}']`).value.trim();
         const numero = parseInt(document.querySelector(`.edit-numero[data-username='${username}']`).value, 10);
+        if (!nombreCompleto.match(/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/)) {
+          showNotification('El nombre completo solo puede contener letras y espacios.', 'error');
+          return;
+        }
+        if (!usernameVal.match(/^[A-Za-zÁÉÍÓÚáéíóúÑñ]+$/)) {
+          showNotification('El usuario debe ser solo el primer nombre, sin espacios ni números.', 'error');
+          return;
+        }
         if (isNaN(numero) || numero < 0 || numero > 10) return showNotification('El número debe estar entre 0 y 10', 'error');
-        if (!documento.match(/^\d{10}$/)) return showNotification('El documento debe ser exactamente 10 dígitos', 'error');
-        const { error } = await updateUserSupabase(username, { username: usernameVal, pin, documento, telefono, numero });
+        if (!documento.match(/^[0-9]{10}$/)) return showNotification('El documento debe ser exactamente 10 dígitos', 'error');
+        const { error } = await updateUserSupabase(username, { nombreCompleto, username: usernameVal, pin, documento, telefono, numero });
         if (error) {
           showNotification('Error al modificar usuario: ' + error.message, 'error');
         } else {
