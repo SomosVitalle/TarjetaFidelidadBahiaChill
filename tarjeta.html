@@ -456,8 +456,9 @@
             <!-- Quitar logo de la palma en el reverso -->
             <div class="title sharp" id="back-title" style="transform: scaleX(-1);">BAHIA CHILL</div>
             <div style="transform: scaleX(-1); display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;margin-top:30px;">
-              <div id="user-name" style="font-size:1.15em;font-weight:bold;margin-bottom:12px;letter-spacing:1px;"></div>
-              <div style="display:flex;align-items:center;gap:10px;">
+              <div id="user-name" style="font-size:1.15em;font-weight:bold;margin-bottom:8px;letter-spacing:1px;"></div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:0;"></div>
+              <div style="display:flex;align-items:center;gap:8px;flex-direction:row;">
                 <span style="font-size:1.05em;letter-spacing:2px;">Documento:</span>
                 <span id="user-doc" style="font-size:1.05em;letter-spacing:2px;font-family:monospace;"></span>
                 <button id="toggle-doc-visibility" style="background:none;border:none;outline:none;cursor:pointer;color:#fff;font-size:1.1em;display:flex;align-items:center;">
@@ -723,16 +724,15 @@
           return;
         }
         userNameDiv.textContent = user.username || '';
-        // Documento: mostrar ****** + últimos 4 dígitos (ocultos por defecto)
+        // Documento: mostrar ****** + últimos 4 dígitos (ocultos por defecto), revelar todo al presionar el ojo
         let doc = user.documento ? String(user.documento) : '';
         debugDiv.textContent += ' | Documento: ' + doc;
         if (doc.length !== 10) {
           doc = doc.padStart(10, '*');
         }
-        const last4 = doc.slice(-4);
         let hidden = true;
         function updateDoc() {
-          userDocSpan.textContent = '******' + (hidden ? '••••' : last4);
+          userDocSpan.textContent = hidden ? '**********' : doc;
           const eyeIcon = document.getElementById('eye-icon');
           if (eyeIcon) eyeIcon.className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
         }
