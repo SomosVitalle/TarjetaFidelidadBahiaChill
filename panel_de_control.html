@@ -442,6 +442,21 @@
                 document.getElementById('respuesta'+i).value = data[i-1]?.respuesta || '';
               }
             }
+            // ACTUALIZAR FAQ EN MODAL DE TARJETA SI EXISTE
+            if (window.parent && window.parent !== window && window.parent.document) {
+              // Si está en iframe, no hacer nada
+              return;
+            }
+            try {
+              const tarjetaFaqModal = window.opener ? window.opener.document.getElementById('faq-modal-integrado') : document.getElementById('faq-modal-integrado');
+              if (tarjetaFaqModal) {
+                const blocks = tarjetaFaqModal.querySelectorAll('.faq-block');
+                for (let i = 0; i < blocks.length && i < data.length; i++) {
+                  blocks[i].querySelector('.faq-block-header').innerHTML = data[i].pregunta + ' <span class="triangle">&#9660;</span>';
+                  blocks[i].querySelector('.faq-block-content').textContent = data[i].respuesta;
+                }
+              }
+            } catch(e) {}
           })();
           // Guardar FAQ en Supabase
           faqForm.onsubmit = async function(e) {
@@ -477,6 +492,19 @@
               await Promise.all(updates);
               faqSaveMsg.textContent = 'FAQ guardado correctamente en Supabase';
               faqSaveMsg.style.color = '#27ae60';
+              // ACTUALIZAR FAQ EN MODAL DE TARJETA SI EXISTE
+              try {
+                const tarjetaFaqModal = window.opener ? window.opener.document.getElementById('faq-modal-integrado') : document.getElementById('faq-modal-integrado');
+                if (tarjetaFaqModal) {
+                  const blocks = tarjetaFaqModal.querySelectorAll('.faq-block');
+                  for (let i = 0; i < blocks.length && i < 5; i++) {
+                    const pregunta = document.getElementById('pregunta'+(i+1)).value.trim();
+                    const respuesta = document.getElementById('respuesta'+(i+1)).value.trim();
+                    blocks[i].querySelector('.faq-block-header').innerHTML = pregunta + ' <span class="triangle">&#9660;</span>';
+                    blocks[i].querySelector('.faq-block-content').textContent = respuesta;
+                  }
+                }
+              } catch(e) {}
             } catch (err) {
               faqSaveMsg.textContent = 'Error al guardar FAQ';
               faqSaveMsg.style.color = '#c0392b';
