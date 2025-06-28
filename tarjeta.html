@@ -790,6 +790,8 @@
         if (!username) return;
         let doc = '';
         let nombre = username;
+        let primerNombre = '';
+        let primerApellido = '';
         if (window.supabase) {
           try {
             const { data, error } = await fetch(
@@ -804,7 +806,16 @@
               }
             ).then(r => r.json().then(data => ({ data, error: r.ok ? null : r.statusText })));
             if (data && data.length > 0) {
-              nombre = data[0].username;
+              // Extraer primer nombre y primer apellido
+              const nombreCompleto = data[0].nombreCompleto || '';
+              if (nombreCompleto) {
+                const partes = nombreCompleto.trim().split(' ');
+                primerNombre = partes[0] || '';
+                primerApellido = partes[1] || '';
+                nombre = (primerNombre + (primerApellido ? ' ' + primerApellido : ''));
+              } else {
+                nombre = data[0].username;
+              }
               doc = data[0].documento ? String(data[0].documento) : '';
             }
           } catch (e) {}
