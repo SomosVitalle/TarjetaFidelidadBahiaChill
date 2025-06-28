@@ -234,7 +234,7 @@
         const documento = document.getElementById('documento').value.trim();
         const pin = document.getElementById('pin').value.trim();
         const telefono = document.getElementById('telefono').value.trim();
-        const numero = 0;
+        const numero = 2;
         // Validaciones estrictas
         if (!nombreCompleto.match(/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/)) {
           showNotification('El nombre completo solo puede contener letras y espacios.', 'error');
@@ -339,19 +339,23 @@
       }
       // Variable global para el modo Borrado Especial
       let borradoEspecialActivado = false;
-      window.confirmDeleteUser = function(username) {
-        if (!borradoEspecialActivado && ['Juan', 'Bc', 'Admin'].includes(username)) {
-          alert('No puedes eliminar un usuario por defecto.');
-          return;
-        }
-        if (username === 'Admin') {
-          alert('No puedes eliminar el usuario Admin.');
-          return;
-        }
-        if (confirm(`¿Estás seguro de eliminar al usuario "${username}"?`)) {
-          window.deleteUser(username);
-        }
-      }
+window.confirmDeleteUser = async function(username) {
+  if (!borradoEspecialActivado && ['Juan', 'Bc', 'Admin'].includes(username)) {
+    alert('No puedes eliminar un usuario por defecto.');
+    return;
+  }
+  if (username === 'Admin') {
+    alert('No puedes eliminar el usuario Admin.');
+    return;
+  }
+  // Buscar datos completos del usuario
+  const user = await getUserSupabase(username);
+  let nombreCompleto = user && user.nombreCompleto ? user.nombreCompleto : username;
+  let documento = user && user.documento ? user.documento : '';
+  if (confirm(`¿Estás seguro de eliminar a ${nombreCompleto} con cédula ${documento}?`)) {
+    window.deleteUser(username);
+  }
+}
       window.deleteUser = async function(username) {
         const { error } = await deleteUserSupabase(username);
         if (error) {
