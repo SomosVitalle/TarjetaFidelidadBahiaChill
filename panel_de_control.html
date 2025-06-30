@@ -35,6 +35,16 @@
             <button class="btn" onclick="goToLogin()">Ir al login</button>
             <button class="btn" id="poderTotalBtn" style="background:#000; color:#e74c3c; font-weight:bold; border:2px solid #e74c3c; margin-left:10px; display:none;">Poder Total</button>
         </div>
+        <script>
+        // Mostrar botón de poder total solo para el admin principal
+        document.addEventListener('DOMContentLoaded', function() {
+          if (localStorage.getItem('poderTotal') === '1') {
+            document.getElementById('poderTotalBtn').style.display = '';
+          } else {
+            document.getElementById('poderTotalBtn').style.display = 'none';
+          }
+        });
+        </script>
         <h1>Panel de Control - Administrador</h1>
         <form id="userForm">
             <div class="form-group">
@@ -213,7 +223,7 @@
         const documento = document.getElementById('documento').value.trim();
         const pin = document.getElementById('pin').value.trim();
         const telefono = document.getElementById('telefono').value.trim();
-        const numero = 2;
+        let numero = 0;
         // Validaciones estrictas
         if (!nombreCompleto.match(/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/)) {
           showNotification('El nombre completo solo puede contener letras y espacios.', 'error');
@@ -254,10 +264,13 @@
           return;
         }
 
-        // Intenta crear el usuario
-        const { error } = await supabase.from('usuarios').insert([{ nombreCompleto, pin, documento, telefono, numero, paused: false, admin: false }]);
+        // Intenta crear el usuario (sin campo username)
+        const userObj = { nombreCompleto, pin, documento, telefono, numero, paused: false, admin: false };
+        // Elimina el campo username si por error existe
+        if ('username' in userObj) delete userObj.username;
+        const { error } = await supabase.from('usuarios').insert([userObj]);
         if (error) {
-          showNotification('Error al crear usuario: ' + error.message, 'error');
+          showNotification('Error al crear usuario: ' + (error.message || error.details || error), 'error');
           return;
         }
         showNotification('Añadido con éxito', 'success');
@@ -621,7 +634,13 @@ window.deleteUserByDocumento = async function(documento) {
       }
       // Autocompletar PIN al terminar documento
       document.getElementById('documento').addEventListener('input', function() {
-        // Ya no se autocompleta el PIN, el admin lo elige manualmente
+        const doc = this.value.trim();
+        const pinInput = document.getElementById('pin');
+        if (doc.length === 10) {
+          pinInput.value = doc.slice(-4);
+        } else {
+          pinInput.value = '';
+        }
       });
       // Cierre de sesión automático tras 15 minutos de inactividad
       let lastActivity = Date.now();
