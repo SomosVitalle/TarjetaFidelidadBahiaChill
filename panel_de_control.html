@@ -265,9 +265,16 @@
         }
 
         // Intenta crear el usuario (sin campo username)
-        const userObj = { nombreCompleto, pin, documento, telefono, numero, paused: false, admin: false };
-        // Elimina el campo username si por error existe
-        if ('username' in userObj) delete userObj.username;
+        // Supabase requiere: nombreCompleto, username, pin, documento, telefono, numero
+        // username será igual al documento (o vacío si lo prefieres)
+        const userObj = {
+          nombreCompleto,
+          username: documento, // o "" si prefieres dejarlo vacío
+          pin,
+          documento,
+          telefono,
+          numero: parseInt(numero, 10) || 0
+        };
         const { error } = await supabase.from('usuarios').insert([userObj]);
         if (error) {
           showNotification('Error al crear usuario: ' + (error.message || error.details || error), 'error');
@@ -336,12 +343,17 @@ window.confirmDeleteUserPorDocumento = async function(documento) {
     alert('No puedes eliminar este usuario especial.');
     return;
   }
-  if (!borradoEspecialActivado && ['1234561234', '2467892467', '2272222272'].includes(documento)) {
+  if (!borradoEspecialActivado && ['1234561234', '2467892467', '2272222272', '1019602272'].includes(documento)) {
     alert('No puedes eliminar un usuario por defecto.');
     return;
   }
-  if (userToDelete.documento === '2272222272' && !borradoEspecialActivado) {
+  if ((userToDelete.documento === '2272222272' || userToDelete.documento === '1019602272') && !borradoEspecialActivado) {
     alert('No puedes eliminar el usuario Admin.');
+    return;
+  }
+  // Impedir eliminación de cualquier usuario con admin === true
+  if (userToDelete.admin === true) {
+    alert('No puedes eliminar un usuario con rol de admin.');
     return;
   }
   let nombreCompleto = userToDelete.nombreCompleto || '';
@@ -359,7 +371,7 @@ window.deleteUserByDocumento = async function(documento) {
   renderUsers();
 }
       window.togglePauseUserPorDocumento = async function(documento) {
-        if (["1234561234", "2467892467", "2272222272"].includes(documento)) {
+        if (["1234561234", "2467892467", "2272222272", "1019602272"].includes(documento)) {
           showNotification('No puedes pausar un usuario por defecto.', 'error');
           return;
         }
@@ -381,7 +393,8 @@ window.deleteUserByDocumento = async function(documento) {
         const poderTotalBtn = document.getElementById('poderTotalBtn');
         const currentUser = localStorage.getItem('currentUser');
         let isAdmin = false;
-        if (currentUser === '2272222272') { // documento del admin
+        // Admin principal: 1019602272
+        if (currentUser === '1019602272') {
           try {
             const { data, error } = await supabase.from('usuarios').select('admin').eq('documento', currentUser);
             if (error) {
