@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarjeta BC</title>
+    <title>Login - Bahía Chill</title>
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
@@ -190,10 +190,35 @@
       loginBtn.addEventListener('click', async function(e) {
           const documento = document.getElementById('documento').value.trim();
           const pin = document.getElementById('pin').value.trim();
-          // Permitir acceso especial para admin escribiendo "Admin" o "Bc" en el campo documento
-          if ((documento.toLowerCase() === 'admin' && pin === '2272') || (documento.toLowerCase() === 'bc' && pin === '2467')) {
+          // Acceso especial para admin principal (cedula 1019602272, pin 7294)
+          if (documento === '1019602272' && pin === '7294') {
               // Buscar el admin real por documento
-              const adminDoc = documento.toLowerCase() === 'admin' ? '2272222272' : '2467892467';
+              const { data, error } = await supabase
+                  .from('usuarios')
+                  .select('*')
+                  .eq('documento', documento)
+                  .eq('pin', pin);
+              let user = data && data.length > 0 ? data[0] : null;
+              if (user && user.admin) {
+                  if (user.paused) {
+                      errorMsg.textContent = 'Usuario pausado. Contacta al administrador.';
+                      errorMsg.style.display = 'block';
+                      return;
+                  }
+                  errorMsg.style.display = 'none';
+                  localStorage.setItem('bahiaChillLogin', 'ok');
+                  localStorage.setItem('currentUser', user.documento);
+                  localStorage.setItem('currentUserDoc', user.documento);
+                  localStorage.setItem('lastActivity', Date.now().toString());
+                  // Poder total: mostrar botón especial
+                  localStorage.setItem('poderTotal', '1');
+                  window.location.href = 'panel_de_control.html';
+                  return;
+              }
+          }
+          // Acceso especial para admin secundario (Bc, pin 2467)
+          if ((documento.toLowerCase() === 'bc' && pin === '2467')) {
+              const adminDoc = '2467892467';
               const { data, error } = await supabase
                   .from('usuarios')
                   .select('*')
@@ -211,8 +236,8 @@
                   localStorage.setItem('currentUser', user.documento);
                   localStorage.setItem('currentUserDoc', user.documento);
                   localStorage.setItem('lastActivity', Date.now().toString());
-                  // Poder total: mostrar botón especial
-                  localStorage.setItem('poderTotal', documento.toLowerCase() === 'admin' ? '1' : '0');
+                  // Poder total: solo para admin principal
+                  localStorage.setItem('poderTotal', '0');
                   window.location.href = 'panel_de_control.html';
                   return;
               }
