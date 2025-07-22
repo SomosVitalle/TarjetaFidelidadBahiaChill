@@ -158,10 +158,14 @@
         const filtro = (document.getElementById('busquedaUsuarios')?.value || '').toLowerCase();
         const tbody = document.querySelector('#usersTable tbody');
         tbody.innerHTML = '';
-        // Ocultar Admin si el usuario actual es Bc
         const currentUser = localStorage.getItem('currentUser');
-        users.filter(user => {
-          // Si el usuario actual es admin, no ocultar nada
+        // Si el usuario actual es admin (pero NO el principal), solo puede ver usuarios que no sean admin
+        let visibleUsers = users;
+        const currentUserObj = users.find(u => u.documento === currentUser);
+        if (currentUserObj && currentUserObj.admin === true && currentUser !== '1019602272') {
+          visibleUsers = users.filter(u => !u.admin);
+        }
+        visibleUsers.filter(user => {
           if (!filtro) return true;
           return (
             (user.nombreCompleto && user.nombreCompleto.toLowerCase().includes(filtro)) ||
