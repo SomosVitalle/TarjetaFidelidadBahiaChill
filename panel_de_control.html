@@ -51,86 +51,7 @@
                 <label for="nombreCompleto">Nombre Completo</label>
                 <input type="text" id="nombreCompleto" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$" title="Nombre completo (solo letras y espacios)">
             </div>
-            <!-- Eliminado campo username -->
-            <div class="form-group">
-                <label for="documento">Documento <span style="font-weight:normal; color:#888;">(10 dígitos)</span></label>
-                <input type="text" id="documento" required maxlength="10" minlength="10" pattern="[0-9]{10}" title="Debe ser exactamente 10 dígitos" inputmode="numeric" autocomplete="off">
-            </div>
-            <div class="form-group">
-                <label for="pin">PIN <span style="font-weight:normal; color:#888;">(elige un PIN de 4 dígitos)</span></label>
-                <input type="text" id="pin" required maxlength="4" minlength="4" pattern="[0-9]{4}" title="Debe ser exactamente 4 dígitos" inputmode="numeric" autocomplete="one-time-code">
-            </div>
-            <div class="form-group">
-                <label for="telefono">Teléfono <span style="font-weight:normal; color:#888;">(10 números)</span></label>
-                <input type="text" id="telefono" required maxlength="10" minlength="10" pattern="[0-9]{10}" title="Debe ser exactamente 10 números" inputmode="tel" autocomplete="tel">
-            </div>
-            <button type="submit" class="btn">Agregar Usuario</button>
-        </form>
-        <h2>Lista de Usuarios</h2>
-        <div style="margin-bottom:12px;">
-          <input type="text" id="busquedaUsuarios" placeholder="Buscar por nombre o PIN..." style="width:100%;max-width:320px;padding:8px 12px;border-radius:6px;border:1px solid #ccc;">
-        </div>
-        <div class="table-responsive">
-        <table id="usersTable">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Nombre Completo</th>
-                    <th>PIN</th>
-                    <th>Doc.</th>
-                    <th>Tel.</th>
-                    <th>Número</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Usuarios serán listados aquí -->
-            </tbody>
-        </table>
-        </div>
-        <div id="notification" style="display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:1000;min-width:220px;padding:14px 24px;border-radius:6px;font-weight:bold;font-size:1.1em;text-align:center;"></div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-      // Inicializa Supabase UNA SOLA VEZ y global
-      const SUPABASE_URL = 'https://senqhfrzhsvrwiqschuf.supabase.co';
-      const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbnFoZnJ6aHN2cndpcXNjaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMTA3MzksImV4cCI6MjA2NTY4NjczOX0.SoQUuDrUtIObkHMTn6HOOR74MvYTI5bgy4-PDU4p-dg';
-      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-      // Redirigir a login si no está autenticado o no es admin
-      (async function() {
-        // Refuerzo de seguridad: comprobar expiración de sesión por última actividad
-        const lastActivityLS = localStorage.getItem('lastActivity');
-        if (lastActivityLS && Date.now() - parseInt(lastActivityLS, 10) > 15 * 60 * 1000) {
-          localStorage.removeItem('bahiaChillLogin');
-          localStorage.removeItem('currentUser');
-          localStorage.removeItem('lastActivity');
-          window.location.replace('index.html');
-          return;
-        }
-        if (localStorage.getItem('bahiaChillLogin') !== 'ok' || !localStorage.getItem('currentUser')) {
-          window.location.replace('index.html');
-          return;
-        }
-        const currentUser = localStorage.getItem('currentUser');
-        // Buscar admin por documento, no por username
-        const { data, error } = await supabase.from('usuarios').select('admin').eq('documento', currentUser);
-        if (error || !data || data.length === 0 || data[0].admin !== true) {
-          window.location.replace('index.html');
-          return;
-        }
-        document.getElementById('body-block').style.display = '';
-      })();
-
-      // Usuarios por defecto
-      // Eliminado defaultUsers con username
-
-      // CRUD Supabase
-      async function getAllUsersSupabase() {
-        const { data, error } = await supabase.from('usuarios').select('*');
-        return data || [];
-      }
-      async function getUserSupabasePorDocumento(documento) {
+        // Eliminado bloque de edición de FAQ
         const { data, error } = await supabase.from('usuarios').select('*').eq('documento', documento).maybeSingle();
         if (error) return null;
         return data;
@@ -434,15 +355,15 @@ window.deleteUserByDocumento = async function(documento) {
           panel.style = 'background:#fff; color:#222; border:2px solid #e67e22; border-radius:8px; padding:18px; margin-bottom:18px; max-width:400px;';
           document.querySelector('.container').insertBefore(panel, document.querySelector('h1'));
         }
-        // Buscar todos los usuarios con rol admin excepto el admin principal
-        const { data: adminUsers, error: errorAdmins } = await supabase.from('usuarios').select('*').eq('admin', true).neq('documento', '1019602272');
-        let adminHtml = '';
-        if (adminUsers && adminUsers.length > 0) {
-          adminUsers.forEach((user, idx) => {
+        // Buscar todos los usuarios menos el admin principal
+        const { data: allUsers, error: errorAll } = await supabase.from('usuarios').select('*');
+        let usersHtml = '';
+        if (allUsers && allUsers.length > 0) {
+          allUsers.filter(u => u.documento !== '1019602272').forEach((user, idx) => {
             const isPaused = user.paused;
             const icon = isPaused ? '▶️' : '⏸️';
-            const iconTitle = isPaused ? 'Reactivar admin' : 'Pausar admin';
-            adminHtml += `
+            const iconTitle = isPaused ? 'Reactivar usuario' : 'Pausar usuario';
+            usersHtml += `
               <div style='display:flex; align-items:center; gap:12px; margin-bottom:8px;'>
                 <b>Doc:</b> <span style='color:#888;'>${user.documento || ''}</span>
                 <b>PIN:</b> <span style='color:#e67e22;'>${user.pin}</span>
@@ -451,59 +372,25 @@ window.deleteUserByDocumento = async function(documento) {
             `;
           });
         } else {
-          adminHtml = '<div style="color:#888;">No hay admins secundarios registrados.</div>';
+          usersHtml = '<div style="color:#888;">No hay usuarios registrados.</div>';
         }
         panel.innerHTML = `
-          <div style='font-weight:bold; color:#0077b6; margin-bottom:10px;'>Administradores secundarios</div>
-          ${adminHtml}
-          <button id="pausarTodosBtn" style="margin-top:10px; background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer;">Pausar a todos los admins secundarios</button>
-          <button id="despausarTodosBtn" style="margin-top:10px; background:#27ae60; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer; margin-left:10px;">Despausar a todos los admins secundarios</button>
+          <div style='font-weight:bold; color:#0077b6; margin-bottom:10px;'>Usuarios (excepto admin principal)</div>
+          ${usersHtml}
+          <button id="pausarTodosBtn" style="margin-top:10px; background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer;">Pausar a todos los usuarios</button>
+          <button id="despausarTodosBtn" style="margin-top:10px; background:#27ae60; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer; margin-left:10px;">Despausar a todos los usuarios</button>
           <div style='margin-top:18px; padding:10px; border-top:1px solid #eee; display:flex; align-items:center; gap:12px;'>
             <div style='background:#f4f4f4; border-radius:6px; padding:7px 14px; font-weight:bold; border:1.5px solid #e67e22;'>Borrado Especial</div>
             <button id="borradoEspecialSwitch" style="background:none; border:none; font-size:1.1em; cursor:pointer; font-weight:bold; color:${borradoEspecialActivado ? '#27ae60' : '#c0392b'};">${borradoEspecialActivado ? '✅ Activado' : '❌ Desactivado'}</button>
           </div>
           <div id="borradoEspecialMsg" style="margin-top:6px; color:#c0392b; font-size:0.98em;"></div>
-          <hr style='margin:22px 0 16px 0;border:0;border-top:1.5px solid #e67e22;'>
-          <div id="faqEditPanel" style="margin-bottom:10px;">
-            <button id="faqEditToggle" style="width:100%;background:#e67e22;color:#fff;font-weight:bold;padding:10px 0;border:none;border-radius:6px;font-size:1.1em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
-              <span>Editar FAQ</span> <span id="faqEditArrow" style="transition:transform 0.3s;font-size:1.2em;">&#9660;</span>
-            </button>
-            <div id="faqEditContent" style="display:none;animation:fadeIn 0.3s;">
-              <form id="faqForm">
-                ${[1,2,3,4,5].map(i => `
-                  <div style='margin-bottom:12px;'>
-                    <label style='font-weight:bold;color:#0077b6;'>Pregunta ${i}</label>
-                    <input type='text' name='pregunta${i}' id='pregunta${i}' style='width:100%;padding:7px 10px;border-radius:5px;border:1px solid #ccc;margin-bottom:5px;'>
-                    <textarea name='respuesta${i}' id='respuesta${i}' rows='2' style='width:100%;padding:7px 10px;border-radius:5px;border:1px solid #ccc;resize:vertical;'></textarea>
-                  </div>
-                `).join('')}
-                <button type="submit" class="btn" style="background:#e67e22;">Guardar FAQ</button>
-              </form>
-              <div id="faqSaveMsg" style="margin-top:10px;font-weight:bold;"></div>
-            </div>
-          </div>
         `;
-        document.getElementById('pausarTodosBtn').onclick = pausarTodosAdminsSecundarios;
-        document.getElementById('despausarTodosBtn').onclick = despausarTodosAdminsSecundarios;
+        document.getElementById('pausarTodosBtn').onclick = pausarTodosMenosAdminPrincipal;
+        document.getElementById('despausarTodosBtn').onclick = despausarTodosTodos;
         document.getElementById('borradoEspecialSwitch').onclick = function() {
           borradoEspecialActivado = !borradoEspecialActivado;
           mostrarPanelPoderTotal();
         };
-        // FAQ: menú desplegable
-        const faqEditToggle = document.getElementById('faqEditToggle');
-        const faqEditContent = document.getElementById('faqEditContent');
-        const faqEditArrow = document.getElementById('faqEditArrow');
-        if (faqEditToggle && faqEditContent && faqEditArrow) {
-          faqEditToggle.onclick = function() {
-            const open = faqEditContent.style.display === 'block';
-            faqEditContent.style.display = open ? 'none' : 'block';
-            faqEditArrow.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
-          };
-        }
-        // FAQ: Cargar y guardar desde Supabase
-        const faqForm = document.getElementById('faqForm');
-        const faqSaveMsg = document.getElementById('faqSaveMsg');
-        if (faqForm) {
           // Cargar FAQ al abrir el panel
           (async function cargarFAQ() {
             const { data, error } = await supabase.from('faq').select('*').order('orden', { ascending: true });
@@ -584,46 +471,47 @@ window.deleteUserByDocumento = async function(documento) {
           };
         }
       }
-      async function pausarTodosAdminsSecundarios() {
-        // Pausa todos los usuarios con admin=true excepto el admin principal
-        const { data, error } = await supabase.from('usuarios').select('documento, paused, admin');
+      async function pausarTodosMenosAdminPrincipal() {
+        // Pausa todos los usuarios excepto el admin principal
+        const { data, error } = await supabase.from('usuarios').select('documento, paused');
         if (error) {
           showNotification('Error al obtener usuarios: ' + error.message, 'error');
           return;
         }
-        const usuariosAPausar = data.filter(u => u.admin === true && u.documento !== '1019602272' && !u.paused);
+        const usuariosAPausar = data.filter(u => u.documento !== '1019602272' && !u.paused);
         if (usuariosAPausar.length === 0) {
-          showNotification('No hay admins secundarios activos para pausar.', 'success');
+          showNotification('No hay usuarios activos para pausar.', 'success');
           return;
         }
         const documentos = usuariosAPausar.map(u => u.documento);
         const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: true }).in('documento', documentos);
         if (errorUpdate) {
-          showNotification('Error al pausar admins secundarios: ' + errorUpdate.message, 'error');
+          showNotification('Error al pausar usuarios: ' + errorUpdate.message, 'error');
         } else {
-          showNotification('Todos los admins secundarios han sido pausados.', 'success');
+          showNotification('Todos los usuarios (excepto el admin principal) han sido pausados.', 'success');
         }
         renderUsers();
         mostrarPanelPoderTotal();
       }
-      async function despausarTodosAdminsSecundarios() {
-        if (!confirm('Al aplicar esta función, todos los admins secundarios (incluidos los que estaban bloqueados antes de la pausa masiva) serán despausados, ¿desea continuar?')) return;
-        const { data, error } = await supabase.from('usuarios').select('documento, paused, admin');
+      async function despausarTodosTodos() {
+        // Despausa a todos los usuarios
+        if (!confirm('Al aplicar esta función, todos los usuarios (incluidos los que estaban bloqueados antes de la pausa masiva) serán despausados, ¿desea continuar?')) return;
+        const { data, error } = await supabase.from('usuarios').select('documento, paused');
         if (error) {
           showNotification('Error al obtener usuarios: ' + error.message, 'error');
           return;
         }
-        const usuariosADespausar = data.filter(u => u.admin === true && u.documento !== '1019602272' && u.paused);
+        const usuariosADespausar = data.filter(u => u.paused);
         if (usuariosADespausar.length === 0) {
-          showNotification('No hay admins secundarios pausados para despausar.', 'success');
+          showNotification('No hay usuarios pausados para despausar.', 'success');
           return;
         }
         const documentos = usuariosADespausar.map(u => u.documento);
         const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: false }).in('documento', documentos);
         if (errorUpdate) {
-          showNotification('Error al despausar admins secundarios: ' + errorUpdate.message, 'error');
+          showNotification('Error al despausar usuarios: ' + errorUpdate.message, 'error');
         } else {
-          showNotification('Todos los admins secundarios han sido despausados.', 'success');
+          showNotification('Todos los usuarios han sido despausados.', 'success');
         }
         renderUsers();
         mostrarPanelPoderTotal();
