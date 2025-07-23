@@ -388,9 +388,9 @@
           letter-spacing: 1px;
         }
         .faq-block {
-          width: 90vw;
-          max-width: 320px;
-          background: rgba(255,255,255,0.08);
+          width: 98vw;
+          max-width: 420px;
+          background: rgba(255,255,255,0.10);
           border-radius: 16px;
           margin-bottom: 18px;
           box-shadow: 0 2px 12px 0 rgba(0,0,0,0.13);
@@ -438,6 +438,39 @@
     </style>
 </head>
 <body style="display:none;" id="body-block">
+    <!-- PANEL LATERAL IZQUIERDO EN ESQUINA SUPERIOR IZQUIERDA -->
+    <div id="side-panel-btn" style="position:fixed;top:18px;left:18px;z-index:1003;">
+      <button aria-label="Abrir menú lateral" style="background:rgba(255,255,255,0.13);border:none;border-radius:50%;width:44px;height:44px;box-shadow:0 2px 8px 0 rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;cursor:pointer;outline:none;">
+        <!-- Icono de 2 personas (FontAwesome users) en círculo blanco con sombra -->
+        <span style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:rgba(255,255,255,0.85);border-radius:50%;box-shadow:0 2px 8px 0 rgba(0,0,0,0.18);">
+          <i class="fa-solid fa-users" style="color:#3d819d;font-size:1.5em;text-shadow:0 2px 8px #0004;"></i>
+        </span>
+      </button>
+    </div>
+    <!-- Menú lateral oculto -->
+    <div id="side-menu" style="position:fixed;top:0;left:0;width:0;height:100vh;max-width:98vw;background:linear-gradient(135deg,#25647a 0%,#13394a 100%);box-shadow:2px 0 16px 0 rgba(0,0,0,0.18);z-index:1004;overflow:hidden;transition:width 0.35s cubic-bezier(.7,1.7,.5,1);display:flex;flex-direction:column;align-items:flex-start;">
+      <div style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 12px 0 12px;">
+        <div style="display:flex;align-items:center;gap:18px;">
+          <a href="https://www.instagram.com/bahia.chill/" target="_blank" title="Instagram" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:none;border:none;cursor:pointer;">
+            <i class="fa-brands fa-instagram" style="color:#fff;font-size:1.7em;"></i>
+          </a>
+          <a href="https://www.tiktok.com/@bahia.chill" target="_blank" title="TikTok" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:none;border:none;cursor:pointer;">
+            <i class="fa-brands fa-tiktok" style="color:#fff;font-size:1.7em;"></i>
+          </a>
+        </div>
+        <button id="side-menu-close" aria-label="Cerrar menú" style="background:none;border:none;color:#fff;font-size:2em;font-weight:bold;cursor:pointer;line-height:1;">&times;</button>
+      </div>
+      <button class="side-menu-item" id="menu-titulo" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;">Menú</button>
+      <div id="menu-content" style="display:none;padding:0 24px 10px 24px;color:#fff;font-size:1em;"></div>
+      <button class="side-menu-item" id="musica-titulo" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;">Poner mi música</button>
+      <div id="musica-content" style="display:none;padding:0 24px 10px 24px;color:#fff;font-size:1em;"></div>
+      <button class="side-menu-item" id="juegos-titulo" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;">Juegos</button>
+      <div id="juegos-content" style="display:none;padding:0 24px 10px 24px;color:#fff;font-size:1em;"></div>
+      <button class="side-menu-item" id="ruleta-titulo" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;">Ruleta VIP</button>
+      <div id="ruleta-content" style="display:none;padding:0 24px 10px 24px;color:#fff;font-size:1em;"></div>
+    </div>
+    <!-- Fondo oscuro al abrir menú -->
+    <div id="side-menu-overlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.25);z-index:1002;"></div>
     <!-- Texto flotante de ayuda -->
     <div id="tap-hint" style="position:fixed;top:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.82);color:#fff;padding:10px 22px;border-radius:22px;font-size:1.08em;z-index:1001;box-shadow:0 2px 12px 0 rgba(0,0,0,0.13);font-weight:bold;opacity:1;transition:opacity 0.7s;pointer-events:none;">
       <i class="fa fa-question-circle" style="margin-right:7px;"></i> Toca el signo de ? para más información
@@ -447,10 +480,11 @@
       <i class="fa fa-question" style="color:#fff;font-size:1.7em;"></i>
     </button>
     <!-- Mostrar solo la información de usuario arriba a la izquierda, sin fondo ni títulos -->
-    <div id="user-info-bar" style="position:fixed;top:18px;left:18px;z-index:1002;color:#fff;font-size:1.08em;font-weight:bold;display:flex;flex-direction:column;align-items:flex-start;gap:2px;">
-      <span id="user-info-nombre"></span>
-      <div style="display:flex;align-items:center;gap:6px;margin-top:2px;width:100%;">
-        <span id="user-info-doc" style="font-family:monospace;font-size:0.98em;letter-spacing:2px;"></span>
+    <!-- Barra de usuario centrada arriba -->
+    <div id="user-info-bar" style="position:fixed;top:18px;left:0;right:0;z-index:1002;color:#fff;font-size:1.08em;font-weight:bold;display:flex;flex-direction:column;align-items:center;gap:2px;">
+      <span id="user-info-nombre" style="width:100%;text-align:center;"></span>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:2px;width:100%;justify-content:center;">
+        <span id="user-info-doc" style="font-family:monospace;font-size:0.98em;letter-spacing:2px;text-align:center;"></span>
         <button id="toggle-doc-visibility-bar" style="background:none;border:none;outline:none;cursor:pointer;color:#fff;font-size:1.1em;display:flex;align-items:center;padding:0 0 0 4px;">
           <i id="eye-icon-bar" class="fa-regular fa-eye-slash"></i>
         </button>
@@ -477,11 +511,11 @@
         <div class="card card-back">
             <div class="title sharp" id="back-title" style="transform: scaleX(-1);">BAHIA CHILL</div>
             <div style="transform: scaleX(-1); display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;margin-top:30px;">
-              <div id="user-name" class="nombre-tarjeta" style="margin-bottom:8px;"></div>
+              <div id="user-name" class="nombre-tarjeta" style="margin-bottom:8px;text-align:center;width:100%;"></div>
               <div style="display:flex;align-items:center;gap:10px;margin-bottom:0;"></div>
-              <div style="display:flex;align-items:center;gap:8px;flex-direction:row;">
+              <div style="display:flex;align-items:center;gap:8px;flex-direction:row;justify-content:center;width:100%;">
                 <span class="documento-tarjeta">Documento:</span>
-                <span id="user-doc" class="documento-tarjeta"></span>
+                <span id="user-doc" class="documento-tarjeta" style="text-align:center;"></span>
                 <button id="toggle-doc-visibility" style="background:none;border:none;outline:none;cursor:pointer;color:#fff;font-size:1.1em;display:flex;align-items:center;">
                   <i id="eye-icon" class="fa-regular fa-eye-slash"></i>
                 </button>
@@ -510,10 +544,14 @@
           <div class="faq-block-header">¿Puedo transferir mis stickers o tarjeta a otra persona? <span class="triangle">&#9660;</span></div>
           <div class="faq-block-content">No, los stickers, la tarjeta y los beneficios son personales e intransferibles.</div>
         </div>
+        <div class="faq-block">
+          <div class="faq-block-header">¿Cómo puedo invitar a un amigo? <span class="triangle">&#9660;</span></div>
+          <div class="faq-block-content">Los cupos son limitados pero puedes recomendarlo como un referido y te daremos <b>2 stickers</b> por cada nuevo referido. ¡Escríbenos!</div>
+        </div>
         <div style="width:100%;margin-top:28px;display:flex;flex-direction:column;align-items:center;">
           <div style="width:100%;text-align:center;margin-bottom:8px;font-size:1.08em;font-weight:bold;color:#fff;">¿Aun tienes dudas? ¡Escríbenos!</div>
           <div style="width:100%;display:flex;justify-content:center;align-items:center;margin-top:8px;">
-            <a href="https://wa.link/228gz3" target="_blank" title="Contactar por WhatsApp" style="display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.13);border-radius:50%;width:54px;height:54px;box-shadow:0 2px 8px 0 rgba(0,0,0,0.13);transition:background 0.2s;">
+            <a href="https://wa.link/7rpuhl" target="_blank" title="Contactar por WhatsApp" style="display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.13);border-radius:50%;width:54px;height:54px;box-shadow:0 2px 8px 0 rgba(0,0,0,0.13);transition:background 0.2s;">
               <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" style="width:36px;height:36px;filter:drop-shadow(0 1px 2px #0002);">
             </a>
           </div>
@@ -522,6 +560,51 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+      // Lógica para el panel lateral izquierdo
+      const sidePanelBtn = document.getElementById('side-panel-btn');
+      const sideMenu = document.getElementById('side-menu');
+      const sideMenuOverlay = document.getElementById('side-menu-overlay');
+      let sideMenuOpen = false;
+      function openSideMenu() {
+        if (window.innerWidth <= 600) {
+          sideMenu.style.width = '90vw';
+        } else {
+          sideMenu.style.width = '270px';
+        }
+        sideMenuOverlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        sideMenuOpen = true;
+      }
+      function closeSideMenu() {
+        sideMenu.style.width = '0';
+        sideMenuOverlay.style.display = 'none';
+        document.body.style.overflow = '';
+        sideMenuOpen = false;
+      }
+      sidePanelBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (!sideMenuOpen) openSideMenu();
+      });
+      // Botón X para cerrar menú
+      setTimeout(() => {
+        const closeBtn = document.getElementById('side-menu-close');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (sideMenuOpen) closeSideMenu();
+          });
+        }
+      }, 100);
+      sideMenuOverlay.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (sideMenuOpen) closeSideMenu();
+      });
+      // Cerrar menú con Escape
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && sideMenuOpen) closeSideMenu();
+      });
+      // Opcional: cerrar menú al hacer click fuera
+      window.addEventListener('resize', function() { if (sideMenuOpen) closeSideMenu(); });
       // Inicialización global de Supabase
       const SUPABASE_URL = 'https://senqhfrzhsvrwiqschuf.supabase.co';
       const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbnFoZnJ6aHN2cndpcXNjaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMTA3MzksImV4cCI6MjA2NTY4NjczOX0.SoQUuDrUtIObkHMTn6HOOR74MvYTI5bgy4-PDU4p-dg';
@@ -908,9 +991,39 @@
       });
       document.querySelectorAll('.faq-block').forEach(block => {
         block.addEventListener('click', function() {
-          this.classList.toggle('open');
+          document.querySelectorAll('.faq-block').forEach(b => b.classList.remove('open'));
+          block.classList.toggle('open');
         });
       });
+      // Menú lateral: solo un bloque abierto a la vez y despliegue de contenido
+      function hideAllMenuContents() {
+        document.getElementById('menu-content').style.display = 'none';
+        document.getElementById('musica-content').style.display = 'none';
+        document.getElementById('juegos-content').style.display = 'none';
+        document.getElementById('ruleta-content').style.display = 'none';
+      }
+      document.getElementById('menu-titulo').onclick = function() {
+        window.open('https://menubahiachillbar.my.canva.site/bahia-chill-men-2025', '_blank');
+        hideAllMenuContents();
+      };
+      document.getElementById('musica-titulo').onclick = function() {
+        hideAllMenuContents();
+        const cont = document.getElementById('musica-content');
+        cont.innerHTML = `<div style='margin-bottom:10px;'><a href='https://app.nosongrequests.com/Bahiachill' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>No song request</a></div><div><a href='https://festify.us/' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>Festify</a></div>`;
+        cont.style.display = 'block';
+      };
+      document.getElementById('juegos-titulo').onclick = function() {
+        hideAllMenuContents();
+        const cont = document.getElementById('juegos-content');
+        cont.innerHTML = `<div style='margin-bottom:10px;'><a href='https://app-sorteos.com/es/apps/la-ruleta-decide?hash=NV3E2L' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>Verdad Reto o Shot - Suave 😇</a></div><div style='margin-bottom:10px;'><a href='https://app-sorteos.com/es/apps/la-ruleta-decide?hash=NV3E2L' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>Verdad Reto o Shot - Picante 😈</a></div><div style='margin-bottom:10px;'><a href='https://app-sorteos.com/es/apps/la-ruleta-decide?hash=GMOD4D' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>Ruleta</a></div><div><a href='https://www.airconsole.com/' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>Consola Multijuegos - 2 jugadores</a></div>`;
+        cont.style.display = 'block';
+      };
+      document.getElementById('ruleta-titulo').onclick = function() {
+        hideAllMenuContents();
+        const cont = document.getElementById('ruleta-content');
+        cont.innerHTML = `<div style='font-weight:bold;margin-bottom:8px;'>Ruleta VIP</div><div style='margin-bottom:8px;'>CADA 100.000 COP CONSUMIDOS TE<br>DARA EL DERECHO A 1 GIRO GRATIS DE NUESTRA RULETA VIP</div><div style='margin-bottom:8px;'>EN ESTA TE REGALAREMOS LO QUE<br>CONSIGAS CON TU GIRO</div><div style='margin-bottom:8px;'>PREGUNTALE AL MESERO COMO<br>JUGAR</div>`;
+        cont.style.display = 'block';
+      };
       // Al cargar, verificar y redirigir si es necesario
       window.addEventListener('DOMContentLoaded', async () => {
         const body = document.getElementById('body-block');
