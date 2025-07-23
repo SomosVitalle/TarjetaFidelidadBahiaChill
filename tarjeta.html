@@ -1017,18 +1017,13 @@
         });
       });
       // FAQ blocks: solo uno abierto a la vez
+      // FAQ blocks: solo uno abierto a la vez (asignar solo una vez)
       window.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.faq-block').forEach(function(block) {
           block.addEventListener('click', function() {
             document.querySelectorAll('.faq-block').forEach(function(b) { b.classList.remove('open'); });
             block.classList.toggle('open');
           });
-        });
-      });
-      document.querySelectorAll('.faq-block').forEach(block => {
-        block.addEventListener('click', function() {
-          document.querySelectorAll('.faq-block').forEach(b => b.classList.remove('open'));
-          block.classList.toggle('open');
         });
       });
       // Menú lateral: solo un bloque abierto a la vez y despliegue de contenido
