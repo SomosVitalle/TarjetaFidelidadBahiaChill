@@ -957,48 +957,73 @@
           };
         }
       }
+      // FAQ MODAL: lógica robusta para mostrar y ocultar el modal
       function openFaqModal() {
-        const modal = document.getElementById('faq-modal-integrado');
-        if (modal) {
-          modal.setAttribute('aria-visible', 'true');
-          modal.classList.remove('faq-slide-out', 'faq-slide-out-active');
-          modal.classList.add('faq-slide-in');
-          setTimeout(() => {
-            modal.classList.add('faq-slide-in-active');
-          }, 10);
-          document.body.style.overflow = 'hidden';
-        }
-        // Difuminar y ocultar el aviso de ayuda
-        const tapHint = document.getElementById('tap-hint');
+        var modal = document.getElementById('faq-modal-integrado');
+        if (!modal) return;
+        modal.setAttribute('aria-visible', 'true');
+        modal.classList.remove('faq-slide-out', 'faq-slide-out-active');
+        modal.classList.add('faq-slide-in');
+        setTimeout(function() {
+          modal.classList.add('faq-slide-in-active');
+        }, 10);
+        document.body.style.overflow = 'hidden';
+        // Ocultar el hint de ayuda si está visible
+        var tapHint = document.getElementById('tap-hint');
         if (tapHint) {
           tapHint.style.transition = 'opacity 0.7s';
           tapHint.style.opacity = '0';
-          setTimeout(() => { tapHint.style.display = 'none'; }, 800);
+          setTimeout(function() { tapHint.style.display = 'none'; }, 800);
         }
       }
-      // Asegura que el evento se registre correctamente en todos los casos
-      document.addEventListener('DOMContentLoaded', function() {
-        var helpBtn = document.getElementById('help-btn');
-        if (helpBtn) {
-          helpBtn.onclick = function(e) {
-            e.stopPropagation();
-            openFaqModal();
-          };
-        }
-      });
-      document.getElementById('faq-close-btn').addEventListener('click', function(e) {
-        e.stopPropagation();
-        const modal = document.getElementById('faq-modal-integrado');
+
+      function closeFaqModal() {
+        var modal = document.getElementById('faq-modal-integrado');
+        if (!modal) return;
         modal.classList.remove('faq-slide-in', 'faq-slide-in-active');
         modal.classList.add('faq-slide-out');
-        setTimeout(() => {
+        setTimeout(function() {
           modal.classList.add('faq-slide-out-active');
         }, 10);
-        setTimeout(() => {
+        setTimeout(function() {
           modal.setAttribute('aria-visible', 'false');
           modal.classList.remove('faq-slide-out', 'faq-slide-out-active');
           document.body.style.overflow = '';
         }, 400);
+      }
+
+      // Asignar eventos al FAQ y al botón de ayuda
+      window.addEventListener('DOMContentLoaded', function() {
+        var helpBtn = document.getElementById('help-btn');
+        if (helpBtn) {
+          helpBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openFaqModal();
+          });
+        }
+        var faqCloseBtn = document.getElementById('faq-close-btn');
+        if (faqCloseBtn) {
+          faqCloseBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeFaqModal();
+          });
+        }
+        // Permitir cerrar el modal con Escape
+        document.addEventListener('keydown', function(e) {
+          var modal = document.getElementById('faq-modal-integrado');
+          if (e.key === 'Escape' && modal && modal.getAttribute('aria-visible') === 'true') {
+            closeFaqModal();
+          }
+        });
+      });
+      // FAQ blocks: solo uno abierto a la vez
+      window.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.faq-block').forEach(function(block) {
+          block.addEventListener('click', function() {
+            document.querySelectorAll('.faq-block').forEach(function(b) { b.classList.remove('open'); });
+            block.classList.toggle('open');
+          });
+        });
       });
       document.querySelectorAll('.faq-block').forEach(block => {
         block.addEventListener('click', function() {
