@@ -388,9 +388,9 @@
           letter-spacing: 1px;
         }
         .faq-block {
-          width: 98vw;
-          max-width: 420px;
-          background: rgba(255,255,255,0.10);
+          width: 90vw;
+          max-width: 320px;
+          background: rgba(255,255,255,0.08);
           border-radius: 16px;
           margin-bottom: 18px;
           box-shadow: 0 2px 12px 0 rgba(0,0,0,0.13);
@@ -480,7 +480,6 @@
       <i class="fa fa-question" style="color:#fff;font-size:1.7em;"></i>
     </button>
     <!-- Mostrar solo la información de usuario arriba a la izquierda, sin fondo ni títulos -->
-    <!-- Barra de usuario centrada arriba -->
     <div id="user-info-bar" style="position:fixed;top:18px;left:0;right:0;z-index:1002;color:#fff;font-size:1.08em;font-weight:bold;display:flex;flex-direction:column;align-items:center;gap:2px;">
       <span id="user-info-nombre" style="width:100%;text-align:center;"></span>
       <div style="display:flex;align-items:center;gap:6px;margin-top:2px;width:100%;justify-content:center;">
@@ -511,11 +510,11 @@
         <div class="card card-back">
             <div class="title sharp" id="back-title" style="transform: scaleX(-1);">BAHIA CHILL</div>
             <div style="transform: scaleX(-1); display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;margin-top:30px;">
-              <div id="user-name" class="nombre-tarjeta" style="margin-bottom:8px;text-align:center;width:100%;"></div>
+              <div id="user-name" class="nombre-tarjeta" style="margin-bottom:8px;"></div>
               <div style="display:flex;align-items:center;gap:10px;margin-bottom:0;"></div>
-              <div style="display:flex;align-items:center;gap:8px;flex-direction:row;justify-content:center;width:100%;">
+              <div style="display:flex;align-items:center;gap:8px;flex-direction:row;">
                 <span class="documento-tarjeta">Documento:</span>
-                <span id="user-doc" class="documento-tarjeta" style="text-align:center;"></span>
+                <span id="user-doc" class="documento-tarjeta"></span>
                 <button id="toggle-doc-visibility" style="background:none;border:none;outline:none;cursor:pointer;color:#fff;font-size:1.1em;display:flex;align-items:center;">
                   <i id="eye-icon" class="fa-regular fa-eye-slash"></i>
                 </button>
@@ -544,14 +543,10 @@
           <div class="faq-block-header">¿Puedo transferir mis stickers o tarjeta a otra persona? <span class="triangle">&#9660;</span></div>
           <div class="faq-block-content">No, los stickers, la tarjeta y los beneficios son personales e intransferibles.</div>
         </div>
-        <div class="faq-block">
-          <div class="faq-block-header">¿Cómo puedo invitar a un amigo? <span class="triangle">&#9660;</span></div>
-          <div class="faq-block-content">Los cupos son limitados pero puedes recomendarlo como un referido y te daremos <b>2 stickers</b> por cada nuevo referido. ¡Escríbenos!</div>
-        </div>
         <div style="width:100%;margin-top:28px;display:flex;flex-direction:column;align-items:center;">
           <div style="width:100%;text-align:center;margin-bottom:8px;font-size:1.08em;font-weight:bold;color:#fff;">¿Aun tienes dudas? ¡Escríbenos!</div>
           <div style="width:100%;display:flex;justify-content:center;align-items:center;margin-top:8px;">
-            <a href="https://wa.link/7rpuhl" target="_blank" title="Contactar por WhatsApp" style="display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.13);border-radius:50%;width:54px;height:54px;box-shadow:0 2px 8px 0 rgba(0,0,0,0.13);transition:background 0.2s;">
+            <a href="https://wa.link/228gz3" target="_blank" title="Contactar por WhatsApp" style="display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.13);border-radius:50%;width:54px;height:54px;box-shadow:0 2px 8px 0 rgba(0,0,0,0.13);transition:background 0.2s;">
               <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" style="width:36px;height:36px;filter:drop-shadow(0 1px 2px #0002);">
             </a>
           </div>
@@ -560,51 +555,6 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-      // Lógica para el panel lateral izquierdo
-      const sidePanelBtn = document.getElementById('side-panel-btn');
-      const sideMenu = document.getElementById('side-menu');
-      const sideMenuOverlay = document.getElementById('side-menu-overlay');
-      let sideMenuOpen = false;
-      function openSideMenu() {
-        if (window.innerWidth <= 600) {
-          sideMenu.style.width = '90vw';
-        } else {
-          sideMenu.style.width = '270px';
-        }
-        sideMenuOverlay.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-        sideMenuOpen = true;
-      }
-      function closeSideMenu() {
-        sideMenu.style.width = '0';
-        sideMenuOverlay.style.display = 'none';
-        document.body.style.overflow = '';
-        sideMenuOpen = false;
-      }
-      sidePanelBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        if (!sideMenuOpen) openSideMenu();
-      });
-      // Botón X para cerrar menú
-      setTimeout(() => {
-        const closeBtn = document.getElementById('side-menu-close');
-        if (closeBtn) {
-          closeBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (sideMenuOpen) closeSideMenu();
-          });
-        }
-      }, 100);
-      sideMenuOverlay.addEventListener('click', function(e) {
-        e.stopPropagation();
-        if (sideMenuOpen) closeSideMenu();
-      });
-      // Cerrar menú con Escape
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && sideMenuOpen) closeSideMenu();
-      });
-      // Opcional: cerrar menú al hacer click fuera
-      window.addEventListener('resize', function() { if (sideMenuOpen) closeSideMenu(); });
       // Inicialización global de Supabase
       const SUPABASE_URL = 'https://senqhfrzhsvrwiqschuf.supabase.co';
       const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbnFoZnJ6aHN2cndpcXNjaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMTA3MzksImV4cCI6MjA2NTY4NjczOX0.SoQUuDrUtIObkHMTn6HOOR74MvYTI5bgy4-PDU4p-dg';
@@ -957,75 +907,51 @@
           };
         }
       }
-      // FAQ MODAL: lógica robusta para mostrar y ocultar el modal
-      function openFaqModal() {
-        var modal = document.getElementById('faq-modal-integrado');
-        if (!modal) return;
-        modal.setAttribute('aria-visible', 'true');
-        modal.classList.remove('faq-slide-out', 'faq-slide-out-active');
-        modal.classList.add('faq-slide-in');
-        setTimeout(function() {
-          modal.classList.add('faq-slide-in-active');
-        }, 10);
+      // Lógica para el panel lateral izquierdo
+      const sidePanelBtn = document.getElementById('side-panel-btn');
+      const sideMenu = document.getElementById('side-menu');
+      const sideMenuOverlay = document.getElementById('side-menu-overlay');
+      let sideMenuOpen = false;
+      function openSideMenu() {
+        if (window.innerWidth <= 600) {
+          sideMenu.style.width = '90vw';
+        } else {
+          sideMenu.style.width = '270px';
+        }
+        sideMenuOverlay.style.display = 'block';
         document.body.style.overflow = 'hidden';
-        // Ocultar el hint de ayuda si está visible
-        var tapHint = document.getElementById('tap-hint');
-        if (tapHint) {
-          tapHint.style.transition = 'opacity 0.7s';
-          tapHint.style.opacity = '0';
-          setTimeout(function() { tapHint.style.display = 'none'; }, 800);
-        }
+        sideMenuOpen = true;
       }
-
-      function closeFaqModal() {
-        var modal = document.getElementById('faq-modal-integrado');
-        if (!modal) return;
-        modal.classList.remove('faq-slide-in', 'faq-slide-in-active');
-        modal.classList.add('faq-slide-out');
-        setTimeout(function() {
-          modal.classList.add('faq-slide-out-active');
-        }, 10);
-        setTimeout(function() {
-          modal.setAttribute('aria-visible', 'false');
-          modal.classList.remove('faq-slide-out', 'faq-slide-out-active');
-          document.body.style.overflow = '';
-        }, 400);
+      function closeSideMenu() {
+        sideMenu.style.width = '0';
+        sideMenuOverlay.style.display = 'none';
+        document.body.style.overflow = '';
+        sideMenuOpen = false;
       }
-
-      // Asignar eventos al FAQ y al botón de ayuda
-      window.addEventListener('DOMContentLoaded', function() {
-        var helpBtn = document.getElementById('help-btn');
-        if (helpBtn) {
-          helpBtn.addEventListener('click', function(e) {
+      sidePanelBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (!sideMenuOpen) openSideMenu();
+      });
+      // Botón X para cerrar menú
+      setTimeout(() => {
+        const closeBtn = document.getElementById('side-menu-close');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function(e) {
             e.stopPropagation();
-            openFaqModal();
+            if (sideMenuOpen) closeSideMenu();
           });
         }
-        var faqCloseBtn = document.getElementById('faq-close-btn');
-        if (faqCloseBtn) {
-          faqCloseBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            closeFaqModal();
-          });
-        }
-        // Permitir cerrar el modal con Escape
-        document.addEventListener('keydown', function(e) {
-          var modal = document.getElementById('faq-modal-integrado');
-          if (e.key === 'Escape' && modal && modal.getAttribute('aria-visible') === 'true') {
-            closeFaqModal();
-          }
-        });
+      }, 100);
+      sideMenuOverlay.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (sideMenuOpen) closeSideMenu();
       });
-      // FAQ blocks: solo uno abierto a la vez
-      // FAQ blocks: solo uno abierto a la vez (asignar solo una vez)
-      window.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.faq-block').forEach(function(block) {
-          block.addEventListener('click', function() {
-            document.querySelectorAll('.faq-block').forEach(function(b) { b.classList.remove('open'); });
-            block.classList.toggle('open');
-          });
-        });
+      // Cerrar menú con Escape
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && sideMenuOpen) closeSideMenu();
       });
+      // Opcional: cerrar menú al hacer click fuera
+      window.addEventListener('resize', function() { if (sideMenuOpen) closeSideMenu(); });
       // Menú lateral: solo un bloque abierto a la vez y despliegue de contenido
       function hideAllMenuContents() {
         document.getElementById('menu-content').style.display = 'none';
