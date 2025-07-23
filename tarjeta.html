@@ -957,8 +957,7 @@
           };
         }
       }
-      document.getElementById('help-btn').addEventListener('click', function(e) {
-        e.stopPropagation();
+      function openFaqModal() {
         const modal = document.getElementById('faq-modal-integrado');
         if (modal) {
           modal.setAttribute('aria-visible', 'true');
@@ -975,6 +974,16 @@
           tapHint.style.transition = 'opacity 0.7s';
           tapHint.style.opacity = '0';
           setTimeout(() => { tapHint.style.display = 'none'; }, 800);
+        }
+      }
+      // Asegura que el evento se registre correctamente en todos los casos
+      document.addEventListener('DOMContentLoaded', function() {
+        var helpBtn = document.getElementById('help-btn');
+        if (helpBtn) {
+          helpBtn.onclick = function(e) {
+            e.stopPropagation();
+            openFaqModal();
+          };
         }
       });
       document.getElementById('faq-close-btn').addEventListener('click', function(e) {
