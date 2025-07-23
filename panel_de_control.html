@@ -595,31 +595,30 @@ window.deleteUserByDocumento = async function(documento) {
         renderUsers();
         mostrarPanelPoderTotal();
       }
-          // Cargar FAQ al abrir el panel (optimizado y con FAQ extra)
+          // Cargar FAQ al abrir el panel
           (async function cargarFAQ() {
             const { data, error } = await supabase.from('faq').select('*').order('orden', { ascending: true });
-            // FAQ optimizado: área amplia y scroll si es necesario
-            let faqHtml = `<div id='faq-area' style='max-height:340px;overflow-y:auto;background:#f9f9f9;border-radius:8px;padding:18px 16px;margin-top:18px;margin-bottom:10px;border:1.5px solid #e67e22;'>`;
-            for (let i = 1; i <= 5; i++) {
-              let pregunta = data && data[i-1]?.pregunta ? data[i-1].pregunta : '';
-              let respuesta = data && data[i-1]?.respuesta ? data[i-1].respuesta : '';
-              // FAQ 4 personalizado
-              if (i === 4) {
-                pregunta = '¿Como puedo invitar a un amigo?';
-                respuesta = 'Los cupos son limitados pero puedes recomendarlo como un referido y te daremos 2 stickers por nuevo referido. ¡Escribenos!';
+            if (!error && data && data.length > 0) {
+              for (let i = 1; i <= 5; i++) {
+                document.getElementById('pregunta'+i).value = data[i-1]?.pregunta || '';
+                document.getElementById('respuesta'+i).value = data[i-1]?.respuesta || '';
               }
-              faqHtml += `<div class='faq-block' style='margin-bottom:18px;'>
-                <div class='faq-block-header' style='font-weight:bold;color:#0077b6;font-size:1.08em;margin-bottom:6px;'>${pregunta}</div>
-                <div class='faq-block-content' style='color:#222;font-size:1em;line-height:1.5;background:#fff;padding:10px 12px;border-radius:6px;border:1px solid #eee;'>${respuesta}</div>
-              </div>`;
             }
-            faqHtml += `</div>`;
-            // Insertar FAQ optimizado en el panel
-            if (!document.getElementById('faq-area')) {
-              panel.insertAdjacentHTML('beforeend', faqHtml);
-            } else {
-              document.getElementById('faq-area').outerHTML = faqHtml;
+            // ACTUALIZAR FAQ EN MODAL DE TARJETA SI EXISTE
+            if (window.parent && window.parent !== window && window.parent.document) {
+              // Si está en iframe, no hacer nada
+              return;
             }
+            try {
+              const tarjetaFaqModal = window.opener ? window.opener.document.getElementById('faq-modal-integrado') : document.getElementById('faq-modal-integrado');
+              if (tarjetaFaqModal) {
+                const blocks = tarjetaFaqModal.querySelectorAll('.faq-block');
+                for (let i = 0; i < blocks.length && i < data.length; i++) {
+                  blocks[i].querySelector('.faq-block-header').innerHTML = data[i].pregunta + ' <span class="triangle">&#9660;</span>';
+                  blocks[i].querySelector('.faq-block-content').textContent = data[i].respuesta;
+                }
+              }
+            } catch(e) {}
           })();
           // Guardar FAQ en Supabase
           faqForm.onsubmit = async function(e) {
