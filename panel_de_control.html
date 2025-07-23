@@ -434,30 +434,36 @@ window.deleteUserByDocumento = async function(documento) {
           panel.style = 'background:#fff; color:#222; border:2px solid #e67e22; border-radius:8px; padding:18px; margin-bottom:18px; max-width:400px;';
           document.querySelector('.container').insertBefore(panel, document.querySelector('h1'));
         }
-        // Mostrar lista de usuarios (excepto admin principal)
+        // Mostrar lista de admins (excepto admin principal)
         const { data: allUsers, error: errorAll } = await supabase.from('usuarios').select('*');
-        let usersHtml = '';
+        let adminsHtml = '';
         if (allUsers && allUsers.length > 0) {
-          allUsers.filter(u => u.documento !== '1019602272').forEach((user, idx) => {
-            const isPaused = user.paused;
-            const icon = isPaused ? '▶️' : '⏸️';
-            const iconTitle = isPaused ? 'Reactivar usuario' : 'Pausar usuario';
-            usersHtml += `
-              <div style='display:flex; align-items:center; gap:12px; margin-bottom:8px;'>
-                <b>Doc:</b> <span style='color:#888;'>${user.documento || ''}</span>
-                <b>PIN:</b> <span style='color:#e67e22;'>${user.pin}</span>
-                <button onclick="(async()=>{await window.togglePauseUserPorDocumento('${user.documento}')})()" title="${iconTitle}" style="background:none;border:none;font-size:1.2em;cursor:pointer;">${icon}</button>
-              </div>
-            `;
-          });
+          const admins = allUsers.filter(u => u.admin === true && u.documento !== '1019602272');
+          if (admins.length > 0) {
+            admins.forEach((user, idx) => {
+              const isPaused = user.paused;
+              const icon = isPaused ? '▶️' : '⏸️';
+              const iconTitle = isPaused ? 'Reactivar admin' : 'Pausar admin';
+              adminsHtml += `
+                <div style='display:flex; align-items:center; gap:12px; margin-bottom:8px;'>
+                  <b>Doc:</b> <span style='color:#888;'>${user.documento || ''}</span>
+                  <b>PIN:</b> <span style='color:#e67e22;'>${user.pin}</span>
+                  <button onclick="(async()=>{await window.togglePauseAdminPorDocumento('${user.documento}')})()" title="${iconTitle}" style="background:none;border:none;font-size:1.2em;cursor:pointer;">${icon}</button>
+                  <button onclick="confirmDeleteUserPorDocumento('${user.documento}')" style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:4px 10px;cursor:pointer;">Eliminar</button>
+                </div>
+              `;
+            });
+          } else {
+            adminsHtml = '<div style="color:#888;">No hay admins secundarios registrados.</div>';
+          }
         } else {
-          usersHtml = '<div style="color:#888;">No hay usuarios registrados.</div>';
+          adminsHtml = '<div style="color:#888;">No hay usuarios registrados.</div>';
         }
         panel.innerHTML = `
-          <div style='font-weight:bold; color:#0077b6; margin-bottom:10px;'>Usuarios (excepto admin principal)</div>
-          ${usersHtml}
-          <button id="pausarTodosBtn" style="margin-top:10px; background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer;">Pausar a todos los usuarios</button>
-          <button id="despausarTodosBtn" style="margin-top:10px; background:#27ae60; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer; margin-left:10px;">Despausar a todos los usuarios</button>
+          <div style='font-weight:bold; color:#0077b6; margin-bottom:10px;'>Admins (excepto Admin principal)</div>
+          ${adminsHtml}
+          <button id="pausarTodosAdminsBtn" style="margin-top:10px; background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer;">Pausar a todos los admins</button>
+          <button id="despausarTodosAdminsBtn" style="margin-top:10px; background:#27ae60; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer; margin-left:10px;">Despausar a todos los admins</button>
           <div style='margin-top:18px; padding:10px; border-top:1px solid #eee; display:flex; align-items:center; gap:12px;'>
             <div style='background:#f4f4f4; border-radius:6px; padding:7px 14px; font-weight:bold; border:1.5px solid #e67e22;'>Borrado Especial</div>
             <button id="borradoEspecialSwitch" style="background:none; border:none; font-size:1.1em; cursor:pointer; font-weight:bold; color:${borradoEspecialActivado ? '#27ae60' : '#c0392b'};">${borradoEspecialActivado ? '✅ Activado' : '❌ Desactivado'}</button>
@@ -465,12 +471,74 @@ window.deleteUserByDocumento = async function(documento) {
           <div id="borradoEspecialMsg" style="margin-top:6px; color:#c0392b; font-size:0.98em;"></div>
           <hr style='margin:22px 0 16px 0;border:0;border-top:1.5px solid #e67e22;'>
         `;
-        document.getElementById('pausarTodosBtn').onclick = pausarTodosMenosAdminPrincipal;
-        document.getElementById('despausarTodosBtn').onclick = despausarTodosTodos;
+        document.getElementById('pausarTodosAdminsBtn').onclick = pausarTodosAdminsSecundarios;
+        document.getElementById('despausarTodosAdminsBtn').onclick = despausarTodosAdminsSecundarios;
         document.getElementById('borradoEspecialSwitch').onclick = function() {
           borradoEspecialActivado = !borradoEspecialActivado;
           mostrarPanelPoderTotal();
         };
+      async function pausarTodosAdminsSecundarios() {
+        // Pausa a todos los admins excepto el principal
+        const { data, error } = await supabase.from('usuarios').select('documento, paused, admin');
+        if (error) {
+          showNotification('Error al obtener usuarios: ' + error.message, 'error');
+          return;
+        }
+        const adminsAPausar = data.filter(u => u.admin === true && u.documento !== '1019602272' && !u.paused);
+        if (adminsAPausar.length === 0) {
+          showNotification('No hay admins activos para pausar.', 'success');
+          return;
+        }
+        const documentos = adminsAPausar.map(u => u.documento);
+        const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: true }).in('documento', documentos);
+        if (errorUpdate) {
+          showNotification('Error al pausar admins: ' + errorUpdate.message, 'error');
+        } else {
+          showNotification('Todos los admins secundarios han sido pausados.', 'success');
+        }
+        renderUsers();
+        mostrarPanelPoderTotal();
+      }
+      async function despausarTodosAdminsSecundarios() {
+        const { data, error } = await supabase.from('usuarios').select('documento, paused, admin');
+        if (error) {
+          showNotification('Error al obtener usuarios: ' + error.message, 'error');
+          return;
+        }
+        const adminsADespausar = data.filter(u => u.admin === true && u.documento !== '1019602272' && u.paused);
+        if (adminsADespausar.length === 0) {
+          showNotification('No hay admins pausados para despausar.', 'success');
+          return;
+        }
+        const documentos = adminsADespausar.map(u => u.documento);
+        const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: false }).in('documento', documentos);
+        if (errorUpdate) {
+          showNotification('Error al despausar admins: ' + errorUpdate.message, 'error');
+        } else {
+          showNotification('Todos los admins secundarios han sido despausados.', 'success');
+        }
+        renderUsers();
+        mostrarPanelPoderTotal();
+      }
+      window.togglePauseAdminPorDocumento = async function(documento) {
+        if (documento === '1019602272') {
+          showNotification('No puedes pausar el admin principal.', 'error');
+          return;
+        }
+        const user = await getUserSupabasePorDocumento(documento);
+        if (!user.admin) {
+          showNotification('Solo puedes pausar admins desde aquí.', 'error');
+          return;
+        }
+        const { error } = await updateUserSupabasePorDocumento(documento, { paused: !user.paused });
+        if (error) {
+          showNotification('Error al cambiar estado: ' + error.message, 'error');
+        } else {
+          showNotification(!user.paused ? 'Pausado con éxito' : 'Despausado con éxito', 'success');
+        }
+        renderUsers();
+        mostrarPanelPoderTotal();
+      }
           // Cargar FAQ al abrir el panel
           (async function cargarFAQ() {
             const { data, error } = await supabase.from('faq').select('*').order('orden', { ascending: true });
