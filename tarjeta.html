@@ -450,11 +450,11 @@
     <!-- Menú lateral oculto -->
     <div id="side-menu" style="position:fixed;top:0;left:0;width:0;height:100vh;max-width:98vw;background:linear-gradient(135deg,#25647a 0%,#13394a 100%);box-shadow:2px 0 16px 0 rgba(0,0,0,0.18);z-index:1004;overflow:hidden;transition:width 0.35s cubic-bezier(.7,1.7,.5,1);display:flex;flex-direction:column;align-items:flex-start;">
       <div style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 12px 0 12px;">
-        <div style="display:flex;align-items:center;gap:18px;">
-          <a href="https://www.instagram.com/bahia.chill/" target="_blank" title="Instagram" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:none;border:none;cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <a href="https://www.instagram.com/bahia.chill/" target="_blank" title="Instagram" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:none;border:none;cursor:pointer;">
             <i class="fa-brands fa-instagram" style="color:#fff;font-size:1.7em;"></i>
           </a>
-          <a href="https://www.tiktok.com/@bahia.chill" target="_blank" title="TikTok" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:none;border:none;cursor:pointer;">
+          <a href="https://www.tiktok.com/@bahia.chill" target="_blank" title="TikTok" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:none;border:none;cursor:pointer;">
             <i class="fa-brands fa-tiktok" style="color:#fff;font-size:1.7em;"></i>
           </a>
         </div>
@@ -957,33 +957,22 @@
           };
         }
       }
-      function openFaqModal() {
+      document.getElementById('help-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
         const modal = document.getElementById('faq-modal-integrado');
-        if (modal) {
-          modal.setAttribute('aria-visible', 'true');
-          modal.classList.remove('faq-slide-out', 'faq-slide-out-active');
-          modal.classList.add('faq-slide-in');
-          setTimeout(() => {
-            modal.classList.add('faq-slide-in-active');
-          }, 10);
-          document.body.style.overflow = 'hidden';
-        }
+        modal.setAttribute('aria-visible', 'true');
+        modal.classList.remove('faq-slide-out', 'faq-slide-out-active');
+        modal.classList.add('faq-slide-in');
+        setTimeout(() => {
+          modal.classList.add('faq-slide-in-active');
+        }, 10);
+        document.body.style.overflow = 'hidden';
         // Difuminar y ocultar el aviso de ayuda
         const tapHint = document.getElementById('tap-hint');
         if (tapHint) {
           tapHint.style.transition = 'opacity 0.7s';
           tapHint.style.opacity = '0';
           setTimeout(() => { tapHint.style.display = 'none'; }, 800);
-        }
-      }
-      // Asegura que el evento se registre correctamente en todos los casos
-      document.addEventListener('DOMContentLoaded', function() {
-        var helpBtn = document.getElementById('help-btn');
-        if (helpBtn) {
-          helpBtn.onclick = function(e) {
-            e.stopPropagation();
-            openFaqModal();
-          };
         }
       });
       document.getElementById('faq-close-btn').addEventListener('click', function(e) {
