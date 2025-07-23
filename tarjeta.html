@@ -960,13 +960,15 @@
       document.getElementById('help-btn').addEventListener('click', function(e) {
         e.stopPropagation();
         const modal = document.getElementById('faq-modal-integrado');
-        modal.setAttribute('aria-visible', 'true');
-        modal.classList.remove('faq-slide-out', 'faq-slide-out-active');
-        modal.classList.add('faq-slide-in');
-        setTimeout(() => {
-          modal.classList.add('faq-slide-in-active');
-        }, 10);
-        document.body.style.overflow = 'hidden';
+        if (modal) {
+          modal.setAttribute('aria-visible', 'true');
+          modal.classList.remove('faq-slide-out', 'faq-slide-out-active');
+          modal.classList.add('faq-slide-in');
+          setTimeout(() => {
+            modal.classList.add('faq-slide-in-active');
+          }, 10);
+          document.body.style.overflow = 'hidden';
+        }
         // Difuminar y ocultar el aviso de ayuda
         const tapHint = document.getElementById('tap-hint');
         if (tapHint) {
