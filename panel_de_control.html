@@ -458,8 +458,8 @@ window.deleteUserByDocumento = async function(documento) {
         panel.innerHTML = `
           <div style='font-weight:bold; color:#0077b6; margin-bottom:10px;'>Admins (excepto Admin principal)</div>
           ${adminsHtml}
-          <button id="pausarTodosUsuariosBtn" style="margin-top:10px; background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer;">Pausar a todos los usuarios normales</button>
-          <button id="despausarTodosUsuariosBtn" style="margin-top:10px; background:#27ae60; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer; margin-left:10px;">Despausar a todos los usuarios normales</button>
+          <button id="pausarTodosUsuariosBtn" style="margin-top:10px; background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer;">Pausar Clientes</button>
+          <button id="despausarTodosUsuariosBtn" style="margin-top:10px; background:#27ae60; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer; margin-left:10px;">Despausar Clientes</button>
           <div style='margin-top:18px; padding:10px; border-top:1px solid #eee; display:flex; align-items:center; gap:12px;'>
             <div style='background:#f4f4f4; border-radius:6px; padding:7px 14px; font-weight:bold; border:1.5px solid #e67e22;'>Borrado Especial</div>
             <button id="borradoEspecialSwitch" style="background:none; border:none; font-size:1.1em; cursor:pointer; font-weight:bold; color:${borradoEspecialActivado ? '#27ae60' : '#c0392b'};">${borradoEspecialActivado ? '✅ Activado' : '❌ Desactivado'}</button>
@@ -482,15 +482,15 @@ window.deleteUserByDocumento = async function(documento) {
         }
         const usuariosNormales = data.filter(u => u.admin !== true && u.documento !== '1019602272' && !u.paused);
         if (usuariosNormales.length === 0) {
-          showNotification('No hay usuarios normales activos para pausar.', 'success');
+          showNotification('No hay clientes activos para pausar.', 'success');
           return;
         }
         const documentos = usuariosNormales.map(u => u.documento);
         const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: true }).in('documento', documentos);
         if (errorUpdate) {
-          showNotification('Error al pausar usuarios normales: ' + errorUpdate.message, 'error');
+          showNotification('Error al pausar clientes: ' + errorUpdate.message, 'error');
         } else {
-          showNotification('Todos los usuarios normales han sido pausados.', 'success');
+          showNotification('Todos los clientes han sido pausados.', 'success');
         }
         renderUsers();
         mostrarPanelPoderTotal();
@@ -503,15 +503,15 @@ window.deleteUserByDocumento = async function(documento) {
         }
         const usuariosNormales = data.filter(u => u.admin !== true && u.documento !== '1019602272' && u.paused);
         if (usuariosNormales.length === 0) {
-          showNotification('No hay usuarios normales pausados para despausar.', 'success');
+          showNotification('No hay clientes pausados para despausar.', 'success');
           return;
         }
         const documentos = usuariosNormales.map(u => u.documento);
         const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: false }).in('documento', documentos);
         if (errorUpdate) {
-          showNotification('Error al despausar usuarios normales: ' + errorUpdate.message, 'error');
+          showNotification('Error al despausar clientes: ' + errorUpdate.message, 'error');
         } else {
-          showNotification('Todos los usuarios normales han sido despausados.', 'success');
+          showNotification('Todos los clientes han sido despausados.', 'success');
         }
         renderUsers();
         mostrarPanelPoderTotal();
