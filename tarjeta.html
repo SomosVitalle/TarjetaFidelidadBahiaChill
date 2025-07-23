@@ -449,25 +449,28 @@
     </div>
     <!-- Menú lateral oculto -->
     <div id="side-menu" style="position:fixed;top:0;left:0;width:0;height:100vh;max-width:98vw;background:linear-gradient(135deg,#25647a 0%,#13394a 100%);box-shadow:2px 0 16px 0 rgba(0,0,0,0.18);z-index:1004;overflow:hidden;transition:width 0.35s cubic-bezier(.7,1.7,.5,1);display:flex;flex-direction:column;align-items:flex-start;">
-      <div style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 12px 0 12px;">
-        <div style="display:flex;align-items:center;gap:14px;">
-          <a href="https://www.instagram.com/bahia.chill/" target="_blank" title="Instagram" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:none;border:none;cursor:pointer;">
-            <i class="fa-brands fa-instagram" style="color:#fff;font-size:1.7em;"></i>
-          </a>
-          <a href="https://www.tiktok.com/@bahia.chill" target="_blank" title="TikTok" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:none;border:none;cursor:pointer;">
-            <i class="fa-brands fa-tiktok" style="color:#fff;font-size:1.7em;"></i>
-          </a>
-        </div>
+      <div style="width:100%;display:flex;align-items:center;justify-content:flex-end;padding:12px 12px 0 12px;">
         <button id="side-menu-close" aria-label="Cerrar menú" style="background:none;border:none;color:#fff;font-size:2em;font-weight:bold;cursor:pointer;line-height:1;">&times;</button>
       </div>
-      <button class="side-menu-item" id="menu-titulo" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;">Menú</button>
-      <div id="menu-content" style="display:none;padding:0 24px 10px 24px;color:#fff;font-size:1em;"></div>
-      <button class="side-menu-item" id="musica-titulo" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;">Poner mi música</button>
-      <div id="musica-content" style="display:none;padding:0 24px 10px 24px;color:#fff;font-size:1em;"></div>
-      <button class="side-menu-item" id="juegos-titulo" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;">Juegos</button>
-      <div id="juegos-content" style="display:none;padding:0 24px 10px 24px;color:#fff;font-size:1em;"></div>
-      <button class="side-menu-item" id="ruleta-titulo" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;">Ruleta VIP</button>
-      <div id="ruleta-content" style="display:none;padding:0 24px 10px 24px;color:#fff;font-size:1em;"></div>
+      <div style="width:100%;display:flex;align-items:center;gap:18px;padding:10px 0 10px 24px;">
+        <a href="https://instagram.com/bahia.chill" target="_blank" title="Instagram" style="color:#fff;"><i class="fa-brands fa-instagram" style="font-size:1.7em;"></i></a>
+        <a href="https://tiktok.com/@bahia.chill" target="_blank" title="TikTok" style="color:#fff;"><i class="fa-brands fa-tiktok" style="font-size:1.7em;"></i></a>
+      </div>
+      <div class="side-menu-item-group">
+        <button class="side-menu-item" data-link="https://bahiachill.com" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">Menú <span class="triangle">&#8599;</span></button>
+      </div>
+      <div class="side-menu-item-group">
+        <button class="side-menu-item expandable" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">Poner mi música <span class="triangle">&#9660;</span></button>
+        <div class="side-menu-content" style="display:none;padding:0 24px 12px 24px;color:#fff;font-size:0.98em;">Envía tu playlist favorita y la pondremos en el local. ¡Escríbenos por Instagram!</div>
+      </div>
+      <div class="side-menu-item-group">
+        <button class="side-menu-item expandable" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">Juegos <span class="triangle">&#9660;</span></button>
+        <div class="side-menu-content" style="display:none;padding:0 24px 12px 24px;color:#fff;font-size:0.98em;">Próximamente podrás participar en juegos y sorteos exclusivos para clientes VIP.</div>
+      </div>
+      <div class="side-menu-item-group">
+        <button class="side-menu-item expandable" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">Ruleta VIP <span class="triangle">&#9660;</span></button>
+        <div class="side-menu-content" style="display:none;padding:0 24px 12px 24px;color:#fff;font-size:0.98em;">Gira la ruleta y gana premios especiales cada mes. ¡Solo para miembros VIP!</div>
+      </div>
     </div>
     <!-- Fondo oscuro al abrir menú -->
     <div id="side-menu-overlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.25);z-index:1002;"></div>
@@ -585,7 +588,6 @@
         e.stopPropagation();
         if (!sideMenuOpen) openSideMenu();
       });
-      // Botón X para cerrar menú
       setTimeout(() => {
         const closeBtn = document.getElementById('side-menu-close');
         if (closeBtn) {
@@ -599,12 +601,34 @@
         e.stopPropagation();
         if (sideMenuOpen) closeSideMenu();
       });
-      // Cerrar menú con Escape
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && sideMenuOpen) closeSideMenu();
       });
-      // Opcional: cerrar menú al hacer click fuera
       window.addEventListener('resize', function() { if (sideMenuOpen) closeSideMenu(); });
+      // Lógica de menú expandible y enlaces
+      document.querySelectorAll('.side-menu-item').forEach(btn => {
+        // Si tiene data-link, redirige
+        if (btn.dataset.link) {
+          btn.addEventListener('click', function(e) {
+            window.open(btn.dataset.link, '_blank');
+            closeSideMenu();
+          });
+        }
+      });
+      document.querySelectorAll('.side-menu-item.expandable').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          // Cerrar todos los contenidos
+          document.querySelectorAll('.side-menu-content').forEach(c => c.style.display = 'none');
+          document.querySelectorAll('.side-menu-item.expandable').forEach(b => b.classList.remove('open'));
+          // Abrir solo el actual si estaba cerrado
+          const content = btn.nextElementSibling;
+          if (content && content.style.display !== 'block') {
+            content.style.display = 'block';
+            btn.classList.add('open');
+          }
+        });
+      });
       // Inicialización global de Supabase
       const SUPABASE_URL = 'https://senqhfrzhsvrwiqschuf.supabase.co';
       const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbnFoZnJ6aHN2cndpcXNjaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMTA3MzksImV4cCI6MjA2NTY4NjczOX0.SoQUuDrUtIObkHMTn6HOOR74MvYTI5bgy4-PDU4p-dg';
@@ -991,39 +1015,14 @@
       });
       document.querySelectorAll('.faq-block').forEach(block => {
         block.addEventListener('click', function() {
+          // Cerrar todos los bloques
           document.querySelectorAll('.faq-block').forEach(b => b.classList.remove('open'));
-          block.classList.toggle('open');
+          // Abrir solo el actual si estaba cerrado
+          if (!this.classList.contains('open')) {
+            this.classList.add('open');
+          }
         });
       });
-      // Menú lateral: solo un bloque abierto a la vez y despliegue de contenido
-      function hideAllMenuContents() {
-        document.getElementById('menu-content').style.display = 'none';
-        document.getElementById('musica-content').style.display = 'none';
-        document.getElementById('juegos-content').style.display = 'none';
-        document.getElementById('ruleta-content').style.display = 'none';
-      }
-      document.getElementById('menu-titulo').onclick = function() {
-        window.open('https://menubahiachillbar.my.canva.site/bahia-chill-men-2025', '_blank');
-        hideAllMenuContents();
-      };
-      document.getElementById('musica-titulo').onclick = function() {
-        hideAllMenuContents();
-        const cont = document.getElementById('musica-content');
-        cont.innerHTML = `<div style='margin-bottom:10px;'><a href='https://app.nosongrequests.com/Bahiachill' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>No song request</a></div><div><a href='https://festify.us/' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>Festify</a></div>`;
-        cont.style.display = 'block';
-      };
-      document.getElementById('juegos-titulo').onclick = function() {
-        hideAllMenuContents();
-        const cont = document.getElementById('juegos-content');
-        cont.innerHTML = `<div style='margin-bottom:10px;'><a href='https://app-sorteos.com/es/apps/la-ruleta-decide?hash=NV3E2L' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>Verdad Reto o Shot - Suave 😇</a></div><div style='margin-bottom:10px;'><a href='https://app-sorteos.com/es/apps/la-ruleta-decide?hash=NV3E2L' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>Verdad Reto o Shot - Picante 😈</a></div><div style='margin-bottom:10px;'><a href='https://app-sorteos.com/es/apps/la-ruleta-decide?hash=GMOD4D' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>Ruleta</a></div><div><a href='https://www.airconsole.com/' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>Consola Multijuegos - 2 jugadores</a></div>`;
-        cont.style.display = 'block';
-      };
-      document.getElementById('ruleta-titulo').onclick = function() {
-        hideAllMenuContents();
-        const cont = document.getElementById('ruleta-content');
-        cont.innerHTML = `<div style='font-weight:bold;margin-bottom:8px;'>Ruleta VIP</div><div style='margin-bottom:8px;'>CADA 100.000 COP CONSUMIDOS TE<br>DARA EL DERECHO A 1 GIRO GRATIS DE NUESTRA RULETA VIP</div><div style='margin-bottom:8px;'>EN ESTA TE REGALAREMOS LO QUE<br>CONSIGAS CON TU GIRO</div><div style='margin-bottom:8px;'>PREGUNTALE AL MESERO COMO<br>JUGAR</div>`;
-        cont.style.display = 'block';
-      };
       // Al cargar, verificar y redirigir si es necesario
       window.addEventListener('DOMContentLoaded', async () => {
         const body = document.getElementById('body-block');
