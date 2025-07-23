@@ -48,7 +48,7 @@
         <h1>Panel de Control - Administrador</h1>
         <form id="userForm">
             <div class="form-group">
-                <label for="nombreCompleto">1er Nombre y 1er Apellido</label>
+                <label for="nombreCompleto">Nombre Completo</label>
                 <input type="text" id="nombreCompleto" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$" title="Nombre completo (solo letras y espacios)">
             </div>
             <!-- Eliminado campo username -->
@@ -229,7 +229,7 @@
         const documento = document.getElementById('documento').value.trim();
         const pin = document.getElementById('pin').value.trim();
         const telefono = document.getElementById('telefono').value.trim();
-        let numero = 0;
+        let numero = 2;
         // Validaciones estrictas
         if (!nombreCompleto.match(/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/)) {
           showNotification('El nombre completo solo puede contener letras y espacios.', 'error');
@@ -279,7 +279,7 @@
           pin,
           documento,
           telefono,
-          numero: parseInt(numero, 10) || 0
+          numero: 2
         };
         const { error } = await supabase.from('usuarios').insert([userObj]);
         if (error) {
@@ -458,8 +458,8 @@ window.deleteUserByDocumento = async function(documento) {
         panel.innerHTML = `
           <div style='font-weight:bold; color:#0077b6; margin-bottom:10px;'>Admins (excepto Admin principal)</div>
           ${adminsHtml}
-          <button id="pausarTodosUsuariosBtn" style="margin-top:10px; background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer;">Pausar Clientes</button>
-          <button id="despausarTodosUsuariosBtn" style="margin-top:10px; background:#27ae60; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer; margin-left:10px;">Despausar Clientes</button>
+          <button id="pausarTodosUsuariosBtn" style="margin-top:10px; background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer;">Pausar a todos los usuarios normales</button>
+          <button id="despausarTodosUsuariosBtn" style="margin-top:10px; background:#27ae60; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-weight:bold; cursor:pointer; margin-left:10px;">Despausar a todos los usuarios normales</button>
           <div style='margin-top:18px; padding:10px; border-top:1px solid #eee; display:flex; align-items:center; gap:12px;'>
             <div style='background:#f4f4f4; border-radius:6px; padding:7px 14px; font-weight:bold; border:1.5px solid #e67e22;'>Borrado Especial</div>
             <button id="borradoEspecialSwitch" style="background:none; border:none; font-size:1.1em; cursor:pointer; font-weight:bold; color:${borradoEspecialActivado ? '#27ae60' : '#c0392b'};">${borradoEspecialActivado ? '✅ Activado' : '❌ Desactivado'}</button>
@@ -482,15 +482,15 @@ window.deleteUserByDocumento = async function(documento) {
         }
         const usuariosNormales = data.filter(u => u.admin !== true && u.documento !== '1019602272' && !u.paused);
         if (usuariosNormales.length === 0) {
-          showNotification('No hay clientes activos para pausar.', 'success');
+          showNotification('No hay usuarios normales activos para pausar.', 'success');
           return;
         }
         const documentos = usuariosNormales.map(u => u.documento);
         const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: true }).in('documento', documentos);
         if (errorUpdate) {
-          showNotification('Error al pausar clientes: ' + errorUpdate.message, 'error');
+          showNotification('Error al pausar usuarios normales: ' + errorUpdate.message, 'error');
         } else {
-          showNotification('Todos los clientes han sido pausados.', 'success');
+          showNotification('Todos los usuarios normales han sido pausados.', 'success');
         }
         renderUsers();
         mostrarPanelPoderTotal();
@@ -503,15 +503,15 @@ window.deleteUserByDocumento = async function(documento) {
         }
         const usuariosNormales = data.filter(u => u.admin !== true && u.documento !== '1019602272' && u.paused);
         if (usuariosNormales.length === 0) {
-          showNotification('No hay clientes pausados para despausar.', 'success');
+          showNotification('No hay usuarios normales pausados para despausar.', 'success');
           return;
         }
         const documentos = usuariosNormales.map(u => u.documento);
         const { error: errorUpdate } = await supabase.from('usuarios').update({ paused: false }).in('documento', documentos);
         if (errorUpdate) {
-          showNotification('Error al despausar clientes: ' + errorUpdate.message, 'error');
+          showNotification('Error al despausar usuarios normales: ' + errorUpdate.message, 'error');
         } else {
-          showNotification('Todos los clientes han sido despausados.', 'success');
+          showNotification('Todos los usuarios normales han sido despausados.', 'success');
         }
         renderUsers();
         mostrarPanelPoderTotal();
@@ -595,30 +595,31 @@ window.deleteUserByDocumento = async function(documento) {
         renderUsers();
         mostrarPanelPoderTotal();
       }
-          // Cargar FAQ al abrir el panel
+          // Cargar FAQ al abrir el panel (optimizado y con FAQ extra)
           (async function cargarFAQ() {
             const { data, error } = await supabase.from('faq').select('*').order('orden', { ascending: true });
-            if (!error && data && data.length > 0) {
-              for (let i = 1; i <= 5; i++) {
-                document.getElementById('pregunta'+i).value = data[i-1]?.pregunta || '';
-                document.getElementById('respuesta'+i).value = data[i-1]?.respuesta || '';
+            // FAQ optimizado: área amplia y scroll si es necesario
+            let faqHtml = `<div id='faq-area' style='max-height:340px;overflow-y:auto;background:#f9f9f9;border-radius:8px;padding:18px 16px;margin-top:18px;margin-bottom:10px;border:1.5px solid #e67e22;'>`;
+            for (let i = 1; i <= 5; i++) {
+              let pregunta = data && data[i-1]?.pregunta ? data[i-1].pregunta : '';
+              let respuesta = data && data[i-1]?.respuesta ? data[i-1].respuesta : '';
+              // FAQ 4 personalizado
+              if (i === 4) {
+                pregunta = '¿Como puedo invitar a un amigo?';
+                respuesta = 'Los cupos son limitados pero puedes recomendarlo como un referido y te daremos 2 stickers por nuevo referido. ¡Escribenos!';
               }
+              faqHtml += `<div class='faq-block' style='margin-bottom:18px;'>
+                <div class='faq-block-header' style='font-weight:bold;color:#0077b6;font-size:1.08em;margin-bottom:6px;'>${pregunta}</div>
+                <div class='faq-block-content' style='color:#222;font-size:1em;line-height:1.5;background:#fff;padding:10px 12px;border-radius:6px;border:1px solid #eee;'>${respuesta}</div>
+              </div>`;
             }
-            // ACTUALIZAR FAQ EN MODAL DE TARJETA SI EXISTE
-            if (window.parent && window.parent !== window && window.parent.document) {
-              // Si está en iframe, no hacer nada
-              return;
+            faqHtml += `</div>`;
+            // Insertar FAQ optimizado en el panel
+            if (!document.getElementById('faq-area')) {
+              panel.insertAdjacentHTML('beforeend', faqHtml);
+            } else {
+              document.getElementById('faq-area').outerHTML = faqHtml;
             }
-            try {
-              const tarjetaFaqModal = window.opener ? window.opener.document.getElementById('faq-modal-integrado') : document.getElementById('faq-modal-integrado');
-              if (tarjetaFaqModal) {
-                const blocks = tarjetaFaqModal.querySelectorAll('.faq-block');
-                for (let i = 0; i < blocks.length && i < data.length; i++) {
-                  blocks[i].querySelector('.faq-block-header').innerHTML = data[i].pregunta + ' <span class="triangle">&#9660;</span>';
-                  blocks[i].querySelector('.faq-block-content').textContent = data[i].respuesta;
-                }
-              }
-            } catch(e) {}
           })();
           // Guardar FAQ en Supabase
           faqForm.onsubmit = async function(e) {
