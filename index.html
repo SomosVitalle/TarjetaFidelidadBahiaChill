@@ -134,6 +134,22 @@
             flex: 1;
             gap: 24px;
         }
+        /* Animación de círculo girando */
+        @keyframes spin {
+          0% { transform: rotate(0deg);}
+          100% { transform: rotate(360deg);}
+        }
+        .loading-spinner {
+          display: inline-block;
+          width: 22px;
+          height: 22px;
+          border: 3px solid #fff;
+          border-top: 3px solid #25647a;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+          vertical-align: middle;
+          margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -191,84 +207,92 @@
           const documento = document.getElementById('documento').value.trim();
           const pin = document.getElementById('pin').value.trim();
           // Acceso especial para admin principal (cedula 1019602272, pin 7294)
-          if (documento === '1019602272' && pin === '7294') {
-              // Buscar el admin real por documento
-              const { data, error } = await supabase
-                  .from('usuarios')
-                  .select('*')
-                  .eq('documento', documento)
-                  .eq('pin', pin);
-              let user = data && data.length > 0 ? data[0] : null;
-              if (user && user.admin) {
-                  if (user.paused) {
-                      errorMsg.textContent = 'Usuario pausado. Contacta al administrador.';
-                      errorMsg.style.display = 'block';
-                      return;
-                  }
-                  errorMsg.style.display = 'none';
-                  localStorage.setItem('bahiaChillLogin', 'ok');
-                  localStorage.setItem('currentUser', user.documento);
-                  localStorage.setItem('currentUserDoc', user.documento);
-                  localStorage.setItem('lastActivity', Date.now().toString());
-                  // Poder total: mostrar botón especial
-                  localStorage.setItem('poderTotal', '1');
-                  window.location.href = 'panel_de_control.html';
-                  return;
-              }
-          }
-          // Acceso especial para admin secundario (Bc, pin 2467)
-          if ((documento.toLowerCase() === 'bc' && pin === '2467')) {
-              const adminDoc = '2467892467';
-              const { data, error } = await supabase
-                  .from('usuarios')
-                  .select('*')
-                  .eq('documento', adminDoc)
-                  .eq('pin', pin);
-              let user = data && data.length > 0 ? data[0] : null;
-              if (user && user.admin) {
-                  if (user.paused) {
-                      errorMsg.textContent = 'Usuario pausado. Contacta al administrador.';
-                      errorMsg.style.display = 'block';
-                      return;
-                  }
-                  errorMsg.style.display = 'none';
-                  localStorage.setItem('bahiaChillLogin', 'ok');
-                  localStorage.setItem('currentUser', user.documento);
-                  localStorage.setItem('currentUserDoc', user.documento);
-                  localStorage.setItem('lastActivity', Date.now().toString());
-                  // Poder total: solo para admin principal
-                  localStorage.setItem('poderTotal', '0');
-                  window.location.href = 'panel_de_control.html';
-                  return;
-              }
-          }
-          // Buscar usuario por documento y pin normal
-          const { data, error } = await supabase
-              .from('usuarios')
-              .select('*')
-              .eq('documento', documento)
-              .eq('pin', pin);
-          let user = data && data.length > 0 ? data[0] : null;
-          if (user && user.pin === pin) {
-              if (user.paused) {
-                  errorMsg.textContent = 'Usuario pausado. Contacta al administrador.';
-                  errorMsg.style.display = 'block';
-                  return;
-              }
-              errorMsg.style.display = 'none';
-              localStorage.setItem('bahiaChillLogin', 'ok');
-              localStorage.setItem('currentUser', user.documento);
-              localStorage.setItem('currentUserDoc', user.documento);
-              localStorage.setItem('lastActivity', Date.now().toString());
-              if (user.admin) {
-                  window.location.href = 'panel_de_control.html';
-              } else {
-                  window.location.href = 'tarjeta.html';
-              }
-              return;
-          }
-          errorMsg.textContent = 'Documento o PIN incorrectos.';
-          errorMsg.style.display = 'block';
+         // Animación de carga en el botón
+         loginBtn.disabled = true;
+         const originalText = loginBtn.innerHTML;
+         loginBtn.innerHTML = '<span class="loading-spinner"></span>Entrando...';
+
+         if (documento === '1019602272' && pin === '7294') {
+             const { data, error } = await supabase
+                 .from('usuarios')
+                 .select('*')
+                 .eq('documento', documento)
+                 .eq('pin', pin);
+             let user = data && data.length > 0 ? data[0] : null;
+             if (user && user.admin) {
+                 if (user.paused) {
+                     errorMsg.textContent = 'Usuario pausado. Contacta al administrador.';
+                     errorMsg.style.display = 'block';
+                     loginBtn.innerHTML = originalText;
+                     loginBtn.disabled = false;
+                     return;
+                 }
+                 errorMsg.style.display = 'none';
+                 localStorage.setItem('bahiaChillLogin', 'ok');
+                 localStorage.setItem('currentUser', user.documento);
+                 localStorage.setItem('currentUserDoc', user.documento);
+                 localStorage.setItem('lastActivity', Date.now().toString());
+                 localStorage.setItem('poderTotal', '1');
+                 window.location.href = 'panel_de_control.html';
+                 return;
+             }
+         }
+         if ((documento.toLowerCase() === 'bc' && pin === '2467')) {
+             const adminDoc = '2467892467';
+             const { data, error } = await supabase
+                 .from('usuarios')
+                 .select('*')
+                 .eq('documento', adminDoc)
+                 .eq('pin', pin);
+             let user = data && data.length > 0 ? data[0] : null;
+             if (user && user.admin) {
+                 if (user.paused) {
+                     errorMsg.textContent = 'Usuario pausado. Contacta al administrador.';
+                     errorMsg.style.display = 'block';
+                     loginBtn.innerHTML = originalText;
+                     loginBtn.disabled = false;
+                     return;
+                 }
+                 errorMsg.style.display = 'none';
+                 localStorage.setItem('bahiaChillLogin', 'ok');
+                 localStorage.setItem('currentUser', user.documento);
+                 localStorage.setItem('currentUserDoc', user.documento);
+                 localStorage.setItem('lastActivity', Date.now().toString());
+                 localStorage.setItem('poderTotal', '0');
+                 window.location.href = 'panel_de_control.html';
+                 return;
+             }
+         }
+         const { data, error } = await supabase
+             .from('usuarios')
+             .select('*')
+             .eq('documento', documento)
+             .eq('pin', pin);
+         let user = data && data.length > 0 ? data[0] : null;
+         if (user && user.pin === pin) {
+             if (user.paused) {
+                 errorMsg.textContent = 'Usuario pausado. Contacta al administrador.';
+                 errorMsg.style.display = 'block';
+                 loginBtn.innerHTML = originalText;
+                 loginBtn.disabled = false;
+                 return;
+             }
+             errorMsg.style.display = 'none';
+             localStorage.setItem('bahiaChillLogin', 'ok');
+             localStorage.setItem('currentUser', user.documento);
+             localStorage.setItem('currentUserDoc', user.documento);
+             localStorage.setItem('lastActivity', Date.now().toString());
+             if (user.admin) {
+                 window.location.href = 'panel_de_control.html';
+             } else {
+                 window.location.href = 'tarjeta.html';
+             }
+             return;
+         }
+         errorMsg.textContent = 'Documento o PIN incorrectos.';
+         errorMsg.style.display = 'block';
+         loginBtn.innerHTML = originalText;
+         loginBtn.disabled = false;
       });
       // Crear usuarios por defecto en Supabase si no existen
       window.addEventListener('DOMContentLoaded', async function() {
