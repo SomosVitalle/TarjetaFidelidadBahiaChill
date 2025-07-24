@@ -303,7 +303,7 @@
          loginBtn.innerHTML = originalText;
          loginBtn.disabled = false;
       });
-      // Cambia la duración de la sesión a 480 minutos (8 horas)
+      // Cierre de sesión automático tras 8 horas desde login y 4 horas de inactividad
       let lastActivity = Date.now();
       function resetInactivityTimer() {
         lastActivity = Date.now();
@@ -313,8 +313,17 @@
       document.addEventListener('keydown', resetInactivityTimer);
       document.addEventListener('mousedown', resetInactivityTimer);
       document.addEventListener('touchstart', resetInactivityTimer);
+      // Cierre por tiempo total desde login
+      setTimeout(function() {
+        localStorage.removeItem('bahiaChillLogin');
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUserDoc');
+        localStorage.removeItem('lastActivity');
+        window.location.href = 'index.html';
+      }, 8 * 60 * 60 * 1000);
+      // Cierre por inactividad
       setInterval(function() {
-        if (Date.now() - lastActivity > 480 * 60 * 1000) { // 480 minutos
+        if (Date.now() - lastActivity > 4 * 60 * 60 * 1000) {
           localStorage.removeItem('bahiaChillLogin');
           localStorage.removeItem('currentUser');
           localStorage.removeItem('currentUserDoc');
