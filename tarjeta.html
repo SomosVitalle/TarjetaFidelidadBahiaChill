@@ -554,7 +554,7 @@
         <div class="faq-title">FAQ</div>
         <div class="faq-block">
           <div class="faq-block-header">¿Qué beneficios tiene esta tarjeta? <span class="triangle">&#9660;</span></div>
-          <div class="faq-block-content">¡Mensualmente podrás recibir diferentes tipos de regalos, asegúrate de tener los 10 stickers!<br><br>Puedes referir a tus amigos y te daremos 2 stickers por cada nuevo referido, los cupos son limitados. ¡Escríbenos!</div>
+          <div class="faq-block-content">¡Mensualmente podrás recibir diferentes tipos de regalos, asegúrate de tener los 10 stickers! Puedes referir a tus amigos y te daremos 2 stickers por cada nuevo referido, los cupos son limitados. ¡Escríbenos!</div>
         </div>
         <div class="faq-block">
           <div class="faq-block-header">¿Cómo obtengo un sticker? <span class="triangle">&#9660;</span></div>
@@ -732,10 +732,10 @@
         });
       }
 
-      // Redirigir a login tras 8 horas
+      // Redirigir a login tras 5 minutos
       setTimeout(function() {
         window.location.href = 'index.html';
-      }, 480 * 60 * 1000);
+      }, 5 * 60 * 1000);
 
       // Mostrar y ocultar el texto de ayuda
       function hideTapHint() {
@@ -751,7 +751,7 @@
         card.addEventListener('click', hideTapHint, { once: true });
       });
 
-      // Cierre de sesión automático tras 4 horas de inactividad
+      // Cierre de sesión automático tras 15 minutos de inactividad
       let lastActivity = Date.now();
       function resetInactivityTimer() {
         lastActivity = Date.now();
@@ -762,7 +762,7 @@
       document.addEventListener('mousedown', resetInactivityTimer);
       document.addEventListener('touchstart', resetInactivityTimer);
       setInterval(function() {
-        if (Date.now() - lastActivity > 240 * 60 * 1000) {
+        if (Date.now() - lastActivity > 15 * 60 * 1000) {
           localStorage.removeItem('bahiaChillLogin');
           localStorage.removeItem('currentUser');
           localStorage.removeItem('currentUserDoc');
