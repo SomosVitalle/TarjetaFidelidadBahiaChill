@@ -321,6 +321,25 @@
               .select('*');
           return data || [];
       }
+      // Cierre de sesión automático tras 180 minutos de inactividad
+      let lastActivity = Date.now();
+      function resetInactivityTimer() {
+        lastActivity = Date.now();
+        localStorage.setItem('lastActivity', lastActivity.toString());
+      }
+      document.addEventListener('mousemove', resetInactivityTimer);
+      document.addEventListener('keydown', resetInactivityTimer);
+      document.addEventListener('mousedown', resetInactivityTimer);
+      document.addEventListener('touchstart', resetInactivityTimer);
+      setInterval(function() {
+        if (Date.now() - lastActivity > 180 * 60 * 1000) {
+          localStorage.removeItem('bahiaChillLogin');
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('currentUserDoc');
+          localStorage.removeItem('lastActivity');
+          window.location.href = 'index.html';
+        }
+      }, 60000);
     </script>
 </body>
 </html>
