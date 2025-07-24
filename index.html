@@ -3,19 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarjeta BC</title>
+    <title>Bahía Chill - Tarjeta VIP</title>
     <!-- Color del navegador y PWA -->
     <meta name="theme-color" content="#25647a">
-    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="Tarjeta BC" />
-    <link rel="manifest" href="/site.webmanifest" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@300;400&display=swap');
+        
         html, body {
             font-family: 'Roboto', sans-serif;
             background: linear-gradient(135deg, #3d819d 0%, #25647a 50%, #13394a 100%);
@@ -32,14 +27,21 @@
             align-items: center;
             perspective: 1000px;
         }
+        
         .card-container {
             width: 427.5px;
-            height: 493.29px; /* 352.35px * 1.4 = 493.29px */
+            height: 217.5px;
             position: relative;
             transform-style: preserve-3d;
             transition: transform 1s;
+            cursor: pointer;
             filter: drop-shadow(0 0 10px rgba(0, 195, 255, 0.3));
         }
+        
+        .card-container.flipped {
+            transform: rotateY(180deg);
+        }
+        
         .card {
             position: absolute;
             width: 100%;
@@ -50,260 +52,722 @@
             backdrop-filter: blur(16px) saturate(180%);
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 32px 24px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             color: white;
             overflow: hidden;
+        }
+        
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            /* Gradiente prisma arcoíris */
+            background: linear-gradient(90deg,
+                rgba(255,0,102,0.0) 0%,
+                rgba(255,0,102,0.5) 10%,
+                rgba(255,154,0,0.5) 25%,
+                rgba(208,222,33,0.5) 40%,
+                rgba(79,220,74,0.5) 55%,
+                rgba(63,218,216,0.5) 70%,
+                rgba(47,201,226,0.5) 80%,
+                rgba(28,127,238,0.5) 90%,
+                rgba(95,21,242,0.5) 100%,
+                rgba(255,0,102,0.0) 100%
+            );
+            transition: none;
+        }
+        
+        .card-container.flipped .card::after {
+            animation: shine 1s ease-out;
+        }
+        
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .card-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(135deg, rgba(61, 129, 157, 0.18) 0%, rgba(61, 129, 157, 0.08) 100%);
+            backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .title {
+            font-family: 'Playfair Display', serif;
+            text-align: center;
+            font-size: 18px;
+            margin-top: 7.5px;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        /* Unificación de tipografía para nombre, documento y frase de palmas */
+        .nombre-tarjeta, .documento-tarjeta, .frase-palmas-tarjeta {
+            font-family: 'Roboto', Arial, sans-serif !important;
+            font-weight: bold !important;
+            letter-spacing: 1px;
+            color: white;
+        }
+        .frase-palmas-tarjeta { font-size: 1.08em !important; }
+        .nombre-tarjeta { font-size: 1.15em !important; }
+        .documento-tarjeta { font-size: 1.05em !important; }
+        /* Ajuste: frase de palmas igual tamaño que highlight */
+        .frase-palmas-tarjeta {
+            font-size: 10.5px !important;
+        }
+        #front-footer {
+            font-size: 10.5px !important;
+        }
+        
+        .stamps {
+            display: flex;
+            justify-content: space-around;
+            margin: 11.25px 0;
+        }
+        
+        .stamp {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
             justify-content: center;
             align-items: center;
         }
-        .login-title {
-            font-family: 'Roboto', sans-serif;
-            font-size: 2rem;
-            color: #fff;
-            margin-bottom: 40px;
-            letter-spacing: 2px;
-            text-align: center;
-        }
-        .login-input, .login-btn {
-            font-family: 'Roboto', sans-serif;
-        }
-        .login-input {
-            width: 100%;
-            max-width: 320px;
-            padding: 12px 16px;
-            margin-bottom: 18px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.3);
-            background: rgba(255,255,255,0.08);
-            color: #fff;
-            font-size: 1rem;
-            outline: none;
-        }
-        .login-input::placeholder {
-            color: #fff;
+        
+        .stamp i {
+            font-size: 12px;
             opacity: 0.7;
         }
-        .pin-container {
-            width: 100%;
-            max-width: 320px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            margin-bottom: 0;
-        }
-        .pin-input {
-            flex: 1;
-            padding-right: 40px;
-        }
-        .eye-btn {
+        
+        .qr-code {
             position: absolute;
-            right: 10px;
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 1.2rem;
-            cursor: pointer;
-            outline: none;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            opacity: 0.3;
         }
-        .login-btn {
-            width: 100%;
-            max-width: 320px;
-            padding: 12px 0;
-            border-radius: 8px;
-            border: none;
-            background: #25647a;
-            color: #fff;
-            font-size: 1.1rem;
-            font-family: 'Roboto', sans-serif;
-            font-weight: bold;
-            margin-top: 0;
-            cursor: pointer;
-            transition: background 0.2s;
+        
+        .qr-code-back {
+            opacity: 0.8;
+            background: rgba(255, 255, 255, 0.2);
         }
-        .login-btn:hover {
-            background: #3d819d;
-        }
-        .error-msg {
-            color: #fff;
-            background: rgba(255,0,0,0.18);
-            border-radius: 6px;
-            padding: 6px 12px;
-            margin-bottom: 0;
-            font-size: 0.95rem;
+        
+        .footer {
             text-align: center;
+            font-size: 9px;
+            margin-top: auto;
+            opacity: 0.9;
+            font-family: 'Roboto', Arial, sans-serif;
         }
-        #login-form {
-            width: 100%;
+        
+        .highlight {
+            font-family: 'Roboto', Arial, sans-serif;
+            font-size: 10.5px;
+            font-weight: bold;
+            color: white;
+            text-decoration: underline;
+        }
+        
+        .stamps-back {
+            transform: scaleX(-1);
+        }
+        
+        .stamp-back {
+            transform: scaleX(-1);
+            opacity: 0.5;
+        }
+
+        .shine-reset {
+            animation: none !important;
+        }
+
+        /* Efectos de nitidez y blur según la cara visible */
+        .card .sharp {
+            filter: none;
+            transition: filter 0.4s;
+        }
+        .card .blurred {
+            filter: blur(2px);
+            transition: filter 0.4s;
+        }
+        .card-back .sharp {
+            filter: none;
+            transition: filter 0.4s;
+        }
+        .card-back .blurred {
+            filter: blur(2px);
+            transition: filter 0.4s;
+        }
+
+        /* Ajuste para el logo superior */
+        .palm-logo img {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+            opacity: 0.7;
+        }
+        /* Ajuste para los logos dentro de los círculos */
+        .stamp img {
+            width: 26.25px;
+            height: 26.25px;
+            object-fit: contain;
+            opacity: 0.7;
+        }
+
+        /* FAQ MODAL: fuerza visibilidad y z-index */
+        #faq-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999 !important;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(2px);
+            justify-content: center;
+            align-items: center;
+        }
+        #faq-modal[aria-visible="true"] {
+            display: flex !important;
+        }
+        #faq-modal > div {
+            background: linear-gradient(135deg,#3d819d 0%,#25647a 100%);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.25);
+            padding: 32px 20px 24px 20px;
+            max-width: 370px;
+            width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            flex: 1;
-            gap: 24px;
         }
-        /* Animación de círculo girando */
-        @keyframes spin {
-          0% { transform: rotate(0deg);}
-          100% { transform: rotate(360deg);}
+
+        .question-circle {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%,-50%) scaleX(-1) !important;
+            width: 80px !important;
+            height: 80px !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            background: rgba(255,255,255,0.10) !important;
+            box-shadow: 0 0 8px 1px rgba(0,0,0,0.10) !important;
+            border-radius: 50% !important;
+            border: 2px solid #fff !important;
+            cursor: pointer !important;
+            z-index: 10 !important;
         }
-        .loading-spinner {
-          display: inline-block;
-          width: 22px;
-          height: 22px;
-          border: 3px solid #fff;
-          border-top: 3px solid #25647a;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-          vertical-align: middle;
-          margin-right: 8px;
+        .question-circle i {
+            color: #fff !important;
+            opacity: 0.95 !important;
+            font-size: 60px !important;
+        }
+
+        .gift-anim {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%) scale(0.1);
+            font-size: 10vw;
+            z-index: 99999;
+            opacity: 0;
+            transition: transform 1s cubic-bezier(.7,1.7,.5,1), opacity 0.5s;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+        .gift-anim.show {
+            opacity: 1;
+            transform: translate(-50%,-50%) scale(1.4);
+            transition: transform 0.7s cubic-bezier(.7,1.7,.5,1), opacity 0.5s;
+        }
+        .gift-anim.shrink {
+            transform: translate(-50%,-50%) scale(0.7);
+            transition: transform 0.35s cubic-bezier(.7,1.7,.5,1);
+        }
+        .gift-anim.heartbeat {
+            animation: heartbeatGift 2.8s cubic-bezier(.7,1.7,.5,1);
+        }
+        @keyframes heartbeatGift {
+          0% { opacity: 0; transform: translate(-50%,-50%) scale(0.1); }
+          8% { opacity: 1; transform: translate(-50%,-50%) scale(1.08); }
+          18% { opacity: 1; transform: translate(-50%,-50%) scale(0.93); }
+          38% { opacity: 1; transform: translate(-50%,-50%) scale(1.15); }
+          58% { opacity: 1; transform: translate(-50%,-50%) scale(0.90); }
+          78% { opacity: 1; transform: translate(-50%,-50%) scale(1.10); }
+          92% { opacity: 1; transform: translate(-50%,-50%) scale(1.0); }
+          100% { opacity: 1; transform: translate(-50%,-50%) scale(1.0); }
+        }
+        .gift-anim.fadeout {
+            opacity: 0 !important;
+            transition: opacity 2.5s;
+        }
+        .footer.gift-claim {
+            font-size: 0.9em !important;
+            font-weight: bold !important;
+        }
+
+        /* MODAL FAQ INTEGRADO */
+        .faq-modal-integrado {
+          position: fixed;
+          top: 0; left: 0; width: 100vw; height: 100vh;
+          background: rgba(0,0,0,0.35);
+          backdrop-filter: blur(2px);
+          z-index: 99999;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          transition: transform 0.5s cubic-bezier(.7,1.7,.5,1), opacity 0.4s;
+          opacity: 0;
+          pointer-events: none;
+        }
+        .faq-modal-integrado[aria-visible="true"] {
+          opacity: 1;
+          pointer-events: auto;
+          transform: translateX(0);
+        }
+        .faq-modal-integrado.faq-slide-in {
+          transform: translateX(100vw);
+          opacity: 0;
+        }
+        .faq-modal-integrado.faq-slide-in-active {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        .faq-modal-integrado.faq-slide-out {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        .faq-modal-integrado.faq-slide-out-active {
+          transform: translateX(100vw);
+          opacity: 0;
+        }
+        .faq-modal-content {
+          background: linear-gradient(135deg,#3d819d 0%,#25647a 100%);
+          border-radius: 18px;
+          box-shadow: 0 8px 32px 0 rgba(0,0,0,0.25);
+          padding: 32px 20px 24px 20px;
+          max-width: 470px;
+          width: 98vw;
+          min-height: 480px;
+          max-height: 98vh;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          position: relative;
+        }
+        .faq-close-btn {
+          position: absolute;
+          top: 12px;
+          right: 18px;
+          background: none;
+          border: none;
+          color: #fff;
+          font-size: 2em;
+          font-weight: bold;
+          cursor: pointer;
+          z-index: 1001;
+        }
+        .faq-title {
+          color: #fff;
+          font-size: 2em;
+          font-weight: bold;
+          text-align: center;
+          margin-top: 18px;
+          margin-bottom: 32px;
+          letter-spacing: 1px;
+        }
+        .faq-block {
+          width: 98vw;
+          max-width: 420px;
+          background: rgba(255,255,255,0.10);
+          border-radius: 16px;
+          margin-bottom: 18px;
+          box-shadow: 0 2px 12px 0 rgba(0,0,0,0.13);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          cursor: pointer;
+          transition: box-shadow 0.2s;
+          padding: 0;
+          overflow: hidden;
+        }
+        .faq-block-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 18px 22px 18px 18px;
+          font-size: 1.13em;
+          font-weight: bold;
+          color: #fff;
+          user-select: none;
+        }
+        .faq-block-header .triangle {
+          margin-left: 18px;
+          transition: transform 0.3s;
+          font-size: 1.2em;
+          color: #fff;
+        }
+        .faq-block.open .faq-block-header .triangle {
+          transform: rotate(180deg);
+        }
+        .faq-block-content {
+          padding: 0 22px 48px 18px;
+          color: #fff;
+          font-size: 1.08em;
+          display: none;
+          animation: fadeIn 0.3s;
+          font-weight: normal;
+          max-height: none !important;
+          overflow: visible !important;
+        }
+        .faq-block.open .faq-block-content {
+          display: block;
+          padding-bottom: 64px !important;
+        }
+        /* Opacar las FAQ no abiertas */
+        .faq-block {
+          opacity: 1;
+          transition: opacity 0.3s, box-shadow 0.3s;
+        }
+        .faq-block.faq-opaca {
+          opacity: 0.45;
+          box-shadow: none !important;
+        }
+        .faq-block.open {
+          opacity: 1 !important;
+          box-shadow: 0 4px 24px 0 rgba(0,0,0,0.22) !important;
+          z-index: 2;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
     </style>
 </head>
-<body>
-    <div class="card-container">
-        <div class="card">
-            <div class="login-title" style="font-weight:bold; white-space:pre-line;">Bahia Chill<br>Tarjeta VIP</div>
-            <form id="login-form" autocomplete="off" style="width:100%;display:flex;flex-direction:column;align-items:center;">
-                <input class="login-input" type="text" id="documento" name="documento" placeholder="Documento" required maxlength="10" minlength="10" pattern="[0-9]{10}" autocomplete="off" inputmode="numeric" />
-                <div class="pin-container">
-                    <input class="login-input pin-input" type="password" id="pin" name="pin" placeholder="PIN" required maxlength="4" autocomplete="off" inputmode="numeric" autocomplete="one-time-code" />
-                    <button type="button" class="eye-btn" id="togglePin"><i class="fa fa-eye"></i></button>
-                </div>
-                <!-- Botón Entrar eliminado y vuelto a añadir con negrita -->
-                <button class="login-btn" type="button" style="font-weight:bold;">Entrar</button>
-                <div id="error-msg" class="error-msg" style="display:none;"></div>
-            </form>
+<body style="display:none;" id="body-block">
+    <!-- PANEL LATERAL IZQUIERDO EN ESQUINA SUPERIOR IZQUIERDA -->
+    <div id="side-panel-btn" style="position:fixed;top:18px;left:18px;z-index:1003;">
+      <button aria-label="Abrir menú lateral" style="background:rgba(255,255,255,0.13);border:none;border-radius:50%;width:44px;height:44px;box-shadow:0 2px 8px 0 rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;cursor:pointer;outline:none;">
+        <!-- Icono de 2 personas (FontAwesome users) en círculo blanco con sombra -->
+        <span style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:rgba(255,255,255,0.85);border-radius:50%;box-shadow:0 2px 8px 0 rgba(0,0,0,0.18);">
+          <i class="fa-solid fa-users" style="color:#3d819d;font-size:1.5em;text-shadow:0 2px 8px #0004;"></i>
+        </span>
+      </button>
+    </div>
+    <!-- Menú lateral oculto -->
+    <div id="side-menu" style="position:fixed;top:0;left:0;width:0;height:100vh;max-width:98vw;background:linear-gradient(135deg,#25647a 0%,#13394a 100%);box-shadow:2px 0 16px 0 rgba(0,0,0,0.18);z-index:1004;overflow:hidden;transition:width 0.35s cubic-bezier(.7,1.7,.5,1);display:flex;flex-direction:column;align-items:flex-start;">
+      <div style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 12px 0 12px;">
+        <div style="display:flex;align-items:center;gap:18px;">
+          <a href="https://www.instagram.com/bahia.chill/" target="_blank" title="Instagram" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:none;border:none;cursor:pointer;">
+            <i class="fa-brands fa-instagram" style="color:#fff;font-size:1.7em;"></i>
+          </a>
+          <a href="https://www.tiktok.com/@bahia.chill" target="_blank" title="TikTok" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:none;border:none;cursor:pointer;">
+            <i class="fa-brands fa-tiktok" style="color:#fff;font-size:1.7em;"></i>
+          </a>
         </div>
+        <button id="side-menu-close" aria-label="Cerrar menú" style="background:none;border:none;color:#fff;font-size:2em;font-weight:bold;cursor:pointer;line-height:1;">&times;</button>
+      </div>
+      <button class="side-menu-item" id="menu-titulo" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;">Menú</button>
+      <div id="menu-content" style="display:none;padding:0 24px 10px 24px;color:#fff;font-size:1em;"></div>
+      <button class="side-menu-item" id="musica-titulo" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;">Poner mi música</button>
+      <div id="musica-content" style="display:none;padding:0 24px 10px 24px;color:#fff;font-size:1em;"></div>
+      <button class="side-menu-item" id="juegos-titulo" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;">Juegos</button>
+      <div id="juegos-content" style="display:none;padding:0 24px 10px 24px;color:#fff;font-size:1em;"></div>
+      <button class="side-menu-item" id="ruleta-titulo" style="background:none;border:none;color:#fff;font-size:1.13em;font-weight:500;padding:14px 0 14px 24px;text-align:left;width:100%;cursor:pointer;">Ruleta VIP</button>
+      <div id="ruleta-content" style="display:none;padding:0 24px 10px 24px;color:#fff;font-size:1em;"></div>
+      <div style="flex:1 1 auto;"></div>
+      <div style="width:100%;display:flex;justify-content:center;align-items:center;padding-bottom:32px;">
+    <button id="help-btn" aria-label="Ayuda" style="background:rgba(0,0,0,0.18);border:none;border-radius:50%;width:54px;height:54px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px 0 rgba(0,0,0,0.13);cursor:pointer;outline:none;position:relative;bottom:4vh;">
+      <i class="fa fa-question" style="color:#fff;font-size:2em;"></i>
+    </button>
+      </div>
+    </div>
+    <!-- Fondo oscuro al abrir menú -->
+    <div id="side-menu-overlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.25);z-index:1002;"></div>
+    <!-- Texto flotante de ayuda -->
+    <div id="tap-hint" style="position:fixed;top:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.82);color:#fff;padding:10px 22px;border-radius:22px;font-size:1.08em;z-index:1001;box-shadow:0 2px 12px 0 rgba(0,0,0,0.13);font-weight:bold;opacity:1;transition:opacity 0.7s;pointer-events:none;">
+      <i class="fa fa-question-circle" style="margin-right:7px;"></i> Presiona el botón de la Izquierda para más información
+    </div>
+    <!-- Botón de ayuda (signo de pregunta) -->
+    <!-- Mostrar solo la información de usuario arriba a la izquierda, sin fondo ni títulos -->
+    <!-- Barra de usuario centrada arriba -->
+    <div id="user-info-bar" style="position:fixed;top:18px;left:0;right:0;z-index:1002;color:#fff;font-size:1.08em;font-weight:bold;display:flex;flex-direction:column;align-items:center;gap:2px;">
+      <span id="user-info-nombre" style="width:100%;text-align:center;"></span>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:2px;width:100%;justify-content:center;">
+        <span id="user-info-doc" style="font-family:monospace;font-size:0.98em;letter-spacing:2px;text-align:center;"></span>
+        <button id="toggle-doc-visibility-bar" style="background:none;border:none;outline:none;cursor:pointer;color:#fff;font-size:1.1em;display:flex;align-items:center;padding:0 0 0 4px;">
+          <i id="eye-icon-bar" class="fa-regular fa-eye-slash"></i>
+        </button>
+      </div>
+    </div>
+    <div class="card-container" id="card">
+        <!-- Animación de regalo -->
+        <div id="gift-anim" class="gift-anim" style="display:none;">🎁</div>
+        <!-- Front of the card -->
+        <div class="card">
+            <!-- Quitar logo de la palma en el frente -->
+            <div class="title sharp" id="front-title">BAHIA CHILL</div>
+            <div class="stamps" id="stamps-row-1"></div>
+            <div class="stamps" id="stamps-row-2"></div>
+            <!-- Cambiar el QR por la imagen de la palmera blanca sin fondo -->
+            <div class="qr-code blurred" id="front-qr">
+                <img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Palmera blanca" style="height: 60px; width: auto; opacity: 0.8;" />
+            </div>
+            <div class="footer sharp frase-palmas-tarjeta" id="front-footer">
+                SOLO TE FALTAN <span class="highlight">PALMAS</span> PARA RECLAMAR TU REGALO
+            </div>
+        </div>
+        <!-- Back of the card -->
+        <div class="card card-back">
+            <div class="title sharp" id="back-title" style="transform: scaleX(-1);">BAHIA CHILL</div>
+            <div style="transform: scaleX(-1); display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;margin-top:30px;">
+              <div id="user-name" class="nombre-tarjeta" style="margin-bottom:8px;text-align:center;width:100%;"></div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:0;"></div>
+              <div style="display:flex;align-items:center;gap:8px;flex-direction:row;justify-content:center;width:100%;">
+                <span class="documento-tarjeta">Documento:</span>
+                <span id="user-doc" class="documento-tarjeta" style="text-align:center;"></span>
+                <button id="toggle-doc-visibility" style="background:none;border:none;outline:none;cursor:pointer;color:#fff;font-size:1.1em;display:flex;align-items:center;">
+                  <i id="eye-icon" class="fa-regular fa-eye-slash"></i>
+                </button>
+              </div>
+            </div>
+            <!-- Cambiar el QR por la imagen de la palmera blanca sin fondo en el reverso -->
+            <div class="qr-code qr-code-back sharp" id="back-qr" style="background: none; box-shadow: none;">
+                <img src="Variantes/palma_blanca_sin_fondo.jpg.png" alt="Palmera blanca" style="height: 120px; width: auto; opacity: 1; background: none; box-shadow: none; border: none;" />
+            </div>
+        </div>
+    </div>
+    <!-- MODAL FAQ INTEGRADO -->
+    <div id="faq-modal-integrado" class="faq-modal-integrado" aria-visible="false">
+      <div class="faq-modal-content">
+        <button id="faq-close-btn" class="faq-close-btn" aria-label="Cerrar FAQ">&times;</button>
+        <div class="faq-title">FAQ</div>
+        <div class="faq-block">
+          <div class="faq-block-header">¿Qué beneficios tiene esta tarjeta? <span class="triangle">&#9660;</span></div>
+          <div class="faq-block-content">¡Mensualmente podrás recibir diferentes tipos de regalos. Puedes referir a tus amigos y te daremos 2 stickers por cada nuevo referido, los cupos son limitados!</div>
+        </div>
+        <div class="faq-block">
+          <div class="faq-block-header">¿Cómo obtengo un sticker - regalo? <span class="triangle">&#9660;</span></div>
+          <div class="faq-block-content">Cada vez que realices una compra igual o superior a 80.000 Cop solicita que te sellen tu tarjeta digital. ¡Acumula 10 y reclama tu regalo!</div>
+        </div>
+        <div class="faq-block">
+          <div class="faq-block-header">¿Puedo transferir mis stickers o tarjeta a otra persona? <span class="triangle">&#9660;</span></div>
+          <div class="faq-block-content">No, los stickers, la tarjeta y los beneficios son personales e intransferibles.</div>
+        </div>
+        <div class="faq-block">
+        </div>
+        <div style="width:100%;margin-top:28px;display:flex;flex-direction:column;align-items:center;">
+          <div style="width:100%;text-align:center;margin-bottom:8px;font-size:1.08em;font-weight:bold;color:#fff;">¿Aun tienes dudas? ¡Escríbenos!</div>
+          <div style="width:100%;display:flex;justify-content:center;align-items:center;margin-top:8px;">
+            <a href="https://wa.link/7rpuhl" target="_blank" title="Contactar por WhatsApp" style="display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.13);border-radius:50%;width:54px;height:54px;box-shadow:0 2px 8px 0 rgba(0,0,0,0.13);transition:background 0.2s;">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" style="width:36px;height:36px;filter:drop-shadow(0 1px 2px #0002);">
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-      const SUPABASE_URL = 'https://senqhfrzhsvrwiqschuf.supabase.co';
-      const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbnFoZnJ6aHN2cndpcXNjaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMTA3MzksImV4cCI6MjA2NTY4NjczOX0.SoQUuDrUtIObkHMTn6HOOR74MvYTI5bgy4-PDU4p-dg';
-      window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-      // Limitar PIN a 4 dígitos numéricos sin aviso
-      document.addEventListener('DOMContentLoaded', function() {
-        const pinInput = document.getElementById('pin');
-        if (pinInput) {
-          pinInput.addEventListener('input', function(e) {
-            // Solo números y máximo 4 caracteres
-            let val = this.value.replace(/\D/g, '');
-            if (val.length > 4) val = val.slice(0, 4);
-            this.value = val;
-          });
+      // Lógica para el panel lateral izquierdo
+      const sidePanelBtn = document.getElementById('side-panel-btn');
+      const sideMenu = document.getElementById('side-menu');
+      const sideMenuOverlay = document.getElementById('side-menu-overlay');
+      let sideMenuOpen = false;
+      function openSideMenu() {
+        if (window.innerWidth <= 600) {
+          sideMenu.style.width = '90vw';
+        } else {
+          sideMenu.style.width = '270px';
+        }
+        sideMenuOverlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        sideMenuOpen = true;
+      }
+      function closeSideMenu() {
+        sideMenu.style.width = '0';
+        sideMenuOverlay.style.display = 'none';
+        document.body.style.overflow = '';
+        sideMenuOpen = false;
+      }
+      sidePanelBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (!sideMenuOpen) openSideMenu();
+      });
+      // Al presionar el botón del menú izquierdo, ocultar el letrero de ayuda con difuminado
+      sidePanelBtn.addEventListener('click', function() {
+        const hint = document.getElementById('tap-hint');
+        if (hint && hint.style.opacity !== '0') {
+          hint.style.opacity = '0';
+          setTimeout(() => { if(hint) hint.style.display = 'none'; }, 800);
         }
       });
+      // Botón X para cerrar menú
+      setTimeout(() => {
+        const closeBtn = document.getElementById('side-menu-close');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (sideMenuOpen) closeSideMenu();
+          });
+        }
+      }, 100);
+      sideMenuOverlay.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (sideMenuOpen) closeSideMenu();
+      });
+      // Cerrar menú con Escape
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && sideMenuOpen) closeSideMenu();
+      });
+      // Opcional: cerrar menú al hacer click fuera
+      window.addEventListener('resize', function() { if (sideMenuOpen) closeSideMenu(); });
+      // Inicialización global de Supabase
+      const SUPABASE_URL = 'https://senqhfrzhsvrwiqschuf.supabase.co';
+      const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbnFoZnJ6aHN2cndpcXNjaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMTA3MzksImV4cCI6MjA2NTY4NjczOX0.SoQUuDrUtIObkHMTn6HOOR74MvYTI5bgy4-PDU4p-dg';
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-      // Mostrar/ocultar PIN
-      const pinInput = document.getElementById('pin');
-      const togglePin = document.getElementById('togglePin');
-      togglePin.addEventListener('click', function() {
-          if (pinInput.type === 'password') {
-              pinInput.type = 'text';
-              this.innerHTML = '<i class="fa fa-eye-slash"></i>';
+      // Verifica login y existencia de usuario en Supabase
+      async function checkAndRedirect() {
+        // Refuerzo de seguridad: comprobar expiración de sesión por última actividad
+        const lastActivityLS = localStorage.getItem('lastActivity');
+        if (lastActivityLS && Date.now() - parseInt(lastActivityLS, 10) > 15 * 60 * 1000) {
+          localStorage.removeItem('bahiaChillLogin');
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('currentUserDoc');
+          localStorage.removeItem('lastActivity');
+          window.location.href = 'index.html';
+          return false;
+        }
+        if (localStorage.getItem('bahiaChillLogin') !== 'ok' || !localStorage.getItem('currentUserDoc')) {
+          window.location.href = 'index.html';
+          return false;
+        }
+        const currentUserDoc = localStorage.getItem('currentUserDoc');
+        // Si es Bc, redirige a panel de control (por username, opcional)
+        const currentUser = localStorage.getItem('currentUser');
+        if (currentUser && currentUser.toLowerCase() === 'bc') {
+          window.location.href = 'panel_de_control.html';
+          return false;
+        }
+        // Buscar por documento
+        const { data, error } = await supabase.from('usuarios').select('documento').eq('documento', currentUserDoc);
+        if (error || !data || data.length === 0) {
+          window.location.href = 'index.html';
+          return false;
+        }
+        return true;
+      }
+
+      // Obtiene datos del usuario actual
+      async function getUserSupabase(documento) {
+        const { data, error } = await supabase.from('usuarios').select('*').eq('documento', documento).maybeSingle();
+        if (error) return null;
+        return data;
+      }
+
+      // Renderiza los stickers según el campo numero
+      async function renderStickers() {
+        const documento = localStorage.getItem('currentUserDoc');
+        const user = await getUserSupabase(documento);
+        let numero = 0;
+        if (user && typeof user.numero === 'number' && user.numero >= 0 && user.numero <= 10) {
+          numero = user.numero;
+        }
+        // Orden personalizado: 1 3 5 7 9 2 4 6 8 10 (índices base 0)
+        const orden = [0,2,4,6,8,1,3,5,7,9];
+        const logoSrc = 'Variantes/palma_blanca_sin_fondo.jpg.png';
+        const stickers = [];
+        for (let i = 0; i < 10; i++) {
+          if (i < numero) {
+            stickers.push(`<div class='stamp sharp'><img src='${logoSrc}' alt='Logo Bahía Chill' /></div>`);
           } else {
-              pinInput.type = 'password';
-              this.innerHTML = '<i class="fa fa-eye"></i>';
+            stickers.push(`<div class='stamp sharp' style='background:rgba(255,255,255,0.08);border:1px dashed #fff;'><i class='fa-regular fa-circle' style='color:#fff;opacity:0.3;font-size:22px;'></i></div>`);
           }
-      });
-      // Login simple: usuario Admin, pin 2272 y Bc, pin 2467
-      const loginBtn = document.querySelector('.login-btn');
-      const loginForm = document.getElementById('login-form');
-      const errorMsg = document.getElementById('error-msg');
-      loginBtn.addEventListener('click', async function(e) {
-          const documento = document.getElementById('documento').value.trim();
-          const pin = document.getElementById('pin').value.trim();
-          // Acceso especial para admin principal (cedula 1019602272, pin 7294)
-         // Animación de carga en el botón
-         loginBtn.disabled = true;
-         const originalText = loginBtn.innerHTML;
-         loginBtn.innerHTML = '<span class="loading-spinner"></span>Entrando...';
+        }
+        const stickersOrdenados = orden.map(idx => stickers[idx]);
+        document.getElementById('stamps-row-1').innerHTML = stickersOrdenados.slice(0,5).join('');
+        document.getElementById('stamps-row-2').innerHTML = stickersOrdenados.slice(5,10).join('');
+        // Actualizar texto de footer
+        const faltan = 10 - numero;
+        const footer = document.getElementById('front-footer');
+        if (faltan === 0) {
+          footer.innerHTML = 'Ya puedes reclamar tu regalo, ¡Ven Ya por el!';
+          footer.classList.add('gift-claim', 'frase-palmas-tarjeta');
+          // Animación regalo y vibración
+          showGiftAnimation();
+        } else {
+          footer.innerHTML = `SOLO TE FALTAN <span class="highlight">${faltan} PALMAS</span> PARA RECLAMAR TU REGALO`;
+          footer.classList.remove('gift-claim');
+          footer.classList.add('frase-palmas-tarjeta');
+        }
+      }
 
-         if (documento === '1019602272' && pin === '7294') {
-             const { data, error } = await supabase
-                 .from('usuarios')
-                 .select('*')
-                 .eq('documento', documento)
-                 .eq('pin', pin);
-             let user = data && data.length > 0 ? data[0] : null;
-             if (user && user.admin) {
-                 if (user.paused) {
-                     errorMsg.textContent = 'Usuario pausado. Contacta al administrador.';
-                     errorMsg.style.display = 'block';
-                     loginBtn.innerHTML = originalText;
-                     loginBtn.disabled = false;
-                     return;
-                 }
-                 errorMsg.style.display = 'none';
-                 localStorage.setItem('bahiaChillLogin', 'ok');
-                 localStorage.setItem('currentUser', user.documento);
-                 localStorage.setItem('currentUserDoc', user.documento);
-                 localStorage.setItem('lastActivity', Date.now().toString());
-                 localStorage.setItem('poderTotal', '1');
-                 window.location.href = 'panel_de_control.html';
-                 return;
-             }
-         }
-         if ((documento.toLowerCase() === 'bc' && pin === '2467')) {
-             const adminDoc = '2467892467';
-             const { data, error } = await supabase
-                 .from('usuarios')
-                 .select('*')
-                 .eq('documento', adminDoc)
-                 .eq('pin', pin);
-             let user = data && data.length > 0 ? data[0] : null;
-             if (user && user.admin) {
-                 if (user.paused) {
-                     errorMsg.textContent = 'Usuario pausado. Contacta al administrador.';
-                     errorMsg.style.display = 'block';
-                     loginBtn.innerHTML = originalText;
-                     loginBtn.disabled = false;
-                     return;
-                 }
-                 errorMsg.style.display = 'none';
-                 localStorage.setItem('bahiaChillLogin', 'ok');
-                 localStorage.setItem('currentUser', user.documento);
-                 localStorage.setItem('currentUserDoc', user.documento);
-                 localStorage.setItem('lastActivity', Date.now().toString());
-                 localStorage.setItem('poderTotal', '0');
-                 window.location.href = 'panel_de_control.html';
-                 return;
-             }
-         }
-         const { data, error } = await supabase
-             .from('usuarios')
-             .select('*')
-             .eq('documento', documento)
-             .eq('pin', pin);
-         let user = data && data.length > 0 ? data[0] : null;
-         if (user && user.pin === pin) {
-             if (user.paused) {
-                 errorMsg.textContent = 'Usuario pausado. Contacta al administrador.';
-                 errorMsg.style.display = 'block';
-                 loginBtn.innerHTML = originalText;
-                 loginBtn.disabled = false;
-                 return;
-             }
-             errorMsg.style.display = 'none';
-             localStorage.setItem('bahiaChillLogin', 'ok');
-             localStorage.setItem('currentUser', user.documento);
-             localStorage.setItem('currentUserDoc', user.documento);
-             localStorage.setItem('lastActivity', Date.now().toString());
-             if (user.admin) {
-                 window.location.href = 'panel_de_control.html';
-             } else {
-                 window.location.href = 'tarjeta.html';
-             }
-             return;
-         }
-         errorMsg.textContent = 'Documento o PIN incorrectos.';
-         errorMsg.style.display = 'block';
-         loginBtn.innerHTML = originalText;
-         loginBtn.disabled = false;
+      // Animación de regalo y vibración
+      function showGiftAnimation() {
+        const gift = document.getElementById('gift-anim');
+        if (!gift) return;
+        // Si ya está visible, no repetir
+        if (gift.classList.contains('heartbeat')) return;
+        gift.style.display = 'block';
+        gift.classList.remove('fadeout');
+        // Forzar reflow para reiniciar animación si se repite
+        void gift.offsetWidth;
+        gift.classList.add('heartbeat');
+        // Vibración 3 veces por 0.5s
+        if (navigator.vibrate) {
+          navigator.vibrate([500, 200, 500, 200, 500]);
+        }
+        // Cuando termine la animación heartbeat, difuminar y ocultar
+        gift.addEventListener('animationend', function handler() {
+          gift.removeEventListener('animationend', handler);
+          gift.classList.remove('heartbeat');
+          gift.classList.add('fadeout');
+          setTimeout(() => {
+            gift.style.display = 'none';
+            gift.classList.remove('fadeout');
+          }, 2500);
+        });
+      }
+
+      // Redirigir a login tras 8 horas desde login
+      setTimeout(function() {
+        window.location.href = 'index.html';
+      }, 8 * 60 * 60 * 1000);
+
+      // Mostrar y ocultar el texto de ayuda
+      function hideTapHint() {
+        const hint = document.getElementById('tap-hint');
+        if (hint && hint.style.opacity !== '0') {
+          hint.style.opacity = '0';
+          setTimeout(() => { if(hint) hint.style.display = 'none'; }, 800);
+        }
+      }
+      window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(hideTapHint, 8000);
+        const card = document.getElementById('card');
+        card.addEventListener('click', hideTapHint, { once: true });
       });
-      // Cierre de sesión automático tras 8 horas desde login y 4 horas de inactividad
+
+      // Cierre de sesión automático tras 4 horas de inactividad
       let lastActivity = Date.now();
       function resetInactivityTimer() {
         lastActivity = Date.now();
@@ -313,15 +777,6 @@
       document.addEventListener('keydown', resetInactivityTimer);
       document.addEventListener('mousedown', resetInactivityTimer);
       document.addEventListener('touchstart', resetInactivityTimer);
-      // Cierre por tiempo total desde login
-      setTimeout(function() {
-        localStorage.removeItem('bahiaChillLogin');
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('currentUserDoc');
-        localStorage.removeItem('lastActivity');
-        window.location.href = 'index.html';
-      }, 8 * 60 * 60 * 1000);
-      // Cierre por inactividad
       setInterval(function() {
         if (Date.now() - lastActivity > 4 * 60 * 60 * 1000) {
           localStorage.removeItem('bahiaChillLogin');
@@ -331,33 +786,354 @@
           window.location.href = 'index.html';
         }
       }, 60000);
-      // Crear usuarios por defecto en Supabase si no existen
-      window.addEventListener('DOMContentLoaded', async function() {
-          // Solo crear usuarios por defecto si NO existe ya un usuario con ese username Y ese documento
-          // Eliminado: creación de usuarios por defecto con username
-      });
-      // Elimina el submit por Enter
-      loginForm.addEventListener('submit', function(e) {
-          e.preventDefault();
-      });
-      // Función para obtener usuario desde Supabase
-      // Eliminada función getUserSupabase por username
-      // Función para crear usuario en Supabase
-      async function createUserSupabase(user) {
-          const { data, error } = await supabase
-              .from('usuarios')
-              .insert([{ ...user, documento: user.documento || '0000000000' }]);
-          return { data, error };
+
+      // Asegura que la parte trasera sea legible al girar la tarjeta
+      function setupCardUI() {
+        const card = document.getElementById('card');
+        let modalOpen = false;
+        function handleCardClick(e) {
+          if (modalOpen) return;
+          card.classList.toggle('flipped');
+          const isFlipped = card.classList.contains('flipped');
+          // Solo aplica blur a la parte frontal cuando está girada
+          document.querySelectorAll('.card .sharp').forEach(el => {
+            el.style.filter = isFlipped ? 'blur(2px)' : 'none';
+          });
+          document.querySelectorAll('.card .blurred').forEach(el => {
+            el.style.filter = isFlipped ? 'none' : 'blur(2px)';
+          });
+          // La parte trasera siempre legible
+          document.querySelectorAll('.card-back .sharp').forEach(el => {
+            el.style.filter = 'none';
+          });
+          // Al girar, si está mostrando la parte trasera, actualiza la info del usuario
+          if (isFlipped) {
+            renderUserBackInfo();
+          }
+        }
+        card.removeEventListener('click', handleCardClick);
+        card.addEventListener('click', handleCardClick);
+        // El resto de la lógica de modal FAQ eliminada
+        window.addEventListener('DOMContentLoaded', () => {
+          document.querySelectorAll('.card .sharp').forEach(el => {
+            el.style.filter = 'none';
+          });
+          document.querySelectorAll('.card .blurred').forEach(el => {
+            el.style.filter = 'blur(2px)';
+          });
+          // La parte trasera siempre legible
+          document.querySelectorAll('.card-back .sharp').forEach(el => {
+            el.style.filter = 'none';
+          });
+        });
       }
-      // Función para actualizar usuario en Supabase
-      // Eliminada función updateUserSupabase por username
-      // Función para obtener todos los usuarios
-      async function getAllUsersSupabase() {
-          const { data, error } = await supabase
-              .from('usuarios')
-              .select('*');
-          return data || [];
+
+      // Renderiza la información del usuario en la parte trasera
+      async function renderUserBackInfo() {
+        const debugDiv = (() => {
+          let d = document.getElementById('debug-tarjeta');
+          if (!d) {
+            d = document.createElement('div');
+            d.id = 'debug-tarjeta';
+            d.style = 'color:#ffbaba;font-size:0.95em;margin-top:8px;text-align:center;word-break:break-all;';
+            const parent = document.getElementById('user-name')?.parentElement;
+            if (parent) parent.appendChild(d);
+          }
+          return d;
+        })();
+        debugDiv.textContent = 'Iniciando renderUserBackInfo...';
+        const documento = localStorage.getItem('currentUserDoc');
+        debugDiv.textContent = 'Documento en localStorage: ' + documento;
+        if (!documento) {
+          console.error('No hay documento en localStorage');
+          mostrarErrorTarjeta('No hay documento en sesión.');
+          debugDiv.textContent += ' | No hay documento en sesión.';
+          return;
+        }
+        let user;
+        try {
+          user = await getUserSupabase(documento);
+          debugDiv.textContent += ' | Resultado getUserSupabase: ' + JSON.stringify(user);
+        } catch (e) {
+          console.error('Error al consultar Supabase:', e);
+          mostrarErrorTarjeta('Error de conexión con Supabase.');
+          debugDiv.textContent += ' | Error de conexión con Supabase.';
+          return;
+        }
+        if (!user) {
+          console.warn('Usuario no encontrado en Supabase:', documento);
+          mostrarErrorTarjeta('Usuario no encontrado.');
+          debugDiv.textContent += ' | Usuario no encontrado en Supabase.';
+          return;
+        }
+        const userNameDiv = document.getElementById('user-name');
+        const userDocSpan = document.getElementById('user-doc');
+        debugDiv.textContent += ' | userNameDiv: ' + !!userNameDiv + ', userDocSpan: ' + !!userDocSpan;
+        if (!userNameDiv || !userDocSpan) {
+          console.error('No se encuentran los elementos user-name o user-doc en el DOM');
+          mostrarErrorTarjeta('Error interno: elementos no encontrados.');
+          debugDiv.textContent += ' | Error interno: elementos no encontrados.';
+          return;
+        }
+        // Mostrar primer nombre y primer apellido
+        let nombreCompleto = user.nombreCompleto || '';
+        let primerNombre = '';
+        let primerApellido = '';
+        if (nombreCompleto) {
+          const partes = nombreCompleto.trim().split(' ');
+          primerNombre = partes[0] || '';
+          primerApellido = partes[1] || '';
+        }
+        userNameDiv.textContent = (primerNombre + (primerApellido ? ' ' + primerApellido : '')) || '';
+        userNameDiv.classList.add('nombre-tarjeta');
+        // Documento: mostrar 10 asteriscos por defecto, revelar todo al presionar el ojo
+        let doc = user.documento ? String(user.documento) : '';
+        debugDiv.textContent += ' | Documento: ' + doc;
+        if (doc.length !== 10) {
+          doc = doc.padStart(10, '*');
+        }
+        let hidden = true;
+        function updateDoc() {
+          userDocSpan.textContent = hidden ? '*'.repeat(10) : doc;
+          userDocSpan.classList.add('documento-tarjeta');
+          const eyeIcon = document.getElementById('eye-icon');
+          if (eyeIcon) eyeIcon.className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+        }
+        updateDoc();
+        const btn = document.getElementById('toggle-doc-visibility');
+        if (btn) {
+          btn.onclick = function(e) {
+            e.stopPropagation();
+            hidden = !hidden;
+            updateDoc();
+          };
+        }
+        debugDiv.textContent += ' | Renderizado finalizado.';
       }
+      // Muestra un mensaje de error en la parte trasera de la tarjeta
+      function mostrarErrorTarjeta(msg) {
+        const userNameDiv = document.getElementById('user-name');
+        const userDocSpan = document.getElementById('user-doc');
+        if (userNameDiv) userNameDiv.textContent = '';
+        if (userDocSpan) userDocSpan.textContent = '';
+        // Busca el contenedor central
+        const parent = userNameDiv ? userNameDiv.parentElement : null;
+        if (parent) {
+          let errorDiv = parent.querySelector('.error-tarjeta');
+          if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'error-tarjeta';
+            errorDiv.style = 'color:#ffbaba;font-size:1em;margin-top:10px;text-align:center;';
+            parent.appendChild(errorDiv);
+          }
+          errorDiv.textContent = msg;
+        }
+      }
+
+      // Mostrar datos de usuario en la barra superior (sin fondo ni títulos)
+      async function mostrarDatosUsuarioBarra() {
+        const documento = localStorage.getItem('currentUserDoc');
+        if (!documento) return;
+        let doc = '';
+        let nombre = '';
+        let primerNombre = '';
+        let primerApellido = '';
+        if (window.supabase) {
+          try {
+            const { data, error } = await fetch(
+              `https://senqhfrzhsvrwiqschuf.supabase.co/rest/v1/usuarios?documento=eq.${encodeURIComponent(documento)}&select=*`,
+              {
+                headers: {
+                  'apikey': SUPABASE_KEY,
+                  'Authorization': `Bearer ${SUPABASE_KEY}`,
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json'
+                }
+              }
+            ).then(r => r.json().then(data => ({ data, error: r.ok ? null : r.statusText })));
+            if (data && data.length > 0) {
+              // Extraer primer nombre y primer apellido
+              const nombreCompleto = data[0].nombreCompleto || '';
+              if (nombreCompleto) {
+                const partes = nombreCompleto.trim().split(' ');
+                primerNombre = partes[0] || '';
+                primerApellido = partes[1] || '';
+                nombre = (primerNombre + (primerApellido ? ' ' + primerApellido : ''));
+              } else {
+                nombre = data[0].username;
+              }
+              doc = data[0].documento ? String(data[0].documento) : '';
+            }
+          } catch (e) {}
+        }
+        let hidden = true;
+        function updateDocBar() {
+          const nombreSpan = document.getElementById('user-info-nombre');
+          if (nombreSpan) {
+            nombreSpan.textContent = nombre;
+            nombreSpan.classList.add('nombre-tarjeta');
+          }
+          // Mostrar el documento debajo del nombre, no a la derecha
+          const docSpan = document.getElementById('user-info-doc');
+          if (docSpan) {
+            docSpan.textContent = doc ? (hidden ? '*'.repeat(10) : doc) : '';
+            docSpan.classList.add('documento-tarjeta');
+          }
+          const eyeIcon = document.getElementById('eye-icon-bar');
+          if (eyeIcon) eyeIcon.className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+        }
+        updateDocBar();
+        const btnBar = document.getElementById('toggle-doc-visibility-bar');
+        if (btnBar) {
+          btnBar.onclick = function(e) {
+            e.stopPropagation();
+            hidden = !hidden;
+            updateDocBar();
+          };
+        }
+      }
+      // FAQ MODAL: lógica robusta para mostrar y ocultar el modal
+      function openFaqModal() {
+        var modal = document.getElementById('faq-modal-integrado');
+        if (!modal) return;
+        modal.setAttribute('aria-visible', 'true');
+        modal.classList.remove('faq-slide-out', 'faq-slide-out-active');
+        modal.classList.add('faq-slide-in');
+        setTimeout(function() {
+          modal.classList.add('faq-slide-in-active');
+        }, 10);
+        document.body.style.overflow = 'hidden';
+        // Ocultar el hint de ayuda si está visible
+        var tapHint = document.getElementById('tap-hint');
+        if (tapHint) {
+          tapHint.style.transition = 'opacity 0.7s';
+          tapHint.style.opacity = '0';
+          setTimeout(function() { tapHint.style.display = 'none'; }, 800);
+        }
+      }
+
+      function closeFaqModal() {
+        var modal = document.getElementById('faq-modal-integrado');
+        if (!modal) return;
+        modal.classList.remove('faq-slide-in', 'faq-slide-in-active');
+        modal.classList.add('faq-slide-out');
+        setTimeout(function() {
+          modal.classList.add('faq-slide-out-active');
+        }, 10);
+        setTimeout(function() {
+          modal.setAttribute('aria-visible', 'false');
+          modal.classList.remove('faq-slide-out', 'faq-slide-out-active');
+          document.body.style.overflow = '';
+        }, 400);
+      }
+
+      // Asignar eventos al FAQ y al botón de ayuda
+      window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          var helpBtn = document.getElementById('help-btn');
+          if (helpBtn) {
+            helpBtn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              openFaqModal();
+            });
+          }
+        }, 200);
+        var faqCloseBtn = document.getElementById('faq-close-btn');
+        if (faqCloseBtn) {
+          faqCloseBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeFaqModal();
+          });
+        }
+        // Permitir cerrar el modal con Escape
+        document.addEventListener('keydown', function(e) {
+          var modal = document.getElementById('faq-modal-integrado');
+          if (e.key === 'Escape' && modal && modal.getAttribute('aria-visible') === 'true') {
+            closeFaqModal();
+          }
+        });
+      });
+      // FAQ blocks: solo uno abierto a la vez
+      // FAQ blocks: solo uno abierto a la vez (asignar solo una vez)
+      window.addEventListener('DOMContentLoaded', function() {
+        const blocks = document.querySelectorAll('.faq-block');
+        blocks.forEach(function(block) {
+          block.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (block.classList.contains('open')) {
+              block.classList.remove('open');
+              blocks.forEach(function(b) { b.classList.remove('faq-opaca'); });
+            } else {
+              blocks.forEach(function(b) {
+                b.classList.remove('open');
+                b.classList.add('faq-opaca');
+              });
+              block.classList.add('open');
+              block.classList.remove('faq-opaca');
+            }
+          });
+        });
+      });
+      // Menú lateral: solo un bloque abierto a la vez y despliegue de contenido
+      function hideAllMenuContents() {
+        document.getElementById('menu-content').style.display = 'none';
+        document.getElementById('musica-content').style.display = 'none';
+        document.getElementById('juegos-content').style.display = 'none';
+        document.getElementById('ruleta-content').style.display = 'none';
+      }
+      document.getElementById('menu-titulo').onclick = function() {
+        window.open('https://menubahiachillbar.my.canva.site/bahia-chill-men-2025', '_blank');
+        hideAllMenuContents();
+      };
+function toggleMenuContent(contentId, htmlContent) {
+  const cont = document.getElementById(contentId);
+  if (cont.style.display === 'block') {
+    cont.style.display = 'none';
+    cont.innerHTML = '';
+  } else {
+    hideAllMenuContents();
+    cont.innerHTML = htmlContent;
+    cont.style.display = 'block';
+  }
+}
+document.getElementById('musica-titulo').onclick = function() {
+  toggleMenuContent('musica-content', `<div style='margin-bottom:10px;'><a href='https://app.nosongrequests.com/Bahiachill' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>No song request</a></div><div><a href='https://festify.us/' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>Festify</a></div>`);
+};
+document.getElementById('juegos-titulo').onclick = function() {
+  toggleMenuContent('juegos-content', `<div style='margin-bottom:10px;'><a href='https://app-sorteos.com/es/apps/la-ruleta-decide?hash=NV3E2L' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>Verdad Reto o Shot - Suave 😇</a></div><div style='margin-bottom:10px;'><a href='https://app-sorteos.com/es/apps/la-ruleta-decide?hash=NV3E2L' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>Verdad Reto o Shot - Picante 😈</a></div><div style='margin-bottom:10px;'><a href='https://app-sorteos.com/es/apps/la-ruleta-decide?hash=GMOD4D' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>Ruleta</a></div><div><a href='https://www.airconsole.com/' target='_blank' style='color:#fff;text-decoration:underline;font-weight:bold;'>Consola Multijuegos - 2 jugadores</a></div>`);
+};
+document.getElementById('ruleta-titulo').onclick = function() {
+  toggleMenuContent('ruleta-content', `
+    <div style=\"background:rgba(0,0,0,0.22);border-radius:12px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;\">
+      <span style=\"color:#ffd700;font-size:1.5em;font-weight:bold;display:flex;align-items:center;justify-content:center;\">&#33;</span>
+      <span style=\"color:#fff;font-size:1em;line-height:1.4;\">
+        CADA 100.000 COP CONSUMIDOS TE<br>DARA EL DERECHO A 1 GIRO GRATIS DE NUESTRA RULETA VIP<br><br>
+        EN ESTA TE REGALAREMOS LO QUE CONSIGAS<br>CON TU GIRO<br><br>
+        PREGUNTALE AL MESERO COMO JUGAR
+      </span>
+    </div>
+  `);
+};
+      // Al cargar, verificar y redirigir si es necesario
+      window.addEventListener('DOMContentLoaded', async () => {
+        const body = document.getElementById('body-block');
+        body.style.display = 'flex';
+        const card = document.getElementById('card');
+        card.classList.remove('flipped');
+        // Esperar a que la tarjeta esté lista para el primer render
+        await new Promise(resolve => setTimeout(resolve, 50));
+        // Verifica y redirige si es necesario
+        const isLoggedIn = await checkAndRedirect();
+        if (!isLoggedIn) return;
+        // Mostrar datos de usuario en la barra superior
+        mostrarDatosUsuarioBarra();
+        // Renderizar stickers
+        renderStickers();
+        // Configurar la interfaz de la tarjeta
+        setupCardUI();
+        // Corregir giro automático de la tarjeta al iniciar sesión
+        // Mostrar la parte trasera de la tarjeta solo si el usuario la gira manualmente
+      });
     </script>
 </body>
 </html>
