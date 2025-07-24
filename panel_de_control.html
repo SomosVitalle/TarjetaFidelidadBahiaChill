@@ -595,7 +595,86 @@ window.deleteUserByDocumento = async function(documento) {
         renderUsers();
         mostrarPanelPoderTotal();
       }
-          // ...existing code...
+          // Cargar FAQ al abrir el panel (optimizado y con FAQ extra)
+          (async function cargarFAQ() {
+            const { data, error } = await supabase.from('faq').select('*').order('orden', { ascending: true });
+            // FAQ optimizado: área amplia y scroll si es necesario
+            let faqHtml = `<div id='faq-area' style='max-height:340px;overflow-y:auto;background:#f9f9f9;border-radius:8px;padding:18px 16px;margin-top:18px;margin-bottom:10px;border:1.5px solid #e67e22;'>`;
+            for (let i = 1; i <= 5; i++) {
+              let pregunta = data && data[i-1]?.pregunta ? data[i-1].pregunta : '';
+              let respuesta = data && data[i-1]?.respuesta ? data[i-1].respuesta : '';
+              // FAQ 4 personalizado
+              if (i === 4) {
+                pregunta = '¿Como puedo invitar a un amigo?';
+                respuesta = 'Los cupos son limitados pero puedes recomendarlo como un referido y te daremos 2 stickers por nuevo referido. ¡Escribenos!';
+              }
+              faqHtml += `<div class='faq-block' style='margin-bottom:18px;'>
+                <div class='faq-block-header' style='font-weight:bold;color:#0077b6;font-size:1.08em;margin-bottom:6px;'>${pregunta}</div>
+                <div class='faq-block-content' style='color:#222;font-size:1em;line-height:1.5;background:#fff;padding:10px 12px;border-radius:6px;border:1px solid #eee;'>${respuesta}</div>
+              </div>`;
+            }
+            faqHtml += `</div>`;
+            // Insertar FAQ optimizado en el panel
+            if (!document.getElementById('faq-area')) {
+              panel.insertAdjacentHTML('beforeend', faqHtml);
+            } else {
+              document.getElementById('faq-area').outerHTML = faqHtml;
+            }
+          })();
+          // Guardar FAQ en Supabase
+          faqForm.onsubmit = async function(e) {
+            e.preventDefault();
+            let ok = true;
+            for (let i = 1; i <= 5; i++) {
+              const pregunta = document.getElementById('pregunta'+i).value.trim();
+              const respuesta = document.getElementById('respuesta'+i).value.trim();
+              if (!pregunta || !respuesta) ok = false;
+            }
+            if (!ok) {
+              faqSaveMsg.textContent = 'Completa todas las preguntas y respuestas.';
+              faqSaveMsg.style.color = '#c0392b';
+              setTimeout(()=>{faqSaveMsg.textContent='';}, 2000);
+              return;
+            }
+            // Obtener los registros actuales
+            const { data: faqs, error: errorGet } = await supabase.from('faq').select('*').order('orden', { ascending: true });
+            let updates = [];
+            for (let i = 1; i <= 5; i++) {
+              const pregunta = document.getElementById('pregunta'+i).value.trim();
+              const respuesta = document.getElementById('respuesta'+i).value.trim();
+              if (faqs && faqs[i-1]) {
+                // Update existente
+                updates.push(supabase.from('faq').update({ pregunta, respuesta, orden: i }).eq('id', faqs[i-1].id));
+              } else {
+                // Insertar nuevo
+                updates.push(supabase.from('faq').insert({ pregunta, respuesta, orden: i }));
+              }
+            }
+            // Ejecutar todas las actualizaciones/inserciones
+            try {
+              await Promise.all(updates);
+              faqSaveMsg.textContent = 'FAQ guardado correctamente en Supabase';
+              faqSaveMsg.style.color = '#27ae60';
+              // ACTUALIZAR FAQ EN MODAL DE TARJETA SI EXISTE
+              try {
+                const tarjetaFaqModal = window.opener ? window.opener.document.getElementById('faq-modal-integrado') : document.getElementById('faq-modal-integrado');
+                if (tarjetaFaqModal) {
+                  const blocks = tarjetaFaqModal.querySelectorAll('.faq-block');
+                  for (let i = 0; i < blocks.length && i < 5; i++) {
+                    const pregunta = document.getElementById('pregunta'+(i+1)).value.trim();
+                    const respuesta = document.getElementById('respuesta'+(i+1)).value.trim();
+                    blocks[i].querySelector('.faq-block-header').innerHTML = pregunta + ' <span class="triangle">&#9660;</span>';
+                    blocks[i].querySelector('.faq-block-content').textContent = respuesta;
+                  }
+                }
+              } catch(e) {}
+            } catch (err) {
+              faqSaveMsg.textContent = 'Error al guardar FAQ';
+              faqSaveMsg.style.color = '#c0392b';
+            }
+            setTimeout(()=>{faqSaveMsg.textContent='';}, 2000);
+          };
+        }
         
       
       async function pausarTodosMenosAdminPrincipal() {
