@@ -4,15 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bahía Chill - Tarjeta VIP</title>
+    <!-- Color del navegador y PWA -->
+    <meta name="theme-color" content="#25647a">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@300;400&display=swap');
         
-        body {
+        html, body {
             font-family: 'Roboto', sans-serif;
             background: linear-gradient(135deg, #3d819d 0%, #25647a 50%, #13394a 100%);
             min-height: 100vh;
+            min-width: 100vw;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -554,7 +563,7 @@
         <div class="faq-title">FAQ</div>
         <div class="faq-block">
           <div class="faq-block-header">¿Qué beneficios tiene esta tarjeta? <span class="triangle">&#9660;</span></div>
-          <div class="faq-block-content">¡Mensualmente podrás recibir diferentes tipos de regalos. Puedes referir a tus amigos y te daremos 2 stickers por cada nuevo referido, los cupos son limitados. ¡Escríbenos!</div>
+          <div class="faq-block-content">¡Mensualmente podrás recibir diferentes tipos de regalos. Puedes referir a tus amigos y te daremos 2 stickers por cada nuevo referido, los cupos son limitados!</div>
         </div>
         <div class="faq-block">
           <div class="faq-block-header">¿Cómo obtengo un sticker - regalo? <span class="triangle">&#9660;</span></div>
