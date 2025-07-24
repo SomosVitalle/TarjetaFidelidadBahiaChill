@@ -612,6 +612,14 @@
         e.stopPropagation();
         if (!sideMenuOpen) openSideMenu();
       });
+      // Al presionar el botón del menú izquierdo, ocultar el letrero de ayuda con difuminado
+      sidePanelBtn.addEventListener('click', function() {
+        const hint = document.getElementById('tap-hint');
+        if (hint && hint.style.opacity !== '0') {
+          hint.style.opacity = '0';
+          setTimeout(() => { if(hint) hint.style.display = 'none'; }, 800);
+        }
+      });
       // Botón X para cerrar menú
       setTimeout(() => {
         const closeBtn = document.getElementById('side-menu-close');
