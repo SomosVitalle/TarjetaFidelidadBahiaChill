@@ -294,6 +294,25 @@
          loginBtn.innerHTML = originalText;
          loginBtn.disabled = false;
       });
+      // Cambia la duración de la sesión a 480 minutos (8 horas)
+      let lastActivity = Date.now();
+      function resetInactivityTimer() {
+        lastActivity = Date.now();
+        localStorage.setItem('lastActivity', lastActivity.toString());
+      }
+      document.addEventListener('mousemove', resetInactivityTimer);
+      document.addEventListener('keydown', resetInactivityTimer);
+      document.addEventListener('mousedown', resetInactivityTimer);
+      document.addEventListener('touchstart', resetInactivityTimer);
+      setInterval(function() {
+        if (Date.now() - lastActivity > 480 * 60 * 1000) { // 480 minutos
+          localStorage.removeItem('bahiaChillLogin');
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('currentUserDoc');
+          localStorage.removeItem('lastActivity');
+          window.location.href = 'index.html';
+        }
+      }, 60000);
       // Crear usuarios por defecto en Supabase si no existen
       window.addEventListener('DOMContentLoaded', async function() {
           // Solo crear usuarios por defecto si NO existe ya un usuario con ese username Y ese documento
@@ -321,25 +340,6 @@
               .select('*');
           return data || [];
       }
-      // Cierre de sesión automático tras 180 minutos de inactividad
-      let lastActivity = Date.now();
-      function resetInactivityTimer() {
-        lastActivity = Date.now();
-        localStorage.setItem('lastActivity', lastActivity.toString());
-      }
-      document.addEventListener('mousemove', resetInactivityTimer);
-      document.addEventListener('keydown', resetInactivityTimer);
-      document.addEventListener('mousedown', resetInactivityTimer);
-      document.addEventListener('touchstart', resetInactivityTimer);
-      setInterval(function() {
-        if (Date.now() - lastActivity > 180 * 60 * 1000) {
-          localStorage.removeItem('bahiaChillLogin');
-          localStorage.removeItem('currentUser');
-          localStorage.removeItem('currentUserDoc');
-          localStorage.removeItem('lastActivity');
-          window.location.href = 'index.html';
-        }
-      }, 60000);
     </script>
 </body>
 </html>
